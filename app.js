@@ -1,98 +1,14 @@
-const state = {
-  A: { weight: 100, concentration: 4 },
-  B: { weight: 100, concentration: 4 },
-  aLocked: true
-};
-
-// IMPORTANT:
-// A and B always use the SAME scale.
-// Width represents solution weight.
-// Height represents concentration.
-const SCALE = {
-  minWeight: 50,
-  maxWeight: 300,
-  minConcentration: 1,
-  maxConcentration: 20,
-  minWidth: 90,
-  maxWidth: 430,
-  minHeight: 48,
-  maxHeight: 310
-};
-
-function map(value, inMin, inMax, outMin, outMax) {
-  return outMin + ((value - inMin) / (inMax - inMin)) * (outMax - outMin);
-}
-
-function formatNumber(n) {
-  return Number.isInteger(n) ? String(n) : n.toFixed(1).replace(/\.0$/, "");
-}
-
-function renderVessel(key) {
-  const data = state[key];
-  const vessel = document.getElementById(`vessel${key}`);
-  const width = map(
-    data.weight, SCALE.minWeight, SCALE.maxWeight,
-    SCALE.minWidth, SCALE.maxWidth
-  );
-  const height = map(
-    data.concentration, SCALE.minConcentration, SCALE.maxConcentration,
-    SCALE.minHeight, SCALE.maxHeight
-  );
-
-  // Keep the two diagrams visually comparable with one common scale.
-  // CSS caps prevent overflow on smaller screens.
-  vessel.style.width = `min(${width}px, var(--max-vessel-width))`;
-  vessel.style.height = `min(${height}px, var(--max-vessel-height))`;
-
-  const salt = data.weight * data.concentration / 100;
-
-  document.getElementById(`weightLabel${key}`).textContent = `${data.weight}g`;
-  document.getElementById(`concentrationLabel${key}`).textContent = `${data.concentration}%`;
-  document.getElementById(`saltLabel${key}`).textContent = `${formatNumber(salt)}g`;
-
-  document.getElementById(`weightValue${key}`).textContent = `${data.weight}g`;
-  document.getElementById(`concentrationValue${key}`).textContent = `${data.concentration}%`;
-}
-
-function bindSlider(id, key, field) {
-  const el = document.getElementById(id);
-  el.addEventListener("input", () => {
-    state[key][field] = Number(el.value);
-    renderVessel(key);
-  });
-}
-
-bindSlider("weightA", "A", "weight");
-bindSlider("concentrationA", "A", "concentration");
-bindSlider("weightB", "B", "weight");
-bindSlider("concentrationB", "B", "concentration");
-
-document.getElementById("lockA").addEventListener("click", () => {
-  state.aLocked = !state.aLocked;
-
-  const weightA = document.getElementById("weightA");
-  const concentrationA = document.getElementById("concentrationA");
-  const controlsA = document.getElementById("controlsA");
-  const button = document.getElementById("lockA");
-
-  weightA.disabled = state.aLocked;
-  concentrationA.disabled = state.aLocked;
-  controlsA.classList.toggle("locked", state.aLocked);
-
-  button.textContent = state.aLocked ? "🔒 基準" : "🔓 変更できます";
-  button.setAttribute("aria-pressed", String(state.aLocked));
-});
-
-document.getElementById("reset").addEventListener("click", () => {
-  state.A = { weight: 100, concentration: 4 };
-  state.B = { weight: 100, concentration: 4 };
-
-  for (const key of ["A", "B"]) {
-    document.getElementById(`weight${key}`).value = 100;
-    document.getElementById(`concentration${key}`).value = 4;
-    renderVessel(key);
-  }
-});
-
-renderVessel("A");
-renderVessel("B");
+const S={A:{w:100,c:4},B:{w:100,c:4},locked:true};
+const PX_G=1.35,PX_PCT=14;
+const f=n=>{n=Math.round(n*10)/10;return Number.isInteger(n)?String(n):n.toFixed(1)};
+function color(c){const t=(c-1)/19;return `hsl(197 ${58+t*10}% ${94-t*35}%)`}
+function render(k){const d=S[k],v=document.getElementById("vessel"+k),salt=d.w*d.c/100,water=d.w-salt;
+v.style.width=(d.w*PX_G)+"px";v.style.height=(d.c*PX_PCT)+"px";v.style.backgroundColor=color(d.c);
+document.getElementById("weightLabel"+k).textContent=f(d.w)+"g";document.getElementById("concLabel"+k).textContent=f(d.c)+"%";
+document.getElementById("salt"+k).textContent="食塩 "+f(salt)+"g";document.getElementById("water"+k).textContent="水 "+f(water)+"g";
+document.getElementById("wv"+k).textContent=f(d.w)+"g";document.getElementById("cv"+k).textContent=f(d.c)+"%"}
+function bind(id,k,p){document.getElementById(id).addEventListener("input",e=>{S[k][p]=+e.target.value;render(k)})}
+bind("weightA","A","w");bind("concA","A","c");bind("weightB","B","w");bind("concB","B","c");
+document.getElementById("lockA").onclick=()=>{S.locked=!S.locked;["weightA","concA"].forEach(id=>document.getElementById(id).disabled=S.locked);document.getElementById("cardA").classList.toggle("locked",S.locked);document.getElementById("lockA").textContent=S.locked?"🔒 基準":"🔓 変更できます"};
+document.getElementById("reset").onclick=()=>{for(const k of ["A","B"]){S[k]={w:100,c:4};document.getElementById("weight"+k).value=100;document.getElementById("conc"+k).value=4;render(k)}};
+render("A");render("B");
