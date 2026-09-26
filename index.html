@@ -1,185 +1,29 @@
-<!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>面積図メーカー v1.2</title>
-<style>
-*{box-sizing:border-box}
-:root{--bg:#f7f5ef;--ink:#252525;--line:#806b52;--card:#ffffffc9;--border:#ddd7ca}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
-.app{width:min(1180px,96vw);margin:auto;padding:14px 18px 28px}
-header{text-align:center}.title-row{display:flex;justify-content:center;align-items:center;gap:12px}
-h1{margin:0;font-size:clamp(27px,3vw,38px)}.version{font-size:12px;font-weight:700;border:1px solid #aaa;background:#fff;border-radius:999px;padding:5px 9px;color:#555}
-header p{margin:6px 0;color:#666}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:end}
-.head{height:48px;display:flex;justify-content:center;align-items:center;gap:12px}.head h2{margin:0;font-size:26px}
-button{font:inherit;background:#fff;border:1px solid #aaa;border-radius:12px;padding:8px 13px;cursor:pointer}
-.space{height:330px;display:flex;align-items:flex-end;justify-content:center}
-.vessel{position:relative;border:3px solid #555;border-top-width:2px;transition:width .12s ease-out,height .12s ease-out,background-color .18s ease-out}
-.weight{position:absolute;left:50%;top:-30px;transform:translateX(-50%);white-space:nowrap}.conc{position:absolute;right:calc(100% + 10px);top:50%;transform:translateY(-50%);white-space:nowrap}
-.inside{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;white-space:nowrap;text-align:center}.inside strong{font-size:clamp(15px,2vw,21px)}.inside span{font-size:clamp(12px,1.4vw,16px);margin-top:3px}
-.table{height:7px;background:var(--line);border-radius:4px;box-shadow:0 3px 0 rgba(0,0,0,.08)}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:5vw;margin-top:18px}.card,.lab{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 18px}.card.locked{opacity:.52}
-.card h3,.lab h3{text-align:center;margin:0 0 12px}.card label,.slider-panel label{display:grid;grid-template-columns:1fr auto;gap:7px;margin:13px 0}.card input,.slider-panel input{grid-column:1/3;width:100%}
-.base-footer{display:flex;justify-content:center;align-items:center;gap:22px;margin-top:15px;color:#666;font-size:14px}
-.lab{margin:20px auto 0;max-width:850px}.lab-title{text-align:center;margin-bottom:12px}.lab-title h2{margin:0;font-size:22px}.lab-title p{margin:4px 0;color:#666;font-size:14px}
-.tabs{display:flex;justify-content:center;margin:8px auto 14px}.tab{border-radius:0;min-width:145px}.tab:first-child{border-radius:10px 0 0 10px}.tab:last-child{border-radius:0 10px 10px 0;margin-left:-1px}.tab.active{background:#333;color:white;border-color:#333}
-.panel{display:none}.panel.active{display:block}
-.slider-panel{max-width:620px;margin:auto}.delta{font-weight:700}.hint{text-align:center;color:#666;font-size:13px;margin:10px 0 0}
-.xy-wrap{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;gap:6px 8px;max-width:600px;margin:4px auto 0}
-.y-label{writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-weight:700}
-.x-label{grid-column:2;text-align:center;font-weight:700}
-.xy-pad{position:relative;height:270px;border-left:2px solid #555;border-bottom:2px solid #555;background:
-linear-gradient(to right,rgba(0,0,0,.06) 1px,transparent 1px),
-linear-gradient(to top,rgba(0,0,0,.06) 1px,transparent 1px);
-background-size:10% 10%;touch-action:none;user-select:none;cursor:crosshair}
-.xy-dot{position:absolute;width:28px;height:28px;border-radius:50%;background:#1677e8;border:4px solid white;box-shadow:0 1px 5px #0005;transform:translate(-50%,50%);cursor:grab}
-.xy-dot:active{cursor:grabbing}.origin-dot{position:absolute;width:16px;height:16px;border-radius:50%;border:3px solid #777;background:var(--bg);transform:translate(-50%,50%);pointer-events:none}
-.path-h,.path-v{position:absolute;background:#9998;pointer-events:none}.path-h{height:2px}.path-v{width:2px}
-.xy-readout{text-align:center;margin-top:10px;font-weight:700}.xy-readout small{display:block;font-weight:400;color:#666;margin-top:3px}
-@media(max-width:760px){.app{width:100%;padding:10px}.pair,.controls{gap:24px}.base-footer{flex-direction:column;gap:8px;text-align:center}.lab{padding:12px}.xy-pad{height:240px}.version{font-size:10px}}
-</style>
-</head>
-<body>
-<main class="app">
-<header><div class="title-row"><h1>面積図メーカー</h1><span class="version">v1.2</span></div><p>重さと濃度を動かして、面積図の変化を見てみよう。</p></header>
-
-<section>
-<div class="pair">
-<article><div class="head"><h2>A</h2><button id="lockA">🔒 基準</button></div><div class="space"><div class="vessel" id="vesselA"><b class="weight" id="weightLabelA"></b><b class="conc" id="concLabelA"></b><div class="inside"><strong id="saltA"></strong><span id="waterA"></span></div></div></div></article>
-<article><div class="head"><h2>B</h2></div><div class="space"><div class="vessel" id="vesselB"><b class="weight" id="weightLabelB"></b><b class="conc" id="concLabelB"></b><div class="inside"><strong id="saltB"></strong><span id="waterB"></span></div></div></div></article>
-</div><div class="table"></div>
-</section>
-
-<section class="controls">
-<article class="card locked" id="cardA"><h3>A の設定</h3><label>食塩水の重さ <b id="wvA"></b><input id="weightA" type="range" min="50" max="300" step="10" value="100" disabled></label><label>濃度 <b id="cvA"></b><input id="concA" type="range" min="1" max="20" step="1" value="4" disabled></label></article>
-<article class="card"><h3>B の設定</h3><label>食塩水の重さ <b id="wvB"></b><input id="weightB" type="range" min="50" max="300" step="10" value="100"></label><label>濃度 <b id="cvB"></b><input id="concB" type="range" min="1" max="20" step="1" value="4"></label></article>
-</section>
-
-<div class="base-footer"><button id="reset">最初にもどす</button><span>横＝食塩水の重さ　｜　縦＝濃度　｜　面積＝食塩の重さ</span></div>
-
-<section class="lab">
-<div class="lab-title"><h2>Bを変えてみる</h2><p>Aを出発点にして、食塩と水を動かします。</p></div>
-<div class="tabs"><button class="tab active" data-panel="sliderPanel">＋で動かす</button><button class="tab" data-panel="xyPanel">XYで動かす</button></div>
-
-<div id="sliderPanel" class="panel slider-panel active">
-<label>食塩を加える <b class="delta" id="saltDeltaLabel">＋0g</b><input id="saltDelta" type="range" min="0" max="50" step="1" value="0"></label>
-<label>水を加える <b class="delta" id="waterDeltaLabel">＋0g</b><input id="waterDelta" type="range" min="0" max="150" step="1" value="0"></label>
-<p class="hint">横へ動かすと食塩だけ、下のスライダーを動かすと水だけが増えます。</p>
-</div>
-
-<div id="xyPanel" class="panel">
-<div class="xy-wrap">
-<div class="y-label">水の量</div>
-<div class="xy-pad" id="xyPad">
-<div class="path-h" id="pathH"></div><div class="path-v" id="pathV"></div>
-<div class="origin-dot" id="originDot" title="Aの位置"></div>
-<div class="xy-dot" id="xyDot" title="B"></div>
-</div>
-<div></div><div class="x-label">食塩の量 →</div>
-</div>
-<div class="xy-readout" id="xyReadout"></div>
-<p class="hint">○＝Aの出発点　●＝B。●を左右に動かすと食塩、上下に動かすと水が変わります。</p>
-</div>
-</section>
-</main>
-
-<script>
-const S={A:{w:100,c:4},B:{w:100,c:4},locked:true};
-const PX_G=1.35,PX_PCT=14;
-const XY={maxSalt:50,maxWater:250};
-
-const $=id=>document.getElementById(id);
-const fmt=n=>{n=Math.round(n*10)/10;return Number.isInteger(n)?String(n):n.toFixed(1)};
-function saltWater(d){const salt=d.w*d.c/100;return{salt,water:d.w-salt}}
-function fromSaltWater(salt,water){const w=salt+water;return{w,c:w===0?0:salt/w*100}}
-function color(c){const t=Math.max(0,Math.min(1,(c-1)/19));return `hsl(197 ${58+t*10}% ${94-t*35}%)`}
-
-function renderVessel(k){
- const d=S[k],v=$("vessel"+k),sw=saltWater(d);
- v.style.width=(d.w*PX_G)+"px"; v.style.height=(d.c*PX_PCT)+"px"; v.style.backgroundColor=color(d.c);
- $("weightLabel"+k).textContent=fmt(d.w)+"g"; $("concLabel"+k).textContent=fmt(d.c)+"%";
- $("salt"+k).textContent="食塩 "+fmt(sw.salt)+"g"; $("water"+k).textContent="水 "+fmt(sw.water)+"g";
- $("wv"+k).textContent=fmt(d.w)+"g"; $("cv"+k).textContent=fmt(d.c)+"%";
-}
-
-function setBFromSaltWater(salt,water){
- salt=Math.max(0,Math.min(XY.maxSalt,salt)); water=Math.max(0,Math.min(XY.maxWater,water));
- S.B=fromSaltWater(salt,water);
- // Top B sliders mirror the current B as closely as their ranges allow.
- $("weightB").value=Math.max(50,Math.min(300,S.B.w));
- $("concB").value=Math.max(1,Math.min(20,S.B.c));
- renderVessel("B"); syncLab();
-}
-
-function bindTop(id,k,p){
- $(id).addEventListener("input",e=>{S[k][p]=Number(e.target.value);renderVessel(k); if(k==="A"||k==="B") syncLab();});
-}
-bindTop("weightA","A","w");bindTop("concA","A","c");bindTop("weightB","B","w");bindTop("concB","B","c");
-
-$("lockA").onclick=()=>{
- S.locked=!S.locked; $("weightA").disabled=S.locked;$("concA").disabled=S.locked;$("cardA").classList.toggle("locked",S.locked);
- $("lockA").textContent=S.locked?"🔒 基準":"🔓 変更できます"; syncLab();
-};
-
-function baseSW(){return saltWater(S.A)}
-function currentSW(){return saltWater(S.B)}
-
-function syncLab(){
- const a=baseSW(),b=currentSW();
- const ds=b.salt-a.salt,dw=b.water-a.water;
- $("saltDelta").value=Math.max(0,Math.min(50,ds));
- $("waterDelta").value=Math.max(0,Math.min(150,dw));
- $("saltDeltaLabel").textContent=(ds>=0?"＋":"")+fmt(ds)+"g";
- $("waterDeltaLabel").textContent=(dw>=0?"＋":"")+fmt(dw)+"g";
- positionXY();
-}
-
-$("saltDelta").addEventListener("input",()=>{
- const a=baseSW(); setBFromSaltWater(a.salt+Number($("saltDelta").value),currentSW().water);
-});
-$("waterDelta").addEventListener("input",()=>{
- const a=baseSW(); setBFromSaltWater(currentSW().salt,a.water+Number($("waterDelta").value));
-});
-
-document.querySelectorAll(".tab").forEach(tab=>tab.onclick=()=>{
- document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
- tab.classList.add("active");$(tab.dataset.panel).classList.add("active");requestAnimationFrame(positionXY);
-});
-
-function xyToPixel(salt,water){
- const pad=$("xyPad"),w=pad.clientWidth,h=pad.clientHeight;
- return{x:(salt/XY.maxSalt)*w,y:h-(water/XY.maxWater)*h};
-}
-function positionXY(){
- const pad=$("xyPad"); if(!pad.clientWidth)return;
- const a=baseSW(),b=currentSW(),ap=xyToPixel(a.salt,a.water),bp=xyToPixel(b.salt,b.water),h=pad.clientHeight;
- $("originDot").style.left=ap.x+"px";$("originDot").style.bottom=(h-ap.y)+"px";
- $("xyDot").style.left=bp.x+"px";$("xyDot").style.bottom=(h-bp.y)+"px";
- $("pathH").style.left=Math.min(ap.x,bp.x)+"px";$("pathH").style.bottom=(h-ap.y)+"px";$("pathH").style.width=Math.abs(bp.x-ap.x)+"px";
- $("pathV").style.left=bp.x+"px";$("pathV").style.bottom=Math.min(h-ap.y,h-bp.y)+"px";$("pathV").style.height=Math.abs(bp.y-ap.y)+"px";
- $("xyReadout").innerHTML=`B：食塩 ${fmt(b.salt)}g ／ 水 ${fmt(b.water)}g<small>全体 ${fmt(S.B.w)}g　濃度 ${fmt(S.B.c)}%</small>`;
-}
-function moveXY(clientX,clientY){
- const r=$("xyPad").getBoundingClientRect();
- const x=Math.max(0,Math.min(r.width,clientX-r.left)), y=Math.max(0,Math.min(r.height,clientY-r.top));
- const salt=x/r.width*XY.maxSalt,water=(1-y/r.height)*XY.maxWater;
- setBFromSaltWater(Math.round(salt),Math.round(water));
-}
-let dragging=false;
-$("xyPad").addEventListener("pointerdown",e=>{dragging=true;$("xyPad").setPointerCapture(e.pointerId);moveXY(e.clientX,e.clientY)});
-$("xyPad").addEventListener("pointermove",e=>{if(dragging)moveXY(e.clientX,e.clientY)});
-$("xyPad").addEventListener("pointerup",()=>dragging=false);$("xyPad").addEventListener("pointercancel",()=>dragging=false);
-window.addEventListener("resize",positionXY);
-
-$("reset").onclick=()=>{
- S.A={w:100,c:4};S.B={w:100,c:4};
- ["A","B"].forEach(k=>{$("weight"+k).value=100;$("conc"+k).value=4;renderVessel(k)});
- syncLab();
-};
-
-renderVessel("A");renderVessel("B");syncLab();
-</script>
-</body>
-</html>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>面積図メーカー v1.3</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f7f5ef;color:#252525;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}main{width:min(1220px,97vw);margin:auto;padding:12px 18px 28px}header{text-align:center}.title{display:flex;justify-content:center;align-items:center;gap:12px}h1{margin:0;font-size:38px}.ver{font-size:12px;font-weight:800;border:1px solid #aaa;background:white;border-radius:99px;padding:5px 9px}header p{margin:5px;color:#666}.pair{display:grid;grid-template-columns:1fr 1fr;gap:4vw}.head{height:48px;display:flex;justify-content:center;align-items:center;gap:12px}.head h2{margin:0;font-size:27px}button{background:white;border:1px solid #aaa;border-radius:12px;padding:8px 13px}.apparatus{height:365px;display:grid;grid-template-columns:64px 1fr 64px;align-items:end;gap:8px}.bar{height:300px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}.barTitle{height:43px;text-align:center;font-size:12px;font-weight:700}.barTitle svg{width:25px;height:25px;display:block;margin:auto}.vr{height:235px;width:34px;writing-mode:vertical-lr;direction:rtl;accent-color:#555}.barVal{font-weight:800;font-size:14px}.space{height:330px;display:flex;align-items:flex-end;justify-content:center}.vessel{position:relative;border:3px solid #555;border-top-width:2px;transition:.13s;min-width:46px}.weight{position:absolute;left:50%;top:-40px;transform:translateX(-50%);font-size:27px;white-space:nowrap}.conc{position:absolute;right:calc(100% + 11px);top:50%;transform:translateY(-50%);font-size:27px;white-space:nowrap}.inside{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;gap:16px;overflow:hidden}.comp{text-align:center}.comp svg{width:30px;height:30px;display:block;margin:auto}.comp b{font-size:18px;white-space:nowrap}.table{height:7px;background:#806b52;border-radius:4px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:4vw;margin-top:16px}.card,.lab{background:#ffffffc9;border:1px solid #ddd7ca;border-radius:16px;padding:13px 18px}.locked{opacity:.52}.card h3{text-align:center;margin:0 0 10px}.card label,.slider label{display:grid;grid-template-columns:1fr auto;gap:7px;margin:11px 0}.card input,.slider input{grid-column:1/3;width:100%}.foot{display:flex;justify-content:center;gap:22px;margin-top:13px;color:#666;font-size:14px}.lab{max-width:850px;margin:18px auto 0}.lab h2{text-align:center;margin:0}.lab>p{text-align:center;color:#666;margin:3px}.tabs{display:flex;justify-content:center;margin:10px}.tab{border-radius:0;min-width:145px}.tab:first-child{border-radius:10px 0 0 10px}.tab:last-child{border-radius:0 10px 10px 0;margin-left:-1px}.tab.on{background:#333;color:white}.panel{display:none}.panel.on{display:block}.slider{max-width:620px;margin:auto}.xywrap{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;gap:6px 8px;max-width:600px;margin:auto}.yl{writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center}.xl{grid-column:2;text-align:center;font-weight:700}.pad{position:relative;height:260px;border-left:2px solid #555;border-bottom:2px solid #555;background:linear-gradient(to right,#0001 1px,transparent 1px),linear-gradient(to top,#0001 1px,transparent 1px);background-size:10% 10%;touch-action:none}.dot,.origin{position:absolute;border-radius:50%;transform:translate(-50%,50%)}.dot{width:28px;height:28px;background:#1677e8;border:4px solid white}.origin{width:16px;height:16px;border:3px solid #777;background:#f7f5ef}.ph,.pv{position:absolute;background:#7779}.ph{height:2px}.pv{width:2px}.read{text-align:center;font-weight:800;margin-top:8px}.read small{display:block;font-weight:400;color:#666}.hint{text-align:center;color:#666;font-size:13px}@media(max-width:850px){main{width:100%;padding:10px}.apparatus{grid-template-columns:48px 1fr 48px;gap:3px}.pair,.controls{gap:16px}.inside{gap:6px}.comp svg{width:25px;height:25px}.foot{flex-direction:column;align-items:center}}
+</style></head><body><main><header><div class="title"><h1>面積図メーカー</h1><span class="ver">v1.3</span></div><p>食塩と水を動かして、食塩水の変化を見てみよう。</p></header>
+<section><div class="pair">
+<article><div class="head"><h2>A</h2><button id="lock">🔒 基準</button></div><div class="apparatus"><div class="bar"><div class="barTitle" id="sma">塩</div><input class="vr" id="sa" type="range" min="0" max="50" disabled><b class="barVal" id="sav"></b></div><div class="space"><div class="vessel" id="va"><b class="weight" id="wa"></b><b class="conc" id="ca"></b><div class="inside"><div class="comp" id="sia"></div><div class="comp" id="wia"></div></div></div></div><div class="bar"><div class="barTitle" id="wma">水</div><input class="vr" id="wta" type="range" min="0" max="250" disabled><b class="barVal" id="wtav"></b></div></div></article>
+<article><div class="head"><h2>B</h2></div><div class="apparatus"><div class="bar"><div class="barTitle" id="smb">塩</div><input class="vr" id="sb" type="range" min="0" max="50"><b class="barVal" id="sbv"></b></div><div class="space"><div class="vessel" id="vb"><b class="weight" id="wb"></b><b class="conc" id="cb"></b><div class="inside"><div class="comp" id="sib"></div><div class="comp" id="wib"></div></div></div></div><div class="bar"><div class="barTitle" id="wmb">水</div><input class="vr" id="wtb" type="range" min="0" max="250"><b class="barVal" id="wtbv"></b></div></div></article>
+</div><div class="table"></div></section>
+<section class="controls"><article class="card locked" id="carda"><h3>A の設定</h3><label>食塩水の重さ <b id="wva"></b><input id="wra" type="range" min="50" max="300" step="10" value="100" disabled></label><label>濃度 <b id="cva"></b><input id="cra" type="range" min="1" max="20" value="4" disabled></label></article><article class="card"><h3>B の設定</h3><label>食塩水の重さ <b id="wvb"></b><input id="wrb" type="range" min="50" max="300" step="10" value="100"></label><label>濃度 <b id="cvb"></b><input id="crb" type="range" min="1" max="20" value="4"></label></article></section>
+<div class="foot"><button id="reset">最初にもどす</button><span>横＝食塩水の重さ ｜ 縦＝濃度 ｜ 面積＝食塩の重さ</span></div>
+<section class="lab"><h2>別の操作方法も試す</h2><p>器横の縦バーと比べてみよう。</p><div class="tabs"><button class="tab on" data-p="sl">＋で動かす</button><button class="tab" data-p="xy">XYで動かす</button></div><div id="sl" class="panel slider on"><label>食塩を加える <b id="sdl">＋0g</b><input id="sd" type="range" min="0" max="50"></label><label>水を加える <b id="wdl">＋0g</b><input id="wd" type="range" min="0" max="150"></label></div><div id="xy" class="panel"><div class="xywrap"><div class="yl">水の量</div><div class="pad" id="pad"><div class="ph" id="ph"></div><div class="pv" id="pv"></div><div class="origin" id="org"></div><div class="dot" id="dot"></div></div><div></div><div class="xl">食塩の量 →</div></div><div class="read" id="read"></div><p class="hint">○＝A、●＝B</p></div></section>
+</main><script>
+const S={a:{w:100,c:4},b:{w:100,c:4},locked:true},PG=1.58,PC=16.4,MAXS=50,MAXW=250,$=x=>document.getElementById(x),f=n=>{n=Math.round(n*10)/10;return Number.isInteger(n)?n:n.toFixed(1)};
+const salt=`<svg viewBox="0 0 40 40"><path d="M8 30h24L26 19l-5 4-5-9-4 10z" fill="#fafaf6" stroke="#555" stroke-width="2"/></svg>`,water=`<svg viewBox="0 0 40 40"><path d="M20 5C17 11 10 18 10 25a10 10 0 0 0 20 0c0-7-7-14-10-20z" fill="#bfe7f5" stroke="#477b8c" stroke-width="2"/></svg>`;
+["a","b"].forEach(k=>{$("sm"+k).innerHTML=salt+"塩";$("wm"+k).innerHTML=water+"水"});
+const sw=d=>{let s=d.w*d.c/100;return{s,w:d.w-s}},from=(s,w)=>({w:s+w,c:s+w?100*s/(s+w):0});
+function col(c){let t=Math.max(0,Math.min(1,c/20));return `hsl(197 ${52+t*18}% ${98-Math.pow(t,.82)*42}%)`}
+function render(k){let d=S[k],q=sw(d);$("v"+k).style.width=d.w*PG+"px";$("v"+k).style.height=d.c*PC+"px";$("v"+k).style.background=col(d.c);$("w"+k).textContent=f(d.w)+"g";$("c"+k).textContent=f(d.c)+"%";$("si"+k).innerHTML=salt+"<b>"+f(q.s)+"g</b>";$("wi"+k).innerHTML=water+"<b>"+f(q.w)+"g</b>";$("wv"+k).textContent=f(d.w)+"g";$("cv"+k).textContent=f(d.c)+"%";$("s"+k).value=q.s;$("wt"+k).value=q.w;$("s"+k+"v").textContent=f(q.s)+"g";$("wt"+k+"v").textContent=f(q.w)+"g"}
+function set(k,s,w){S[k]=from(Math.max(0,s),Math.max(0,w));$("wr"+k).value=Math.max(50,Math.min(300,S[k].w));$("cr"+k).value=Math.max(1,Math.min(20,S[k].c));render(k);sync()}
+["a","b"].forEach(k=>{$("wr"+k).oninput=e=>{S[k].w=+e.target.value;render(k);sync()};$("cr"+k).oninput=e=>{S[k].c=+e.target.value;render(k);sync()};$("s"+k).oninput=e=>set(k,+e.target.value,sw(S[k]).w);$("wt"+k).oninput=e=>set(k,sw(S[k]).s,+e.target.value)});
+$("lock").onclick=()=>{S.locked=!S.locked;["wra","cra","sa","wta"].forEach(x=>$(x).disabled=S.locked);$("carda").classList.toggle("locked",S.locked);$("lock").textContent=S.locked?"🔒 基準":"🔓 変更できます"};
+function sync(){let a=sw(S.a),b=sw(S.b),ds=b.s-a.s,dw=b.w-a.w;$("sd").value=Math.max(0,Math.min(50,ds));$("wd").value=Math.max(0,Math.min(150,dw));$("sdl").textContent=(ds>=0?"＋":"")+f(ds)+"g";$("wdl").textContent=(dw>=0?"＋":"")+f(dw)+"g";pos()}
+$("sd").oninput=e=>{let a=sw(S.a),b=sw(S.b);set("b",a.s+(+e.target.value),b.w)};$("wd").oninput=e=>{let a=sw(S.a),b=sw(S.b);set("b",b.s,a.w+(+e.target.value))};
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab,.panel").forEach(x=>x.classList.remove("on"));t.classList.add("on");$(t.dataset.p).classList.add("on");requestAnimationFrame(pos)});
+function pos(){let p=$("pad");if(!p.clientWidth)return,a=sw(S.a),b=sw(S.b),px=(s,w)=>({x:s/MAXS*p.clientWidth,y:w/MAXW*p.clientHeight}),A=px(a.s,a.w),B=px(b.s,b.w);$("org").style.cssText=`left:${A.x}px;bottom:${A.y}px`;$("dot").style.cssText=`left:${B.x}px;bottom:${B.y}px`;$("ph").style.cssText=`left:${Math.min(A.x,B.x)}px;bottom:${A.y}px;width:${Math.abs(B.x-A.x)}px`;$("pv").style.cssText=`left:${B.x}px;bottom:${Math.min(A.y,B.y)}px;height:${Math.abs(B.y-A.y)}px`;$("read").innerHTML=`B：食塩 ${f(b.s)}g ／ 水 ${f(b.w)}g<small>全体 ${f(S.b.w)}g　濃度 ${f(S.b.c)}%</small>`}
+let drag=false;function mv(e){let r=$("pad").getBoundingClientRect(),x=Math.max(0,Math.min(r.width,e.clientX-r.left)),y=Math.max(0,Math.min(r.height,e.clientY-r.top));set("b",Math.round(x/r.width*MAXS),Math.round((1-y/r.height)*MAXW))}
+$("pad").onpointerdown=e=>{drag=true;$("pad").setPointerCapture(e.pointerId);mv(e)};$("pad").onpointermove=e=>{if(drag)mv(e)};$("pad").onpointerup=()=>drag=false;window.onresize=pos;
+$("reset").onclick=()=>{S.a={w:100,c:4};S.b={w:100,c:4};["a","b"].forEach(k=>{$("wr"+k).value=100;$("cr"+k).value=4;render(k)});sync()};
+render("a");render("b");sync();
+</script></body></html>
