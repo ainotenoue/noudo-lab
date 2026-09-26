@@ -1,7 +1,159 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>面積図メーカー v1.1</title><link rel="stylesheet" href="style.css"></head><body><main><header><h1>面積図メーカー</h1><p>重さと濃度を動かして、面積図の変化を見てみよう。</p></header><section class="stage"><div class="pair">
-<article><div class="head"><h2>A</h2><button id="lockA">🔒 基準</button></div><div class="space"><div class="vessel" id="vesselA"><b class="weight" id="weightLabelA"></b><b class="conc" id="concLabelA"></b><div class="inside"><strong id="saltA"></strong><span id="waterA"></span></div></div></div></article>
-<article><div class="head"><h2>B</h2></div><div class="space"><div class="vessel" id="vesselB"><b class="weight" id="weightLabelB"></b><b class="conc" id="concLabelB"></b><div class="inside"><strong id="saltB"></strong><span id="waterB"></span></div></div></div></article>
-</div><div class="table"></div></section><section class="controls">
-<article class="card locked" id="cardA"><h3>A の設定</h3><label>食塩水の重さ <b id="wvA"></b><input id="weightA" type="range" min="50" max="300" step="10" value="100" disabled></label><label>濃度 <b id="cvA"></b><input id="concA" type="range" min="1" max="20" value="4" disabled></label></article>
-<article class="card"><h3>B の設定</h3><label>食塩水の重さ <b id="wvB"></b><input id="weightB" type="range" min="50" max="300" step="10" value="100"></label><label>濃度 <b id="cvB"></b><input id="concB" type="range" min="1" max="20" value="4"></label></article>
-</section><footer><button id="reset">最初にもどす</button><span>横＝食塩水の重さ　｜　縦＝濃度　｜　面積＝食塩の重さ</span></footer></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>面積図メーカー v1.1.1 FIX</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f5ef;color:#252525;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+.app{width:min(1180px,96vw);margin:auto;padding:14px 18px 22px}
+header{text-align:center}
+.title-row{display:flex;justify-content:center;align-items:center;gap:12px}
+h1{margin:0;font-size:clamp(27px,3vw,38px)}
+.version{font-size:12px;font-weight:700;border:1px solid #aaa;background:#fff;border-radius:999px;padding:5px 9px;color:#555}
+header p{margin:6px 0;color:#666}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:end}
+.head{height:48px;display:flex;justify-content:center;align-items:center;gap:12px}
+.head h2{margin:0;font-size:26px}
+button{background:#fff;border:1px solid #aaa;border-radius:12px;padding:8px 13px;cursor:pointer}
+.space{height:330px;display:flex;align-items:flex-end;justify-content:center}
+.vessel{position:relative;border:3px solid #555;border-top-width:2px;transition:width .12s ease-out,height .12s ease-out,background-color .18s ease-out}
+.weight{position:absolute;left:50%;top:-30px;transform:translateX(-50%);white-space:nowrap}
+.conc{position:absolute;right:calc(100% + 10px);top:50%;transform:translateY(-50%);white-space:nowrap}
+.inside{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;white-space:nowrap;text-align:center}
+.inside strong{font-size:clamp(15px,2vw,21px)}
+.inside span{font-size:clamp(12px,1.4vw,16px);margin-top:3px}
+.table{height:7px;background:#806b52;border-radius:4px;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:5vw;margin-top:18px}
+.card{background:rgba(255,255,255,.72);border:1px solid #ddd7ca;border-radius:16px;padding:14px 18px}
+.card.locked{opacity:.52}
+.card h3{text-align:center;margin:0 0 12px}
+.card label{display:grid;grid-template-columns:1fr auto;gap:7px;margin:13px 0}
+.card input{grid-column:1/3;width:100%}
+footer{display:flex;justify-content:center;align-items:center;gap:22px;margin-top:15px;color:#666;font-size:14px}
+@media(max-width:760px){
+ .app{width:100%;padding:10px}
+ .pair,.controls{gap:24px}
+ footer{flex-direction:column;gap:8px;text-align:center}
+ .version{font-size:10px}
+}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+  <div class="title-row"><h1>面積図メーカー</h1><span class="version">v1.1.1 FIX</span></div>
+  <p>重さと濃度を動かして、面積図の変化を見てみよう。</p>
+</header>
+
+<section>
+<div class="pair">
+  <article>
+    <div class="head"><h2>A</h2><button id="lockA">🔒 基準</button></div>
+    <div class="space">
+      <div class="vessel" id="vesselA">
+        <b class="weight" id="weightLabelA"></b>
+        <b class="conc" id="concLabelA"></b>
+        <div class="inside"><strong id="saltA"></strong><span id="waterA"></span></div>
+      </div>
+    </div>
+  </article>
+  <article>
+    <div class="head"><h2>B</h2></div>
+    <div class="space">
+      <div class="vessel" id="vesselB">
+        <b class="weight" id="weightLabelB"></b>
+        <b class="conc" id="concLabelB"></b>
+        <div class="inside"><strong id="saltB"></strong><span id="waterB"></span></div>
+      </div>
+    </div>
+  </article>
+</div>
+<div class="table"></div>
+</section>
+
+<section class="controls">
+  <article class="card locked" id="cardA">
+    <h3>A の設定</h3>
+    <label>食塩水の重さ <b id="wvA"></b><input id="weightA" type="range" min="50" max="300" step="10" value="100" disabled></label>
+    <label>濃度 <b id="cvA"></b><input id="concA" type="range" min="1" max="20" step="1" value="4" disabled></label>
+  </article>
+  <article class="card">
+    <h3>B の設定</h3>
+    <label>食塩水の重さ <b id="wvB"></b><input id="weightB" type="range" min="50" max="300" step="10" value="100"></label>
+    <label>濃度 <b id="cvB"></b><input id="concB" type="range" min="1" max="20" step="1" value="4"></label>
+  </article>
+</section>
+
+<footer>
+  <button id="reset">最初にもどす</button>
+  <span>横＝食塩水の重さ　｜　縦＝濃度　｜　面積＝食塩の重さ</span>
+</footer>
+</main>
+
+<script>
+const S={A:{w:100,c:4},B:{w:100,c:4},locked:true};
+
+// 完全比例縮尺：A/B 共通
+const PX_PER_GRAM=1.35;
+const PX_PER_PERCENT=14;
+
+function fmt(n){
+  n=Math.round(n*10)/10;
+  return Number.isInteger(n)?String(n):n.toFixed(1);
+}
+function concentrationColor(c){
+  const t=(c-1)/19;
+  return `hsl(197 ${58+t*10}% ${94-t*35}%)`;
+}
+function render(k){
+  const d=S[k];
+  const v=document.getElementById("vessel"+k);
+  const salt=d.w*d.c/100;
+  const water=d.w-salt;
+
+  v.style.width=(d.w*PX_PER_GRAM)+"px";
+  v.style.height=(d.c*PX_PER_PERCENT)+"px";
+  v.style.backgroundColor=concentrationColor(d.c);
+
+  document.getElementById("weightLabel"+k).textContent=fmt(d.w)+"g";
+  document.getElementById("concLabel"+k).textContent=fmt(d.c)+"%";
+  document.getElementById("salt"+k).textContent="食塩 "+fmt(salt)+"g";
+  document.getElementById("water"+k).textContent="水 "+fmt(water)+"g";
+  document.getElementById("wv"+k).textContent=fmt(d.w)+"g";
+  document.getElementById("cv"+k).textContent=fmt(d.c)+"%";
+}
+function bind(id,k,p){
+  document.getElementById(id).addEventListener("input",e=>{
+    S[k][p]=Number(e.target.value);
+    render(k);
+  });
+}
+bind("weightA","A","w");
+bind("concA","A","c");
+bind("weightB","B","w");
+bind("concB","B","c");
+
+document.getElementById("lockA").addEventListener("click",()=>{
+  S.locked=!S.locked;
+  document.getElementById("weightA").disabled=S.locked;
+  document.getElementById("concA").disabled=S.locked;
+  document.getElementById("cardA").classList.toggle("locked",S.locked);
+  document.getElementById("lockA").textContent=S.locked?"🔒 基準":"🔓 変更できます";
+});
+
+document.getElementById("reset").addEventListener("click",()=>{
+  S.A.w=100; S.A.c=4; S.B.w=100; S.B.c=4;
+  ["A","B"].forEach(k=>{
+    document.getElementById("weight"+k).value=100;
+    document.getElementById("conc"+k).value=4;
+    render(k);
+  });
+});
+
+render("A");
+render("B");
+</script>
+</body>
+</html>
