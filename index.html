@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>濃度ラボ v2.3</title>
+<title>濃度ラボ v2.4</title>
 <style>
 *{box-sizing:border-box}
 :root{--bg:#f7f5ef;--ink:#181818;--line:#505050}
@@ -22,7 +22,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 }
 .vesselAnchor{
   position:absolute;
-  left:58%;
+  left:59%;
   bottom:150px;
   width:0;height:0;
 }
@@ -37,24 +37,24 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 /* Contents NEVER follow vessel width/height. They stay at the reference-state coordinates. */
 .contentsFixed{
   position:absolute;
-  right:52px;
-  bottom:18px;
-  width:185px;
-  height:78px;
+  right:34px;
+  bottom:13px;
+  width:205px;
+  height:82px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   pointer-events:none;
   z-index:3;
 }
-.component{display:flex;flex-direction:column;align-items:center;font-size:21px;font-weight:900;white-space:nowrap}
+.component{display:flex;flex-direction:column;align-items:center;font-size:29px;font-weight:900;white-space:nowrap}
 .component svg{width:47px;height:47px;display:block;margin-bottom:1px}
 
 /* Total amount is also fixed at the reference-state position, under the vessel. */
 .totalFixed{
   position:absolute;
-  right:66px;
-  top:18px;
+  right:38px;
+  top:16px;
   display:flex;
   align-items:center;
   gap:10px;
@@ -66,9 +66,9 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 /* Concentration: icon fraction above, number below. Fixed position. */
 .concFixed{
   position:absolute;
-  left:calc(58% + 38px);
+  left:calc(59% + 18px);
   bottom:195px;
-  width:150px;
+  width:142px;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -83,10 +83,10 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 /* Right-handed touch controls. Slider bottoms align to vessel bottom. */
 .controls{
   position:absolute;
-  right:12px;
+  right:48px;
   bottom:150px;
   display:flex;
-  gap:16px;
+  gap:8px;
   align-items:flex-end;
 }
 .barSide{width:86px;height:410px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
@@ -109,14 +109,14 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
  main{padding:6px 8px}
  header{height:64px}
  .stage{height:calc(100vh - 70px);min-height:560px}
- .vesselAnchor{left:57%;bottom:128px}
- .contentsFixed{right:43px;bottom:14px;width:158px;height:68px}
- .component{font-size:18px}.component svg{width:39px;height:39px}
- .totalFixed{right:50px;top:14px}.totalFixed svg{width:53px;height:47px}.totalVal{font-size:25px}
- .concFixed{left:calc(57% + 24px);bottom:168px;width:130px}
+ .vesselAnchor{left:58%;bottom:128px}
+ .contentsFixed{right:25px;bottom:10px;width:185px;height:72px}
+ .component{font-size:25px}.component svg{width:39px;height:39px}
+ .totalFixed{right:28px;top:14px}.totalFixed svg{width:53px;height:47px}.totalVal{font-size:25px}
+ .concFixed{left:calc(58% + 12px);bottom:168px;width:125px}
  .ratio .saltIcon svg{width:34px;height:34px}.ratio .beakerIcon svg{width:44px;height:39px}
  .slash{font-size:50px}.pct{font-size:29px}
- .controls{right:4px;bottom:128px;gap:2px}
+ .controls{right:26px;bottom:128px;gap:2px}
  .barSide{width:72px;height:370px}.vr{height:270px}
  .sideval{font-size:21px}
  .reset{right:10px;bottom:10px}
@@ -125,7 +125,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 </head>
 <body>
 <main>
-<header><h1>濃度ラボ</h1><span class="ver">v2.3</span></header>
+<header><h1>濃度ラボ</h1><span class="ver">v2.4</span></header>
 
 <section class="stage">
   <div class="vesselAnchor">
@@ -170,7 +170,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 const $=id=>document.getElementById(id);
 
 /* Reference state 100g / 4% is deliberately large enough to contain both fixed labels cleanly. */
-const PG=2.55;   // 100g -> 255px width
+const PG=2.75;   // 100g -> 255px width
 const PC=25.0;   // 4%   -> 100px height
 
 const salt=`<svg viewBox="0 0 48 48" aria-hidden="true"><g fill="#fafaf7" stroke="#4f4f4f" stroke-width="1.8"><path d="M8 30l8-11 8 11-8 7z"/><path d="M23 25l7-10 8 10-7 8z"/><path d="M19 39l6-9 7 9-7 5z"/></g></svg>`;
