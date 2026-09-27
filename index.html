@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>濃度ラボ v2.4</title>
+<title>濃度ラボ v2.5</title>
 <style>
 *{box-sizing:border-box}
 :root{--bg:#f7f5ef;--ink:#181818;--line:#505050}
@@ -121,13 +121,37 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
  .sideval{font-size:21px}
  .reset{right:10px;bottom:10px}
 }
+
+/* v2.5: common zero line */
+.zeroLine{
+  position:absolute;
+  left:6%;
+  right:48px;
+  bottom:188px;
+  height:2px;
+  background:#9a9184;
+  opacity:.72;
+  z-index:1;
+  pointer-events:none;
+}
+.vesselAnchor{bottom:188px}
+.controls{bottom:188px}
+.vesselAnchor,.controls,.concFixed{z-index:2}
+
+@media(max-width:900px){
+  .zeroLine{left:4%;right:26px;bottom:166px}
+  .vesselAnchor{bottom:166px}
+  .controls{bottom:166px}
+}
+
 </style>
 </head>
 <body>
 <main>
-<header><h1>濃度ラボ</h1><span class="ver">v2.4</span></header>
+<header><h1>濃度ラボ</h1><span class="ver">v2.5</span></header>
 
 <section class="stage">
+  <div class="zeroLine" aria-hidden="true"></div>
   <div class="vesselAnchor">
     <div id="vessel" class="vessel"></div>
 
