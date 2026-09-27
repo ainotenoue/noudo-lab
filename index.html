@@ -1,165 +1,112 @@
 <!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>濃度ラボ v2.0</title>
-<style>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>濃度ラボ v2.1</title><style>
 *{box-sizing:border-box}
-:root{--bg:#f7f5ef;--ink:#181818;--line:#4f4f4f;--table:#806b52}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
-main{width:min(1240px,97vw);margin:auto;padding:12px 18px 28px}
-header{text-align:center;height:82px}
+:root{--bg:#f7f5ef;--ink:#181818;--line:#4f4f4f}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;overflow-x:hidden}
+main{width:min(1240px,98vw);margin:auto;padding:10px 14px 18px;min-height:100vh;position:relative}
+header{text-align:center;height:78px}
 h1{display:inline;font-size:clamp(32px,4vw,44px);margin:0}
 .ver{margin-left:12px;border:1px solid #aaa;border-radius:99px;background:#fff;padding:5px 10px;font-size:12px;font-weight:800}
 
 .stage{
-  height:650px;
+  height:680px;
   display:grid;
-  grid-template-columns:105px 105px minmax(430px,1fr) 180px;
-  gap:22px;
+  grid-template-columns:170px minmax(430px,1fr) 105px 105px;
+  gap:18px;
   align-items:end;
 }
-.side{
-  height:445px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-end;
-}
+.totalSide,.barSide{height:465px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.totalSide{justify-content:center}
+.totalIcon svg{width:76px;height:64px;display:block}
+.totalVal{font-size:30px;font-weight:900;margin-top:5px}
+
+.center{height:590px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:0}
+.vspace{height:465px;width:100%;display:flex;align-items:flex-end;justify-content:center;position:relative}
+.vesselWrap{position:relative;display:flex;align-items:flex-end;justify-content:center}
+.vessel{position:relative;border:3px solid var(--line);border-top-width:2px;transition:width .12s,height .12s,background .15s;overflow:visible}
+.inside{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:38px;overflow:hidden}
+.component{display:flex;flex-direction:column;align-items:center;font-size:22px;font-weight:900;white-space:nowrap}
+.component svg{width:50px;height:50px;display:block;margin-bottom:2px}
+.inside.vertical{flex-direction:column;gap:8px}
+.inside.vertical .component{flex-direction:row;gap:5px}
+.inside.vertical .component svg{width:38px;height:38px;margin:0}
+
+/* When the vessel is too shallow, its contents move above it. */
+.inside.outTop{overflow:visible;inset:auto;bottom:100%;left:50%;transform:translateX(-50%);height:72px;width:max-content;min-width:190px;gap:30px;align-items:flex-end;padding-bottom:6px}
+/* Extreme narrow case: move contents to the vessel's left, preserving the area diagram itself. */
+.inside.outSide{overflow:visible;inset:auto;right:calc(100% + 10px);top:50%;transform:translateY(-50%);width:82px;height:auto;flex-direction:column;gap:8px}
+.inside.outSide .component{flex-direction:row;gap:4px;font-size:18px}
+.inside.outSide .component svg{width:34px;height:34px;margin:0}
+
+.conc{height:118px;display:flex;align-items:center;justify-content:center;gap:13px}
+.ratio{display:flex;align-items:center;gap:7px}
+.ratio .saltIcon svg{width:42px;height:42px}
+.slash{font-size:61px;line-height:.8;font-weight:300}
+.ratio .beakerIcon svg{width:54px;height:48px}
+.pct{font-size:35px;font-weight:900}
+
 .iconbox{height:58px;display:flex;align-items:center;justify-content:center}
-.iconbox svg{width:48px;height:48px}
-.vr{
-  height:305px;width:48px;
-  writing-mode:vertical-lr;direction:rtl;
-  accent-color:#555;touch-action:none;
-}
+.iconbox svg{width:47px;height:47px}
+.vr{height:330px;width:48px;writing-mode:vertical-lr;direction:rtl;accent-color:#555;touch-action:none}
 .sideval{font-size:25px;font-weight:900;margin-top:7px;white-space:nowrap}
 
-.center{
-  height:555px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-end;
-  min-width:0;
-}
-.vspace{
-  height:410px;width:100%;
-  display:flex;align-items:flex-end;justify-content:center;
-}
-.vessel{
-  position:relative;
-  border:3px solid var(--line);
-  border-top-width:2px;
-  min-width:58px;
-  transition:width .12s ease-out,height .12s ease-out,background .15s ease-out;
-}
-.inside{
-  position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  gap:42px;overflow:hidden;
-}
-.component{
-  display:flex;flex-direction:column;align-items:center;
-  font-size:22px;font-weight:900;white-space:nowrap;
-}
-.component svg{width:52px;height:52px;display:block;margin-bottom:2px}
-
-.total{
-  height:105px;
-  display:flex;align-items:center;justify-content:center;
-  gap:10px;
-  font-size:31px;font-weight:900;
-}
-.total svg{width:68px;height:58px;display:block}
-
-.conc{
-  height:445px;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-}
-.ratio{
-  display:flex;align-items:center;justify-content:center;
-  gap:9px;
-}
-.ratio .saltIcon svg{width:50px;height:50px}
-.slash{
-  font-size:76px;
-  line-height:.8;
-  font-weight:300;
-  transform:translateY(-1px);
-}
-.ratio .beakerIcon svg{width:62px;height:54px}
-.pct{font-size:38px;font-weight:900;margin-top:10px}
-
-.table{height:7px;background:var(--table);border-radius:5px}
-.reset{
-  display:block;margin:12px auto 0;
-  border:1px solid #aaa;background:#fff;border-radius:12px;
-  padding:9px 16px;font-size:20px;cursor:pointer;
-}
-.note{text-align:center;color:#777;font-size:13px;margin-top:8px}
+.reset{position:fixed;right:22px;bottom:20px;width:52px;height:52px;border:1px solid #aaa;background:#fff;border-radius:13px;font-size:23px;z-index:10}
 
 @media(max-width:900px){
-  main{width:100%;padding:8px}
-  .stage{grid-template-columns:78px 78px minmax(330px,1fr) 135px;gap:5px}
-  .side,.conc{height:420px}
-  .vr{height:280px}
-  .inside{gap:18px}
-  .component svg{width:42px;height:42px}
-  .component{font-size:18px}
-  .total{font-size:25px}
-  .ratio .saltIcon svg{width:42px;height:42px}
-  .ratio .beakerIcon svg{width:52px;height:46px}
-  .slash{font-size:62px}
-  .pct{font-size:32px}
+ main{width:100%;padding:8px}
+ .stage{grid-template-columns:125px minmax(320px,1fr) 82px 82px;gap:5px;height:620px}
+ .totalSide,.barSide{height:420px}.center{height:540px}.vspace{height:420px}
+ .vr{height:290px}.totalIcon svg{width:62px;height:54px}.totalVal{font-size:25px}
+ .inside{gap:16px}.component{font-size:18px}.component svg{width:41px;height:41px}
+ .conc{height:105px}.pct{font-size:30px}.ratio .saltIcon svg{width:37px;height:37px}.ratio .beakerIcon svg{width:48px;height:43px}.slash{font-size:54px}
+ .reset{right:14px;bottom:14px}
 }
-</style>
-</head>
-<body>
+</style></head><body>
 <main>
-<header><h1>濃度ラボ</h1><span class="ver">v2.0</span></header>
+<header><h1>濃度ラボ</h1><span class="ver">v2.1</span></header>
 
 <section class="stage">
-  <div class="side">
-    <div class="iconbox" id="waterTop"></div>
-    <input id="waterBar" class="vr" type="range" min="0" max="300" step="1" value="96" aria-label="水の量">
-    <div id="waterVal" class="sideval">96g</div>
+  <div class="totalSide">
+    <span id="totalIcon" class="totalIcon"></span>
+    <div id="totalVal" class="totalVal">100g</div>
   </div>
 
-  <div class="side">
+  <div class="center">
+    <div class="vspace">
+      <div id="vesselWrap" class="vesselWrap">
+        <div id="vessel" class="vessel">
+          <div id="inside" class="inside">
+            <div class="component"><span id="saltInside"></span><span id="saltInsideVal">4g</span></div>
+            <div class="component"><span id="waterInside"></span><span id="waterInsideVal">96g</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="conc">
+      <div class="ratio">
+        <span class="saltIcon" id="ratioSalt"></span>
+        <span class="slash">/</span>
+        <span class="beakerIcon" id="ratioTotal"></span>
+      </div>
+      <div id="pct" class="pct">4%</div>
+    </div>
+  </div>
+
+  <div class="barSide">
     <div class="iconbox" id="saltTop"></div>
     <input id="saltBar" class="vr" type="range" min="0" max="50" step="1" value="4" aria-label="食塩の量">
     <div id="saltVal" class="sideval">4g</div>
   </div>
 
-  <div class="center">
-    <div class="vspace">
-      <div id="vessel" class="vessel">
-        <div class="inside">
-          <div class="component"><span id="waterInside"></span><span id="waterInsideVal">96g</span></div>
-          <div class="component"><span id="saltInside"></span><span id="saltInsideVal">4g</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="total"><span id="totalIcon"></span><span id="totalVal">100g</span></div>
-  </div>
-
-  <div class="conc">
-    <div class="ratio">
-      <span class="saltIcon" id="ratioSalt"></span>
-      <span class="slash">/</span>
-      <span class="beakerIcon" id="ratioTotal"></span>
-    </div>
-    <div id="pct" class="pct">4%</div>
+  <div class="barSide">
+    <div class="iconbox" id="waterTop"></div>
+    <input id="waterBar" class="vr" type="range" min="0" max="300" step="1" value="96" aria-label="水の量">
+    <div id="waterVal" class="sideval">96g</div>
   </div>
 </section>
 
-<div class="table"></div>
 <button id="reset" class="reset" aria-label="最初にもどす">↺</button>
-<p class="note">横＝全体量　｜　縦＝濃度　｜　面積＝食塩の量</p>
-
 <script>
 const $=id=>document.getElementById(id);
 const PG=1.58, PC=16.4;
@@ -197,16 +144,30 @@ function render(){
   $("totalVal").textContent=fmt(total)+"g";
   $("pct").textContent=fmt(conc)+"%";
 
+  const w=Math.max(2,total*PG);
+  const h=Math.max(2,conc*PC);
   const vessel=$("vessel");
-  vessel.style.width=Math.max(58,total*PG)+"px";
-  vessel.style.height=Math.max(2,conc*PC)+"px";
+  vessel.style.width=w+"px";
+  vessel.style.height=h+"px";
   vessel.style.background=color(conc);
+
+  const inside=$("inside");
+  inside.className="inside";
+
+  // Keep the area diagram mathematically proportional; only the labels move.
+  if(h < 82){
+    inside.classList.add("outTop");
+  }else if(w < 112 && h >= 155){
+    inside.classList.add("vertical");
+  }else if(w < 112){
+    inside.classList.add("outSide");
+  }
 }
 
-$("waterTop").innerHTML=water;
 $("saltTop").innerHTML=salt;
-$("waterInside").innerHTML=water;
+$("waterTop").innerHTML=water;
 $("saltInside").innerHTML=salt;
+$("waterInside").innerHTML=water;
 $("totalIcon").innerHTML=beaker;
 $("ratioSalt").innerHTML=salt;
 $("ratioTotal").innerHTML=beaker;
@@ -220,7 +181,4 @@ $("reset").addEventListener("click",()=>{
 });
 
 render();
-</script>
-</main>
-</body>
-</html>
+</script></main></body></html>
