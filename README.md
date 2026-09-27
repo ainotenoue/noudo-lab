@@ -1,4 +1,5 @@
 # 面積図メーカー v1.1
+https://ainotenoue.github.io/noudo-lab/
 ## 変更点
 - 完全比例縮尺：横 1g=1.35px、縦 1%=14px。A/Bは常に同一縮尺。
 - 図の内部に「食塩○g」「水○g」を表示。
