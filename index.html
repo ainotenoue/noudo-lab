@@ -29,7 +29,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 .vessel{
   position:absolute;
   right:0;bottom:0;
-  border:2px solid var(--line);
+  border:1px solid var(--line);
   background:#dff2f8;
   overflow:visible;
   transition:width .09s linear,height .09s linear,background .10s linear;
@@ -84,7 +84,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 .controls{
   position:absolute;
   right:48px;
-  bottom:260px;
+  bottom:240px;
   display:flex;
   gap:8px;
   align-items:flex-end;
@@ -126,7 +126,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 .zeroLine{
   position:absolute;
   left:6%;
-  right:250px;
+  right:280px;
   bottom:220px;
   height:2px;
   background:#9a9184;
@@ -139,7 +139,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 .vesselAnchor,.controls,.concFixed{z-index:2}
 
 @media(max-width:900px){
-  .zeroLine{left:4%;right:250px;bottom:220px}
+  .zeroLine{left:4%;right:280px;bottom:220px}
   .vesselAnchor{bottom:220px}
   .controls{bottom:260px}
 }
