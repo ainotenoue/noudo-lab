@@ -1,4 +1,4 @@
-# 面積図メーカー v1.1
+# 濃度ラボ
 https://ainotenoue.github.io/noudo-lab/
 ## 変更点
 - 完全比例縮尺：横 1g=1.35px、縦 1%=14px。A/Bは常に同一縮尺。
