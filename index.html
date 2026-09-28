@@ -29,7 +29,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 .vessel{
   position:absolute;
   right:0;bottom:0;
-  border:3px solid var(--line);
+  border:2px solid var(--line);
   background:#dff2f8;
   overflow:visible;
   transition:width .09s linear,height .09s linear,background .10s linear;
@@ -53,7 +53,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 /* Total amount is also fixed at the reference-state position, under the vessel. */
 .totalFixed{
   position:absolute;
-  right:35px;
+  right:25px;
   top:8px;
   display:flex;
   align-items:center;
@@ -66,8 +66,8 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 /* Concentration: icon fraction above, number below. Fixed position. */
 .concFixed{
   position:absolute;
-  left:calc(59% + 22px);
-  bottom:240px;
+  left:calc(59% + 30px);
+  bottom:260px;
   width:142px;
   display:flex;
   flex-direction:column;
@@ -84,7 +84,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 .controls{
   position:absolute;
   right:48px;
-  bottom:240px;
+  bottom:260px;
   display:flex;
   gap:8px;
   align-items:flex-end;
@@ -116,7 +116,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
  .concFixed{left:calc(58% + 12px);bottom:220px;width:125px}
  .ratio .saltIcon svg{width:34px;height:34px}.ratio .beakerIcon svg{width:44px;height:39px}
  .slash{font-size:40px}.pct{font-size:29px}
- .controls{right:26px;bottom:220px;gap:2px}
+ .controls{right:26px;bottom:260px;gap:2px}
  .barSide{width:72px;height:370px}.vr{height:270px}
  .sideval{font-size:21px}
  .reset{right:10px;bottom:10px}
@@ -141,7 +141,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 @media(max-width:900px){
   .zeroLine{left:4%;right:26px;bottom:220px}
   .vesselAnchor{bottom:220px}
-  .controls{bottom:220px}
+  .controls{bottom:260px}
 }
 
 </style>
