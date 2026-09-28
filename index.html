@@ -1,2 +1,254 @@
-<h1>This is ZenPen
-</h1><p>&lt;!doctype html&gt;</p><p>&lt;html lang="ja"&gt;</p><p>&lt;head&gt;</p><p>&lt;meta charset="utf-8"&gt;</p><p>&lt;meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"&gt;</p><p>&lt;title&gt;濃度ラボ v2.5&lt;/title&gt;</p><p>&lt;style&gt;</p><p>*{box-sizing:border-box}</p><p>:root{--bg:#f7f5ef;--ink:#181818;--line:#505050}</p><p>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg)}</p><p>body{color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}</p><p>main{position:relative;width:min(1240px,100vw);height:100vh;margin:auto;padding:8px 14px}</p><p>header{text-align:center;height:72px}</p><p>h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}</p><p>.ver{margin-left:12px;padding:5px 10px;border:1px solid #aaa;border-radius:99px;background:#fff;font-size:12px;font-weight:800}</p><p><br></p><p>/* Fixed visual field.&nbsp; The reference state (salt 4g / water 96g / 4%) defines all label positions. */</p><p>.stage{</p><p>&nbsp; position:relative;</p><p>&nbsp; height:calc(100vh - 80px);</p><p>&nbsp; min-height:600px;</p><p>}</p><p>.vesselAnchor{</p><p>&nbsp; position:absolute;</p><p>&nbsp; left:59%;</p><p>&nbsp; bottom:220px;</p><p>&nbsp; width:0;height:0;</p><p>}</p><p>.vessel{</p><p>&nbsp; position:absolute;</p><p>&nbsp; right:0;bottom:0;</p><p>&nbsp; border:1px solid var(--line);</p><p>&nbsp; background:#dff2f8;</p><p>&nbsp; overflow:visible;</p><p>&nbsp; transition:width .09s linear,height .09s linear,background .10s linear;</p><p>}</p><p>/* Contents NEVER follow vessel width/height. They stay at the reference-state coordinates. */</p><p>.contentsFixed{</p><p>&nbsp; position:absolute;</p><p>&nbsp; right:32px;</p><p>&nbsp; bottom:25px;</p><p>&nbsp; width:160px;</p><p>&nbsp; height:82px;</p><p>&nbsp; display:flex;</p><p>&nbsp; align-items:center;</p><p>&nbsp; justify-content:space-between;</p><p>&nbsp; pointer-events:none;</p><p>&nbsp; z-index:3;</p><p>}</p><p>.component{display:flex;flex-direction:column;align-items:center;font-size:34px;font-weight:900;white-space:nowrap}</p><p>.component svg{width:47px;height:47px;display:block;margin-bottom:1px}</p><p><br></p><p>/* Total amount is also fixed at the reference-state position, under the vessel. */</p><p>.totalFixed{</p><p>&nbsp; position:absolute;</p><p>&nbsp; right:25px;</p><p>&nbsp; top:8px;</p><p>&nbsp; display:flex;</p><p>&nbsp; align-items:center;</p><p>&nbsp; gap:10px;</p><p>&nbsp; white-space:nowrap;</p><p>}</p><p>.totalFixed svg{width:62px;height:54px;display:block}</p><p>.totalVal{font-size:34px;font-weight:900}</p><p><br></p><p>/* Concentration: icon fraction above, number below. Fixed position. */</p><p>.concFixed{</p><p>&nbsp; position:absolute;</p><p>&nbsp; left:calc(59% + 30px);</p><p>&nbsp; bottom:260px;</p><p>&nbsp; width:142px;</p><p>&nbsp; display:flex;</p><p>&nbsp; flex-direction:column;</p><p>&nbsp; align-items:center;</p><p>&nbsp; z-index:4;</p><p>}</p><p>.ratio{display:flex;align-items:center;justify-content:center;gap:7px;height:58px}</p><p>.ratio .saltIcon svg{width:39px;height:39px}</p><p>.slash{font-size:40px;line-height:.8;font-weight:300}</p><p>.ratio .beakerIcon svg{width:51px;height:45px}</p><p>.pct{font-size:34px;font-weight:900;margin-top:5px;white-space:nowrap}</p><p><br></p><p>/* Right-handed touch controls. Slider bottoms align to vessel bottom. */</p><p>.controls{</p><p>&nbsp; position:absolute;</p><p>&nbsp; right:48px;</p><p>&nbsp; bottom:240px;</p><p>&nbsp; display:flex;</p><p>&nbsp; gap:8px;</p><p>&nbsp; align-items:flex-end;</p><p>}</p><p>.barSide{width:86px;height:500px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}</p><p>.iconbox{height:54px;display:flex;align-items:center;justify-content:center}</p><p>.iconbox svg{width:44px;height:44px}</p><p>.vr{</p><p>&nbsp; height:350px;width:46px;</p><p>&nbsp; writing-mode:vertical-lr;direction:rtl;</p><p>&nbsp; accent-color:#555;touch-action:none;</p><p>}</p><p>.sideval{height:38px;font-size:34px;font-weight:900;margin-top:5px;white-space:nowrap}</p><p><br></p><p>.reset{</p><p>&nbsp; position:fixed;right:16px;bottom:14px;</p><p>&nbsp; width:50px;height:50px;border:1px solid #aaa;background:#fff;</p><p>&nbsp; border-radius:12px;font-size:22px;z-index:20;cursor:pointer</p><p>}</p><p><br></p><p>@media(max-width:900px){</p><p>&nbsp;main{padding:6px 8px}</p><p>&nbsp;header{height:64px}</p><p>&nbsp;.stage{height:calc(100vh - 70px);min-height:560px}</p><p>&nbsp;.vesselAnchor{left:58%;bottom:220px}</p><p>&nbsp;.contentsFixed{right:32px;bottom:25px;width:140px;height:82px}</p><p>&nbsp;.component{font-size:25px}.component svg{width:39px;height:39px}</p><p>&nbsp;.totalFixed{right:35px;top:8px}.totalFixed svg{width:53px;height:47px}.totalVal{font-size:25px}</p><p>&nbsp;.concFixed{left:calc(58% + 12px);bottom:220px;width:125px}</p><p>&nbsp;.ratio .saltIcon svg{width:34px;height:34px}.ratio .beakerIcon svg{width:44px;height:39px}</p><p>&nbsp;.slash{font-size:40px}.pct{font-size:29px}</p><p>&nbsp;.controls{right:26px;bottom:260px;gap:2px}</p><p>&nbsp;.barSide{width:72px;height:370px}.vr{height:270px}</p><p>&nbsp;.sideval{font-size:21px}</p><p>&nbsp;.reset{right:10px;bottom:10px}</p><p>}</p><p><br></p><p>/* v2.5: common zero line */</p><p>.zeroLine{</p><p>&nbsp; position:absolute;</p><p>&nbsp; left:6%;</p><p>&nbsp; right:280px;</p><p>&nbsp; bottom:220px;</p><p>&nbsp; height:2px;</p><p>&nbsp; background:#9a9184;</p><p>&nbsp; opacity:.72;</p><p>&nbsp; z-index:1;</p><p>&nbsp; pointer-events:none;</p><p>}</p><p>.vesselAnchor{bottom:220px}</p><p>.controls{bottom:220px}</p><p>.vesselAnchor,.controls,.concFixed{z-index:2}</p><p><br></p><p>@media(max-width:900px){</p><p>&nbsp; .zeroLine{left:4%;right:280px;bottom:220px}</p><p>&nbsp; .vesselAnchor{bottom:220px}</p><p>&nbsp; .controls{bottom:260px}</p><p>}</p><p><br></p><p>&lt;/style&gt;</p><p>&lt;/head&gt;</p><p>&lt;body&gt;</p><p>&lt;main&gt;</p><p>&lt;header&gt;&lt;h1&gt;濃度ラボ&lt;/h1&gt;&lt;span class="ver"&gt;v2.5&lt;/span&gt;&lt;/header&gt;</p><p><br></p><p>&lt;section class="stage"&gt;</p><p>&nbsp; &lt;div class="zeroLine" aria-hidden="true"&gt;&lt;/div&gt;</p><p>&nbsp; &lt;div class="vesselAnchor"&gt;</p><p>&nbsp; &nbsp; &lt;div id="vessel" class="vessel"&gt;&lt;/div&gt;</p><p><br></p><p>&nbsp; &nbsp; &lt;div class="contentsFixed"&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;div class="component"&gt;&lt;span id="saltInside"&gt;&lt;/span&gt;&lt;span id="saltInsideVal"&gt;4g&lt;/span&gt;&lt;/div&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;div class="component"&gt;&lt;span id="waterInside"&gt;&lt;/span&gt;&lt;span id="waterInsideVal"&gt;96g&lt;/span&gt;&lt;/div&gt;</p><p>&nbsp; &nbsp; &lt;/div&gt;</p><p><br></p><p>&nbsp; &nbsp; &lt;div class="totalFixed"&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;span id="totalIcon"&gt;&lt;/span&gt;&lt;span id="totalVal" class="totalVal"&gt;100g&lt;/span&gt;</p><p>&nbsp; &nbsp; &lt;/div&gt;</p><p>&nbsp; &lt;/div&gt;</p><p><br></p><p>&nbsp; &lt;div class="concFixed"&gt;</p><p>&nbsp; &nbsp; &lt;div class="ratio"&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;span class="saltIcon" id="ratioSalt"&gt;&lt;/span&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;span class="slash"&gt;/&lt;/span&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;span class="beakerIcon" id="ratioTotal"&gt;&lt;/span&gt;</p><p>&nbsp; &nbsp; &lt;/div&gt;</p><p>&nbsp; &nbsp; &lt;div id="pct" class="pct"&gt;4%&lt;/div&gt;</p><p>&nbsp; &lt;/div&gt;</p><p><br></p><p>&nbsp; &lt;div class="controls"&gt;</p><p>&nbsp; &nbsp; &lt;div class="barSide"&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;div class="iconbox" id="saltTop"&gt;&lt;/div&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;input id="saltBar" class="vr" type="range" min="0" max="50" step="1" value="4" aria-label="食塩の量"&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;div id="saltVal" class="sideval"&gt;4g&lt;/div&gt;</p><p>&nbsp; &nbsp; &lt;/div&gt;</p><p>&nbsp; &nbsp; &lt;div class="barSide"&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;div class="iconbox" id="waterTop"&gt;&lt;/div&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;input id="waterBar" class="vr" type="range" min="0" max="300" step="1" value="96" aria-label="水の量"&gt;</p><p>&nbsp; &nbsp; &nbsp; &lt;div id="waterVal" class="sideval"&gt;96g&lt;/div&gt;</p><p>&nbsp; &nbsp; &lt;/div&gt;</p><p>&nbsp; &lt;/div&gt;</p><p>&lt;/section&gt;</p><p><br></p><p>&lt;button id="reset" class="reset" aria-label="最初にもどす"&gt;↺&lt;/button&gt;</p><p><br></p><p>&lt;script&gt;</p><p>const $=id=&gt;document.getElementById(id);</p><p><br></p><p>/* Reference state 100g / 4% is deliberately large enough to contain both fixed labels cleanly. */</p><p>const PG=2.10;&nbsp; &nbsp;// 100g -&gt; 210px width</p><p>const PC=16.50;&nbsp; &nbsp;// 4%&nbsp; &nbsp;-&gt; 68px height</p><p><br></p><p>const salt=`&lt;svg viewBox="0 0 48 48" aria-hidden="true"&gt;&lt;g fill="#fafaf7" stroke="#4f4f4f" stroke-width="1.8"&gt;&lt;path d="M8 30l8-11 8 11-8 7z"/&gt;&lt;path d="M23 25l7-10 8 10-7 8z"/&gt;&lt;path d="M19 39l6-9 7 9-7 5z"/&gt;&lt;/g&gt;&lt;/svg&gt;`;</p><p>const water=`&lt;svg viewBox="0 0 48 48" aria-hidden="true"&gt;&lt;path d="M24 5C20 13 12 22 12 30a12 12 0 0 0 24 0c0-8-8-17-12-25z" fill="#bfe7f5" stroke="#176b91" stroke-width="2"/&gt;&lt;/svg&gt;`;</p><p>const beaker=`&lt;svg viewBox="0 0 72 60" aria-hidden="true"&gt;</p><p>&lt;path d="M12 7h48M16 7v43c0 4 3 6 7 6h26c4 0 7-2 7-6V7" fill="#70c7ea" stroke="#4f4f4f" stroke-width="2.5"/&gt;</p><p>&lt;g transform="translate(18 21) scale(.48)"&gt;&lt;path d="M24 5C20 13 12 22 12 30a12 12 0 0 0 24 0c0-8-8-17-12-25z" fill="#bfe7f5" stroke="#176b91" stroke-width="2.5"/&gt;&lt;/g&gt;</p><p>&lt;g transform="translate(39 20) scale(.48)"&gt;&lt;g fill="#fafaf7" stroke="#4f4f4f" stroke-width="1.8"&gt;&lt;path d="M8 30l8-11 8 11-8 7z"/&gt;&lt;path d="M23 25l7-10 8 10-7 8z"/&gt;&lt;path d="M19 39l6-9 7 9-7 5z"/&gt;&lt;/g&gt;&lt;/g&gt;&lt;/svg&gt;`;</p><p><br></p><p>const fmt=n=&gt;{</p><p>&nbsp; n=Math.round(n*10)/10;</p><p>&nbsp; return Number.isInteger(n)?String(n):n.toFixed(1);</p><p>};</p><p>function color(c){</p><p>&nbsp; const t=Math.max(0,Math.min(1,c/20));</p><p>&nbsp; return `hsl(197 ${52+t*18}% ${98-Math.pow(t,.82)*42}%)`;</p><p>}</p><p><br></p><p>function render(){</p><p>&nbsp; const waterG=+$("waterBar").value;</p><p>&nbsp; const saltG=+$("saltBar").value;</p><p>&nbsp; const total=saltG+waterG;</p><p>&nbsp; const conc=total?100*saltG/total:0;</p><p><br></p><p>&nbsp; $("waterVal").textContent=fmt(waterG)+"g";</p><p>&nbsp; $("saltVal").textContent=fmt(saltG)+"g";</p><p>&nbsp; $("waterInsideVal").textContent=fmt(waterG)+"g";</p><p>&nbsp; $("saltInsideVal").textContent=fmt(saltG)+"g";</p><p>&nbsp; $("totalVal").textContent=fmt(total)+"g";</p><p>&nbsp; $("pct").textContent=fmt(conc)+"%";</p><p><br></p><p>&nbsp; const vessel=$("vessel");</p><p>&nbsp; vessel.style.width=Math.max(2,total*PG)+"px";</p><p>&nbsp; vessel.style.height=Math.max(2,conc*PC)+"px";</p><p>&nbsp; vessel.style.background=color(conc);</p><p>}</p><p><br></p><p>$("saltTop").innerHTML=salt;</p><p>$("waterTop").innerHTML=water;</p><p>$("saltInside").innerHTML=salt;</p><p>$("waterInside").innerHTML=water;</p><p>$("totalIcon").innerHTML=beaker;</p><p>$("ratioSalt").innerHTML=salt;</p><p>$("ratioTotal").innerHTML=beaker;</p><p><br></p><p>$("saltBar").addEventListener("input",render);</p><p>$("waterBar").addEventListener("input",render);</p><p>$("reset").addEventListener("click",()=&gt;{</p><p>&nbsp; $("saltBar").value=4;</p><p>&nbsp; $("waterBar").value=96;</p><p>&nbsp; render();</p><p>});</p><p>render();</p><p>&lt;/script&gt;</p><p>&lt;/main&gt;</p><p>&lt;/body&gt;</p><p>&lt;/html&gt;</p>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>濃度ラボ v2.5</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f7f5ef;--ink:#181818;--line:#505050}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg)}
+body{color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+main{position:relative;width:min(1240px,100vw);height:100vh;margin:auto;padding:8px 14px}
+header{text-align:center;height:72px}
+h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
+.ver{margin-left:12px;padding:5px 10px;border:1px solid #aaa;border-radius:99px;background:#fff;font-size:12px;font-weight:800}
+
+/* Fixed visual field.  The reference state (salt 4g / water 96g / 4%) defines all label positions. */
+.stage{
+  position:relative;
+  height:calc(100vh - 80px);
+  min-height:600px;
+}
+.vesselAnchor{
+  position:absolute;
+  left:59%;
+  bottom:220px;
+  width:0;height:0;
+}
+.vessel{
+  position:absolute;
+  right:0;bottom:0;
+  border:1px solid var(--line);
+  background:#dff2f8;
+  overflow:visible;
+  transition:width .09s linear,height .09s linear,background .10s linear;
+}
+/* Contents NEVER follow vessel width/height. They stay at the reference-state coordinates. */
+.contentsFixed{
+  position:absolute;
+  right:32px;
+  bottom:25px;
+  width:160px;
+  height:82px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  pointer-events:none;
+  z-index:3;
+}
+.component{display:flex;flex-direction:column;align-items:center;font-size:34px;font-weight:900;white-space:nowrap}
+.component svg{width:47px;height:47px;display:block;margin-bottom:1px}
+
+/* Total amount is also fixed at the reference-state position, under the vessel. */
+.totalFixed{
+  position:absolute;
+  right:25px;
+  top:8px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  white-space:nowrap;
+}
+.totalFixed svg{width:62px;height:54px;display:block}
+.totalVal{font-size:34px;font-weight:900}
+
+/* Concentration: icon fraction above, number below. Fixed position. */
+.concFixed{
+  position:absolute;
+  left:calc(59% + 30px);
+  bottom:260px;
+  width:142px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  z-index:4;
+}
+.ratio{display:flex;align-items:center;justify-content:center;gap:7px;height:58px}
+.ratio .saltIcon svg{width:39px;height:39px}
+.slash{font-size:40px;line-height:.8;font-weight:300}
+.ratio .beakerIcon svg{width:51px;height:45px}
+.pct{font-size:34px;font-weight:900;margin-top:5px;white-space:nowrap}
+
+/* Right-handed touch controls. Slider bottoms align to vessel bottom. */
+.controls{
+  position:absolute;
+  right:48px;
+  bottom:240px;
+  display:flex;
+  gap:8px;
+  align-items:flex-end;
+}
+.barSide{width:86px;height:500px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.iconbox{height:54px;display:flex;align-items:center;justify-content:center}
+.iconbox svg{width:44px;height:44px}
+.vr{
+  height:350px;width:46px;
+  writing-mode:vertical-lr;direction:rtl;
+  accent-color:#555;touch-action:none;
+}
+.sideval{height:38px;font-size:34px;font-weight:900;margin-top:5px;white-space:nowrap}
+
+.reset{
+  position:fixed;right:16px;bottom:14px;
+  width:50px;height:50px;border:1px solid #aaa;background:#fff;
+  border-radius:12px;font-size:22px;z-index:20;cursor:pointer
+}
+
+@media(max-width:900px){
+ main{padding:6px 8px}
+ header{height:64px}
+ .stage{height:calc(100vh - 70px);min-height:560px}
+ .vesselAnchor{left:58%;bottom:220px}
+ .contentsFixed{right:32px;bottom:25px;width:140px;height:82px}
+ .component{font-size:25px}.component svg{width:39px;height:39px}
+ .totalFixed{right:35px;top:8px}.totalFixed svg{width:53px;height:47px}.totalVal{font-size:25px}
+ .concFixed{left:calc(58% + 12px);bottom:220px;width:125px}
+ .ratio .saltIcon svg{width:34px;height:34px}.ratio .beakerIcon svg{width:44px;height:39px}
+ .slash{font-size:40px}.pct{font-size:29px}
+ .controls{right:26px;bottom:260px;gap:2px}
+ .barSide{width:72px;height:370px}.vr{height:270px}
+ .sideval{font-size:21px}
+ .reset{right:10px;bottom:10px}
+}
+
+/* v2.5: common zero line */
+.zeroLine{
+  position:absolute;
+  left:6%;
+  right:280px;
+  bottom:220px;
+  height:2px;
+  background:#9a9184;
+  opacity:.72;
+  z-index:1;
+  pointer-events:none;
+}
+.vesselAnchor{bottom:220px}
+.controls{bottom:220px}
+.vesselAnchor,.controls,.concFixed{z-index:2}
+
+@media(max-width:900px){
+  .zeroLine{left:4%;right:280px;bottom:220px}
+  .vesselAnchor{bottom:220px}
+  .controls{bottom:260px}
+}
+
+</style>
+</head>
+<body>
+<main>
+<header><h1>濃度ラボ</h1><span class="ver">v2.5</span></header>
+
+<section class="stage">
+  <div class="zeroLine" aria-hidden="true"></div>
+  <div class="vesselAnchor">
+    <div id="vessel" class="vessel"></div>
+
+    <div class="contentsFixed">
+      <div class="component"><span id="saltInside"></span><span id="saltInsideVal">4g</span></div>
+      <div class="component"><span id="waterInside"></span><span id="waterInsideVal">96g</span></div>
+    </div>
+
+    <div class="totalFixed">
+      <span id="totalIcon"></span><span id="totalVal" class="totalVal">100g</span>
+    </div>
+  </div>
+
+  <div class="concFixed">
+    <div class="ratio">
+      <span class="saltIcon" id="ratioSalt"></span>
+      <span class="slash">/</span>
+      <span class="beakerIcon" id="ratioTotal"></span>
+    </div>
+    <div id="pct" class="pct">4%</div>
+  </div>
+
+  <div class="controls">
+    <div class="barSide">
+      <div class="iconbox" id="saltTop"></div>
+      <input id="saltBar" class="vr" type="range" min="0" max="50" step="1" value="4" aria-label="食塩の量">
+      <div id="saltVal" class="sideval">4g</div>
+    </div>
+    <div class="barSide">
+      <div class="iconbox" id="waterTop"></div>
+      <input id="waterBar" class="vr" type="range" min="0" max="300" step="1" value="96" aria-label="水の量">
+      <div id="waterVal" class="sideval">96g</div>
+    </div>
+  </div>
+</section>
+
+<button id="reset" class="reset" aria-label="最初にもどす">↺</button>
+
+<script>
+const $=id=>document.getElementById(id);
+
+/* Reference state 100g / 4% is deliberately large enough to contain both fixed labels cleanly. */
+const PG=2.10;   // 100g -> 210px width
+const PC=16.50;   // 4%   -> 68px height
+
+const salt=`<svg viewBox="0 0 48 48" aria-hidden="true"><g fill="#fafaf7" stroke="#4f4f4f" stroke-width="1.8"><path d="M8 30l8-11 8 11-8 7z"/><path d="M23 25l7-10 8 10-7 8z"/><path d="M19 39l6-9 7 9-7 5z"/></g></svg>`;
+const water=`<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5C20 13 12 22 12 30a12 12 0 0 0 24 0c0-8-8-17-12-25z" fill="#bfe7f5" stroke="#176b91" stroke-width="2"/></svg>`;
+const beaker=`<svg viewBox="0 0 72 60" aria-hidden="true">
+<path d="M12 7h48M16 7v43c0 4 3 6 7 6h26c4 0 7-2 7-6V7" fill="#70c7ea" stroke="#4f4f4f" stroke-width="2.5"/>
+<g transform="translate(18 21) scale(.48)"><path d="M24 5C20 13 12 22 12 30a12 12 0 0 0 24 0c0-8-8-17-12-25z" fill="#bfe7f5" stroke="#176b91" stroke-width="2.5"/></g>
+<g transform="translate(39 20) scale(.48)"><g fill="#fafaf7" stroke="#4f4f4f" stroke-width="1.8"><path d="M8 30l8-11 8 11-8 7z"/><path d="M23 25l7-10 8 10-7 8z"/><path d="M19 39l6-9 7 9-7 5z"/></g></g></svg>`;
+
+const fmt=n=>{
+  n=Math.round(n*10)/10;
+  return Number.isInteger(n)?String(n):n.toFixed(1);
+};
+function color(c){
+  const t=Math.max(0,Math.min(1,c/20));
+  return `hsl(197 ${52+t*18}% ${98-Math.pow(t,.82)*42}%)`;
+}
+
+function render(){
+  const waterG=+$("waterBar").value;
+  const saltG=+$("saltBar").value;
+  const total=saltG+waterG;
+  const conc=total?100*saltG/total:0;
+
+  $("waterVal").textContent=fmt(waterG)+"g";
+  $("saltVal").textContent=fmt(saltG)+"g";
+  $("waterInsideVal").textContent=fmt(waterG)+"g";
+  $("saltInsideVal").textContent=fmt(saltG)+"g";
+  $("totalVal").textContent=fmt(total)+"g";
+  $("pct").textContent=fmt(conc)+"%";
+
+  const vessel=$("vessel");
+  vessel.style.width=Math.max(2,total*PG)+"px";
+  vessel.style.height=Math.max(2,conc*PC)+"px";
+  vessel.style.background=color(conc);
+}
+
+$("saltTop").innerHTML=salt;
+$("waterTop").innerHTML=water;
+$("saltInside").innerHTML=salt;
+$("waterInside").innerHTML=water;
+$("totalIcon").innerHTML=beaker;
+$("ratioSalt").innerHTML=salt;
+$("ratioTotal").innerHTML=beaker;
+
+$("saltBar").addEventListener("input",render);
+$("waterBar").addEventListener("input",render);
+$("reset").addEventListener("click",()=>{
+  $("saltBar").value=4;
+  $("waterBar").value=96;
+  render();
+});
+render();
+</script>
+</main>
+</body>
+</html>
