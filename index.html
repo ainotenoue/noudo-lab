@@ -201,7 +201,54 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
   .vesselAnchor{bottom:220px}
   .controls{bottom:260px}
 }
+  
+/* 数値ガイドの基準位置 */
+.barSide{
+  position:relative;
+}
 
+/* ガイド共通 */
+.sliderGuide{
+  position:absolute;
+  left:-85px;
+  bottom:0;
+
+  min-width:75px;
+  padding:7px 12px;
+
+  background:#fff;
+  border:2px solid #ddd;
+  border-radius:12px;
+
+  font-size:28px;
+  font-weight:900;
+  text-align:center;
+  white-space:nowrap;
+
+  box-shadow:0 3px 10px rgba(0,0,0,.15);
+
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  z-index:30;
+}
+
+/* 操作中だけ表示 */
+.sliderGuide.active{
+  opacity:1;
+  visibility:visible;
+}
+
+/* 塩 */
+.saltGuide{
+  border-color:#E6C5A8;
+}
+
+/* 水 */
+.waterGuide{
+  border-color:#A8D8EA;
+}
+  
 </style>
 </head>
 <body>
@@ -235,11 +282,13 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
   <div class="controls">
     <div class="barSide">
       <div class="iconbox" id="saltTop"></div>
+      <div id="saltGuide" class="sliderGuide saltGuide">4g</div>
       <input id="saltBar" class="vr" type="range" min="0" max="50" step="1" value="4" aria-label="食塩の量">
       <div id="saltVal" class="sideval">4g</div>
     </div>
     <div class="barSide">
       <div class="iconbox" id="waterTop"></div>
+      <div id="waterGuide" class="sliderGuide waterGuide">96g</div>
       <input id="waterBar" class="vr" type="range" min="0" max="300" step="1" value="96" aria-label="水の量">
       <div id="waterVal" class="sideval">96g</div>
     </div>
