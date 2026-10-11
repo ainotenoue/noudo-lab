@@ -361,6 +361,61 @@ $("reset").addEventListener("click",()=>{
   $("waterBar").value=96;
   render();
 });
+function updateGuide(barId, guideId){
+  const bar = $(barId);
+  const guide = $(guideId);
+
+  const min = Number(bar.min);
+  const max = Number(bar.max);
+  const value = Number(bar.value);
+
+  const ratio = (value - min) / (max - min);
+
+  // 縦スライダーのつまみ中心位置
+  const thumbSize = 36;
+  const trackHeight = bar.getBoundingClientRect().height;
+  const y = thumbSize / 2
+    + (1 - ratio) * (trackHeight - thumbSize);
+
+  // barSideを基準に位置を計算
+  const parentRect = bar.parentElement.getBoundingClientRect();
+  const barRect = bar.getBoundingClientRect();
+
+  const guideHeight = guide.offsetHeight;
+  const guideBottom =
+    parentRect.bottom - barRect.top - y
+    + guideHeight + 8;
+
+  guide.style.bottom = guideBottom + "px";
+  guide.textContent = value + "g";
+}
+
+function setupGuide(barId, guideId){
+  const bar = $(barId);
+  const guide = $(guideId);
+
+  bar.addEventListener("input",()=>{
+    updateGuide(barId,guideId);
+    guide.classList.add("active");
+  });
+
+  bar.addEventListener("pointerdown",()=>{
+    updateGuide(barId,guideId);
+    guide.classList.add("active");
+  });
+
+  const hide = ()=>{
+    guide.classList.remove("active");
+  };
+
+  bar.addEventListener("pointerup",hide);
+  bar.addEventListener("pointercancel",hide);
+  bar.addEventListener("blur",hide);
+}
+
+setupGuide("saltBar","saltGuide");
+setupGuide("waterBar","waterGuide");
+  
 render();
 </script>
 </main>
