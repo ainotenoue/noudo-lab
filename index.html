@@ -113,8 +113,16 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
   align-items:flex-end;
 }
 .barSide{width:86px;height:500px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
-.iconbox{height:54px;display:flex;align-items:center;justify-content:center}
-.iconbox svg{width:44px;height:44px}
+.iconbox{
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.iconbox svg{
+  width:54px;
+  height:54px;
+}
 .vr{
   height:350px;width:46px;
   writing-mode:vertical-lr;
@@ -136,6 +144,15 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
   background:#555;
   border:3px solid #fff;
   box-shadow:0 1px 4px rgba(0,0,0,.25);
+}
+  /* 塩のつまみ */
+#saltBar::-webkit-slider-thumb{
+  background:#E6C5A8;
+}
+
+/* 水のつまみ */
+#waterBar::-webkit-slider-thumb{
+  background:#A8D8EA;
 }
   
 .sideval{height:38px;font-size:34px;font-weight:900;margin-top:5px;white-space:nowrap}
