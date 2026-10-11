@@ -117,9 +117,27 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 .iconbox svg{width:44px;height:44px}
 .vr{
   height:350px;width:46px;
-  writing-mode:vertical-lr;direction:rtl;
-  accent-color:#555;touch-action:none;
+  writing-mode:vertical-lr;
+  direction:rtl;
+  accent-color:#555;
+  touch-action:none;
+  
+  -webkit-appearance:none;
+  appearance:none;
 }
+  
+/* スライダーのつまみ */
+.vr::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  appearance:none;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#555;
+  border:3px solid #fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.25);
+}
+  
 .sideval{height:38px;font-size:34px;font-weight:900;margin-top:5px;white-space:nowrap}
 
 .reset{
