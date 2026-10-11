@@ -61,6 +61,18 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
   align-self:center;
 }
 
+/* 塩の表示領域 */
+.contentsFixed .component:first-child{
+  width:80px;
+  align-items:flex-start;
+  flex-shrink:0;
+}
+
+/* 塩のアイコンは中央配置で固定 */
+.contentsFixed .component:first-child svg{
+  align-self:center;
+}
+
 /* Total amount is also fixed at the reference-state position, under the vessel. */
 .totalFixed{
   position:absolute;
