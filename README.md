@@ -1,5 +1,5 @@
 # 濃度ラボ
-TOP	https://ainotenoue.github.io/noudo-lab/
+TOP	https://ainotenoue.github.io/noudo-lab/　<br/>
 濃度ラボ	https://ainotenoue.github.io/noudo-lab/lab/
 天秤図の部屋	https://ainotenoue.github.io/noudo-lab/balance/
 
