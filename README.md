@@ -1,8 +1,12 @@
 # 濃度ラボ
-https://ainotenoue.github.io/noudo-lab/
+TOP	https://ainotenoue.github.io/noudo-lab/
+濃度ラボ	https://ainotenoue.github.io/noudo-lab/lab/
+天秤図の部屋	https://ainotenoue.github.io/noudo-lab/balance/
+
 ## 変更点
 - 完全比例縮尺：横 1g=1.35px、縦 1%=14px。A/Bは常に同一縮尺。
 - 図の内部に「食塩○g」「水○g」を表示。
 - 濃度が高いほど背景色が濃くなる。色は濃淡を感じる補助表現であり、割合の面積表現ではない。
+
 ## 確認例
 A=100g・4% と B=50g・8% は形が違っても長方形の面積が同じになります（食塩はいずれも4g）。
