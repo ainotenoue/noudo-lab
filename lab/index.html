@@ -3,19 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>濃度ラボ v3.01</title>
+<title>食塩水の部屋 v3.01｜濃度ラボ</title>
 <style>
 *{box-sizing:border-box}
 :root{--bg:#f7f5ef;--ink:#181818;--line:#505050}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg)}
 body{color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
 main{position:relative;width:min(1240px,100vw);height:100vh;margin:auto;padding:8px 14px}
-header{text-align:center;height:72px}
+header{position:relative;text-align:center;height:72px;display:flex;align-items:center;justify-content:center;gap:12px}
+.back{position:absolute;left:8px;top:8px;font-size:15px;color:#5b737b;text-decoration:none;font-weight:800;border:1px solid #d5d1c8;border-radius:12px;padding:10px 16px;background:#fff;z-index:10}
+.back:focus-visible{outline:3px solid #8cbfd0;outline-offset:3px}
 h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 .ver{margin-left:12px;padding:5px 10px;border:1px solid #aaa;border-radius:99px;background:#fff;font-size:12px;font-weight:800}
 
 /* Fixed visual field.  The reference state (salt 4g / water 96g / 4%) defines all label positions. */
 .stage{
+  background:#fff;
+  border:1px solid #e5dfd5;
+  border-radius:24px;
   position:relative;
   height:calc(100vh - 80px);
   min-height:600px;
@@ -172,6 +177,7 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 @media(max-width:900px){
  main{padding:6px 8px}
  header{height:64px}
+ .back{left:0;top:8px;padding:8px 10px;font-size:13px}
  .stage{height:calc(100vh - 70px);min-height:560px}
  .vesselAnchor{left:58%;bottom:220px}
  .contentsFixed{right:-20px;bottom:25px;width:200px;height:82px}
@@ -258,8 +264,9 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 </style>
 </head>
 <body>
+<a href="../" style="position:fixed;left:12px;top:12px;z-index:40;background:#fff;border:1px solid #ccc;border-radius:10px;padding:8px 12px;color:#456;text-decoration:none;font-size:14px;font-weight:800">← TOP</a>
 <main>
-<header><h1>濃度ラボ</h1><span class="ver">v3.01</span></header>
+<header><a class="back" href="../">← TOP</a><h1>食塩水の部屋</h1><span class="ver">v3.01</span></header>
 
 <section class="stage">
   <div class="zeroLine" aria-hidden="true"></div>
