@@ -18,12 +18,19 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 
 /* Fixed visual field.  The reference state (salt 4g / water 96g / 4%) defines all label positions. */
 .stage{
-  background:#fff;
-  border:1px solid #e5dfd5;
-  border-radius:24px;
   position:relative;
   height:calc(100vh - 80px);
   min-height:600px;
+}
+/* 白いパネルだけを短くする。操作パーツの座標は変更しない */
+.stage::before{
+  content:"";
+  position:absolute;
+  inset:0 0 56px;
+  background:#fff;
+  border:1px solid #e5dfd5;
+  border-radius:24px;
+  pointer-events:none;
 }
 .vesselAnchor{
   position:absolute;
@@ -264,7 +271,6 @@ h1{display:inline;margin:0;font-size:clamp(32px,4vw,44px);font-weight:900}
 </style>
 </head>
 <body>
-<a href="../" style="position:fixed;left:12px;top:12px;z-index:40;background:#fff;border:1px solid #ccc;border-radius:10px;padding:8px 12px;color:#456;text-decoration:none;font-size:14px;font-weight:800">← TOP</a>
 <main>
 <header><a class="back" href="../">← TOP</a><h1>食塩水の部屋</h1><span class="ver">v3.01</span></header>
 
