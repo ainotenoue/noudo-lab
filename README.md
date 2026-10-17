@@ -1,7 +1,10 @@
 # 濃度ラボ
-TOP	https://ainotenoue.github.io/noudo-lab/　<br/>
-濃度ラボ	https://ainotenoue.github.io/noudo-lab/lab/　<br/>
-天秤図の部屋	https://ainotenoue.github.io/noudo-lab/balance/　<br/>
+TOP
+https://ainotenoue.github.io/noudo-lab/
+
+濃度ラボ
+https://ainotenoue.github.io/noudo-lab/lab/
+天秤図の部屋	https://ainotenoue.github.io/noudo-lab/balance/
 
 ## 変更点
 - 完全比例縮尺：横 1g=1.35px、縦 1%=14px。A/Bは常に同一縮尺。
