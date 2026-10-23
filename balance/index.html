@@ -1,59 +1,123 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>天秤図の部屋 v0.1｜濃度ラボ</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>天秤図の部屋 v0.2｜濃度ラボ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box} :root{--bg:#f7f5ef;--ink:#242424;--salt:#e6c5a8;--water:#a8d8ea;--line:#716f6a}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'Noto Sans JP',sans-serif}main{max-width:1200px;margin:0 auto;padding:15px 28px 26px}.head{display:flex;align-items:center;justify-content:space-between;gap:16px}.back{font-size:15px;color:#5b737b;text-decoration:none;font-weight:800;border:1px solid #d5d1c8;border-radius:12px;padding:10px 16px;background:#fff}h1{font-size:clamp(27px,3vw,39px);margin:0;text-align:center}.ver{font-size:12px;border:1px solid #c8c2b7;border-radius:20px;padding:5px 10px;background:#fff;white-space:nowrap}.question{margin:20px 0 12px;background:#fff;border:1px solid #e5dfd5;border-radius:14px;padding:26px 26px;line-height:1.65;font-size:clamp(17px,2vw,22px);font-weight:700}.question small{display:block;font-size:13px;color:#807a70;font-weight:700;margin-bottom:3px}.panel{background:#fff;border:1px solid #e5dfd5;border-radius:18px;padding:12px 22px 18px}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.panel-head strong{font-size:17px}.hint{font-size:13px;color:#777}.diagram{width:100%;height:auto;display:block;max-height:460px;touch-action:none;user-select:none}.pivot-hit{cursor:grab;touch-action:none}.pivot-hit:active{cursor:grabbing}.weight-text{font-weight:900;fill:#26343a;text-anchor:middle;dominant-baseline:middle;pointer-events:none}.legend{display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin:6px 0 0;font-size:14px;color:#5f5c57}.legend b{color:#242424}.footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}.status{font-size:15px;color:#5e5b56;line-height:1.6}.status strong{color:#222}.panel-foot{display:flex;justify-content:flex-end;margin-top:10px}button{font:inherit;cursor:pointer;border:1px solid #c9c5bd;border-radius:12px;padding:10px 15px;background:#fff;font-weight:800;color:#3c4e54}button.primary{background:#d8eaf0;border-color:#afc9d1}.note{margin:12px 0 0;font-size:13px;color:#7c786f;line-height:1.7}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}@media(max-width:760px){main{padding:12px}.question{margin:12px 0;padding:18px 16px}.panel{padding:10px}.hint{font-size:11px}.legend{font-size:12px;gap:10px}.diagram{max-height:390px}}@media(orientation:landscape) and (max-height:760px){.question{margin:10px 0 8px;padding:16px 20px}.panel{padding:6px 18px}.diagram{max-height:340px}.note{margin-top:6px}}
-</style></head><body><main><div class="head"><a class="back" href="../">← TOP</a><h1>天秤図の部屋</h1><span class="ver">v0.1</span></div>
-<div class="question"><small>問題 03｜食塩水を混ぜる</small>4％の食塩水100gに、10％の食塩水を加えたら6％になりました。何g加えた？</div>
-<section class="panel"><div class="panel-head"><strong>支点を左右に動かしてみよう</strong><span class="hint">▲ を指でドラッグ</span></div>
-<svg class="diagram" id="diagram" viewBox="0 0 1040 440" role="img" aria-label="4パーセントと10パーセントの食塩水を混ぜる天秤図。支点を左右に動かせます">
-<line x1="180" y1="151" x2="860" y2="151" stroke="#62625f" stroke-width="7" stroke-linecap="round"/>
-<line x1="180" y1="138" x2="180" y2="164" stroke="#7697a6" stroke-width="4"/><line x1="860" y1="138" x2="860" y2="164" stroke="#d998aa" stroke-width="4"/>
-<g font-size="29" font-weight="800" fill="#343434" text-anchor="middle"><text x="180" y="108">4％</text><text x="860" y="108">10％</text></g>
-<line x1="180" y1="151" x2="180" y2="218" stroke="#9e9c96" stroke-width="3"/><line x1="860" y1="151" x2="860" y2="218" stroke="#9e9c96" stroke-width="3"/>
-<rect id="leftWeight" x="117" y="218" width="126" height="126" rx="14" fill="#add8e6" stroke="#7aa9b8" stroke-width="2"/>
-<text class="weight-text" x="180" y="281" font-size="30">100g</text>
-<rect id="rightWeight" x="816" y="218" width="88" height="88" rx="12" fill="#ffd1dc" stroke="#d998aa" stroke-width="2"/>
-<text id="rightText" class="weight-text" x="860" y="262" font-size="27">50g</text>
-<g id="pivot" class="pivot-hit" tabindex="0" role="slider" aria-label="混合後の濃度を決める支点" aria-valuemin="4.5" aria-valuemax="8.5" aria-valuenow="6" aria-valuetext="6パーセント">
-<rect id="pivotTouch" x="382" y="54" width="76" height="160" fill="transparent"/>
-<text id="pivotLabel" x="420" y="102" text-anchor="middle" font-size="32" font-weight="900" fill="#b27e4e">6.0％</text>
-<circle id="pivotCircle" cx="420" cy="151" r="10" fill="#5cbf5c" stroke="#fff" stroke-width="3"/>
-<path id="pivotTriangle" d="M420 163 L397 206 L443 206 Z" fill="#90ee90" stroke="#5aa85a" stroke-width="2"/>
-</g>
-<g fill="#7a7770" font-size="21" font-weight="700" text-anchor="middle"><text id="leftGap" x="300" y="185">差 2.0</text><text id="rightGap" x="640" y="185">差 4.0</text></g>
-<text x="180" y="385" text-anchor="middle" font-size="21" fill="#6c6a65">4％の食塩水</text><text x="860" y="385" text-anchor="middle" font-size="21" fill="#6c6a65">10％の食塩水</text>
+*{box-sizing:border-box}
+:root{
+  --bg:#f7f5ef;--ink:#2f3437;--ink2:#7b766d;--card:#fff;--edge:#ebe5da;
+  --green-d:#3f9b4a;--green-s:#ebfbea;
+}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Maru Gothic ProN','M PLUS Rounded 1c',-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:15px 28px 26px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.back{font-size:15px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;padding:9px 18px;background:#fff}
+h1{font-size:clamp(27px,3vw,39px);margin:0;text-align:center;font-weight:800;letter-spacing:.04em}
+.ver{font-size:12px;border:2px solid var(--edge);border-radius:20px;padding:4px 10px;background:#fff;white-space:nowrap;color:var(--ink2);font-weight:700}
+.question{margin:20px 0 12px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:26px 26px;line-height:1.7;font-size:clamp(17px,2vw,22px);font-weight:800}
+.question small{display:inline-block;font-size:13px;color:var(--green-d);background:var(--green-s);border-radius:999px;padding:2px 12px;font-weight:800;margin-bottom:8px}
+.panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:14px 22px 18px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-head strong{font-size:17px;font-weight:800}
+.hint{font-size:13px;color:var(--ink2);font-weight:700}
+.hint b{color:var(--green-d)}
+.diagram{width:100%;height:auto;display:block;max-height:470px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
+.pivot-hit{cursor:grab;touch-action:none;outline:none}
+.pivot-hit:active{cursor:grabbing}
+.pivot-hit:focus-visible .pv-tri{stroke:var(--green-d)}
+.wt{font-weight:800;fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.panel-foot{display:flex;justify-content:flex-end;margin-top:6px}
+button{font:inherit;cursor:pointer;border:2px solid #b9e6b9;border-radius:999px;padding:10px 20px;background:var(--green-s);font-weight:800;color:#2f6f37}
+button:active{transform:translateY(1px)}
+/* 支点の左右の矢印: 触るまでゆらゆら動いて「動かせる」ことを伝える */
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+@keyframes nudgeL{0%,100%{transform:translateX(0)}50%{transform:translateX(-5px)}}
+.ar-r{animation:nudge 1.6s ease-in-out infinite}
+.ar-l{animation:nudgeL 1.6s ease-in-out infinite}
+.moved .ar-r,.moved .ar-l{display:none}
+@media(max-width:760px){main{padding:12px}.question{margin:12px 0;padding:18px 16px}.panel{padding:10px}.hint{font-size:11px}.diagram{max-height:400px}}
+@media(orientation:landscape) and (max-height:760px){.question{margin:10px 0 8px;padding:16px 20px}.panel{padding:8px 18px}.diagram{max-height:350px}}
+@media(prefers-reduced-motion:reduce){.ar-r,.ar-l{animation:none}}
+</style></head><body><main><div class="head"><a class="back" href="../">← TOP</a><h1>天秤図の部屋</h1><span class="ver">v0.2</span></div>
+<div class="question"><small>問題 03｜食塩水を混ぜる</small><br>4％の食塩水100gに、10％の食塩水を加えたら6％になりました。何g加えた？</div>
+<section class="panel"><div class="panel-head"><strong>支点を左右に動かしてみよう</strong><span class="hint"><b>▲</b> を指でドラッグ</span></div>
+<svg class="diagram" id="diagram" viewBox="0 0 1040 470" role="img" aria-label="4パーセントと10パーセントの食塩水を混ぜる天秤図。支点を左右に動かせます">
+  <!-- 両はしの濃度 -->
+  <g font-weight="800" text-anchor="middle">
+    <rect x="62" y="130" width="96" height="42" rx="21" fill="#e9f5f9" stroke="#add8e6" stroke-width="2"/>
+    <text x="110" y="152" font-size="24" fill="#3f7f93" dominant-baseline="central">4％</text>
+    <rect x="874" y="130" width="108" height="42" rx="21" fill="#fff0f4" stroke="#ffd1dc" stroke-width="2"/>
+    <text x="928" y="152" font-size="24" fill="#b5607a" dominant-baseline="central">10％</text>
+  </g>
+  <!-- うで（支点の左右で色分け） -->
+  <line id="beamL" x1="180" y1="151" x2="420" y2="151" stroke="#add8e6" stroke-width="12" stroke-linecap="round"/>
+  <line id="beamR" x1="420" y1="151" x2="860" y2="151" stroke="#ffd1dc" stroke-width="12" stroke-linecap="round"/>
+  <!-- 濃度の差 -->
+  <g id="gapLG" style="transition:opacity .15s" transform="translate(300,0)">
+    <rect x="-42" y="172" width="84" height="32" rx="16" fill="#e9f5f9"/>
+    <text id="leftGap" y="188" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="800" fill="#3f7f93">差 2</text>
+  </g>
+  <g id="gapRG" style="transition:opacity .15s" transform="translate(640,0)">
+    <rect x="-42" y="172" width="84" height="32" rx="16" fill="#fff0f4"/>
+    <text id="rightGap" y="188" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="800" fill="#b5607a">差 4</text>
+  </g>
+  <!-- おもり（JSで描く） -->
+  <g id="weights"></g>
+  <!-- 支点 -->
+  <g id="pivot" class="pivot-hit" tabindex="0" role="slider" aria-label="混合後の濃度を決める支点" aria-valuemin="4.5" aria-valuemax="8.5" aria-valuenow="6" aria-valuetext="6パーセント" transform="translate(420,0)">
+    <rect x="-56" y="56" width="112" height="190" fill="transparent"/>
+    <ellipse cx="0" cy="230" rx="50" ry="6" fill="#000" opacity=".06"/>
+    <path class="pv-tri" d="M0 160 L-28 214 L28 214 Z" fill="#90ee90" stroke="#90ee90" stroke-width="10" stroke-linejoin="round"/>
+    <rect x="-44" y="216" width="88" height="10" rx="5" fill="#6fd16f"/>
+    <circle cx="0" cy="151" r="11" fill="#5cbf5c" stroke="#fff" stroke-width="3"/>
+    <g fill="#8fcf8f" font-size="26" font-weight="800" text-anchor="middle">
+      <text class="ar-l" x="-50" y="200">‹</text><text class="ar-r" x="50" y="200">›</text>
+    </g>
+    <rect x="-60" y="68" width="120" height="44" rx="22" fill="#90ee90"/>
+    <path d="M-9 110 L0 122 L9 110 Z" fill="#90ee90"/>
+    <text id="pivotLabel" y="90" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#25642c">6.0％</text>
+  </g>
 </svg>
-<div class="panel-foot"><button id="reset" class="primary">6％に戻す</button></div></section>
+<div class="panel-foot"><button id="reset">6％に戻す</button></div></section>
 </main><script>
 (()=>{
 const $=id=>document.getElementById(id), svg=$('diagram');
-const x0=180,x1=860,min=4,max=10,leftMass=100,leftSide=126;
+const x0=180,x1=860,min=4,max=10,leftMass=100,leftSide=112,TOP=232;
 let conc=6,dragging=false;
 const fmt=n=>Number(n.toFixed(1)).toString();
+const C={l:{fill:'#add8e6',stroke:'#7fb8ca',ink:'#3f7f93',name:'4％の食塩水'},r:{fill:'#ffd1dc',stroke:'#e9a3b6',ink:'#b5607a',name:'10％の食塩水'}};
+/* おもり: ひも＋つり輪＋角丸の箱（面積が重さに比例）＋つや＋名前 */
+function weight(cx,side,mass,c){
+  const x=cx-side/2,r=Math.min(18,side/5),fs=Math.max(16,Math.min(30,side*.3));
+  return '<line x1="'+cx+'" y1="157" x2="'+cx+'" y2="'+(TOP-16)+'" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>'+
+    '<circle cx="'+cx+'" cy="'+(TOP-9)+'" r="8" fill="none" stroke="'+c.stroke+'" stroke-width="4"/>'+
+    '<rect x="'+x+'" y="'+TOP+'" width="'+side+'" height="'+side+'" rx="'+r+'" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="3"/>'+
+    '<rect x="'+(x+Math.max(6,side*.1))+'" y="'+(TOP+Math.max(5,side*.08))+'" width="'+(side*.32)+'" height="'+Math.max(4,side*.06)+'" rx="3" fill="#fff" opacity=".7"/>'+
+    '<text class="wt" x="'+cx+'" y="'+(TOP+side/2+2)+'" font-size="'+fs+'">'+fmt(mass)+'g</text>'+
+    '<text x="'+cx+'" y="'+(TOP+side+30)+'" text-anchor="middle" font-size="19" font-weight="700" fill="'+c.ink+'">'+c.name+'</text>';
+}
 function setConcentration(n){
   conc=Math.max(4.5,Math.min(8.5,Math.round(n*10)/10));
   const x=x0+(conc-min)/(max-min)*(x1-x0);
   const rightMass=leftMass*(conc-min)/(max-conc);
   const side=leftSide*Math.sqrt(rightMass/leftMass);
-  const weight=$('rightWeight');
-  weight.setAttribute('x',x1-side/2);weight.setAttribute('width',side);weight.setAttribute('height',side);
-  weight.setAttribute('y',218);weight.setAttribute('rx',Math.min(14,side/8));
-  const label=$('rightText');label.setAttribute('y',218+side/2);label.textContent=fmt(rightMass)+'g';
-  label.setAttribute('font-size',Math.max(17,Math.min(30,side*.32)));
-  $('pivotTouch').setAttribute('x',x-38);
-  $('pivotLabel').setAttribute('x',x);
-  $('pivotCircle').setAttribute('cx',x);
-  $('pivotTriangle').setAttribute('d',`M${x} 163 L${x-23} 206 L${x+23} 206 Z`);
-  $('leftGap').setAttribute('x',(x0+x)/2);$('rightGap').setAttribute('x',(x+x1)/2);
+  $('weights').innerHTML=weight(x0,leftSide,leftMass,C.l)+weight(x1,side,rightMass,C.r);
+  $('beamL').setAttribute('x2',x);$('beamR').setAttribute('x1',x);
+  $('pivot').setAttribute('transform','translate('+x+',0)');
+  $('gapLG').setAttribute('transform','translate('+(x0+x)/2+',0)');
+  $('gapRG').setAttribute('transform','translate('+(x+x1)/2+',0)');
+  /* 区間が短すぎて支点と重なるときは「差」を隠す */
+  $('gapLG').style.opacity=(x-x0)<124?0:1;$('gapRG').style.opacity=(x1-x)<124?0:1;
   $('leftGap').textContent='差 '+fmt(conc-min);$('rightGap').textContent='差 '+fmt(max-conc);
   $('pivot').setAttribute('aria-valuenow',fmt(conc));$('pivot').setAttribute('aria-valuetext',fmt(conc)+'パーセント');
   $('pivotLabel').textContent=conc.toFixed(1)+'％';
 }
 function positionFromEvent(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();if(!m)return conc;const local=p.matrixTransform(m.inverse());return min+(local.x-x0)/(x1-x0)*(max-min);}
-$('pivot').addEventListener('pointerdown',e=>{dragging=true;$('pivot').setPointerCapture(e.pointerId);setConcentration(positionFromEvent(e));e.preventDefault();});
+const moved=()=>svg.classList.add('moved');
+$('pivot').addEventListener('pointerdown',e=>{dragging=true;moved();$('pivot').setPointerCapture(e.pointerId);setConcentration(positionFromEvent(e));e.preventDefault();});
 $('pivot').addEventListener('pointermove',e=>{if(dragging)setConcentration(positionFromEvent(e));});
 $('pivot').addEventListener('pointerup',()=>dragging=false);$('pivot').addEventListener('pointercancel',()=>dragging=false);
-$('pivot').addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setConcentration(conc-.1);e.preventDefault();}if(e.key==='ArrowRight'||e.key==='ArrowUp'){setConcentration(conc+.1);e.preventDefault();}});
+$('pivot').addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowDown'){moved();setConcentration(conc-.1);e.preventDefault();}if(e.key==='ArrowRight'||e.key==='ArrowUp'){moved();setConcentration(conc+.1);e.preventDefault();}});
 $('reset').addEventListener('click',()=>setConcentration(6));setConcentration(6);
 })();
 </script></body></html>
