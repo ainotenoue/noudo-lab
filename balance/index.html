@@ -69,12 +69,14 @@ button:active{transform:translateY(1px)}
   </g>
   <!-- 濃度の差の比（うでの下） -->
   <g id="ratLG" transform="translate(320,0)">
-    <circle cy="196" r="28" fill="#e6defb" stroke="#a48fe0" stroke-width="3.5"/>
-    <text id="ratL" y="197" text-anchor="middle" dominant-baseline="central" font-size="32" font-weight="800" fill="#6a4fc4">1</text>
+    <rect x="-34" y="167" width="68" height="58" rx="18" fill="#e6defb" stroke="#a48fe0" stroke-width="2"/>
+    <text y="184" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="#6a4fc4">比</text>
+    <text id="ratL" y="208" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#6a4fc4">1</text>
   </g>
   <g id="ratRG" transform="translate(660,0)">
-    <circle cy="196" r="28" fill="#ffe7c4" stroke="#eeac5c" stroke-width="3.5"/>
-    <text id="ratR" y="197" text-anchor="middle" dominant-baseline="central" font-size="32" font-weight="800" fill="#a8651a">2</text>
+    <rect x="-34" y="167" width="68" height="58" rx="18" fill="#ffe7c4" stroke="#eeac5c" stroke-width="2"/>
+    <text y="184" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="#a8651a">比</text>
+    <text id="ratR" y="208" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#a8651a">2</text>
   </g>
   <!-- おもり（JSで描く） -->
   <g id="weights"></g>
@@ -107,11 +109,11 @@ const C={l:{fill:'#add8e6',stroke:'#7fb8ca',ink:'#3f7f93',name:'4％の食塩水
 /* 比を整数にそろえる（0.1きざみ） */
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 function ratio(a,b){a=Math.round(a*10);b=Math.round(b*10);const g=gcd(a,b)||1;return [a/g,b/g];}
-const rfs=n=>String(n).length>1?26:32;
 /* 重さの比: おもりの外側（左のおもりは左、右のおもりは右）に置く */
 function wRatio(cx,cy,n,c){
-  return '<circle cx="'+cx+'" cy="'+cy+'" r="28" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="3.5"/>'+
-    '<text x="'+cx+'" y="'+(cy+1)+'" text-anchor="middle" dominant-baseline="central" font-size="'+rfs(n)+'" font-weight="800" fill="'+c.ink+'">'+n+'</text>';
+  return '<rect x="'+(cx-34)+'" y="'+(cy-29)+'" width="68" height="58" rx="18" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="2"/>'+
+    '<text x="'+cx+'" y="'+(cy-12)+'" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="'+c.ink+'">比</text>'+
+    '<text x="'+cx+'" y="'+(cy+12)+'" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="'+c.ink+'">'+n+'</text>';
 }
 function weight(cx,side,mass,c){
   const x=cx-side/2,r=Math.min(18,side/5),fs=Math.max(16,Math.min(30,side*.3));
@@ -130,13 +132,12 @@ function setConcentration(n){
   const d=ratio(conc-min,max-conc);          // 濃度の差の比（左：右）
   const w=[d[1],d[0]];                        // 重さの比は逆（左：右）
   $('weights').innerHTML=weight(x0,leftSide,leftMass,C.l)+weight(x1,side,rightMass,C.r)+
-    wRatio(x0-leftSide/2-44,TOP+leftSide/2,w[0],RB)+wRatio(x1+side/2+44,TOP+side/2,w[1],RA);
+    wRatio(x0-leftSide/2-46,TOP+leftSide/2,w[0],RB)+wRatio(x1+side/2+46,TOP+side/2,w[1],RA);
   $('ratL').textContent=d[0];$('ratR').textContent=d[1];
-  $('ratL').setAttribute('font-size',rfs(d[0]));$('ratR').setAttribute('font-size',rfs(d[1]));
   /* 差の比の丸: ふだんは区間のまん中。支点や糸に近すぎるときは外側へよける */
   let rl=(x0+x)/2,rr=(x+x1)/2;
-  if(x-rl<56)rl=x-56; if(rl-x0<34)rl=x0-36;
-  if(rr-x<56)rr=x+56; if(x1-rr<34)rr=x1+36;
+  if(x-rl<62)rl=x-62; if(rl-x0<40)rl=x0-42;
+  if(rr-x<62)rr=x+62; if(x1-rr<40)rr=x1+42;
   $('ratLG').setAttribute('transform','translate('+rl+',0)');
   $('ratRG').setAttribute('transform','translate('+rr+',0)');
   /* 始点・終点のふきだし: 支点のふきだしと重なるときは、両方を少しずつ外へずらす */
