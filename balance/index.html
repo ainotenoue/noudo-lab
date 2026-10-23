@@ -52,6 +52,15 @@ button:active{transform:translateY(1px)}
   <!-- うで（支点の左右で色分け） -->
   <line id="beamL" x1="180" y1="151" x2="420" y2="151" stroke="#add8e6" stroke-width="12" stroke-linecap="round"/>
   <line id="beamR" x1="420" y1="151" x2="860" y2="151" stroke="#ffd1dc" stroke-width="12" stroke-linecap="round"/>
+  <!-- 濃度の差の比（うでの上） -->
+  <g id="ratLG" transform="translate(300,0)">
+    <circle cy="122" r="19" fill="#fff" stroke="#7fb8ca" stroke-width="3"/>
+    <text id="ratL" y="123" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="800" fill="#3f7f93">1</text>
+  </g>
+  <g id="ratRG" transform="translate(640,0)">
+    <circle cy="122" r="19" fill="#fff" stroke="#e9a3b6" stroke-width="3"/>
+    <text id="ratR" y="123" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="800" fill="#b5607a">2</text>
+  </g>
   <!-- 濃度の差 -->
   <g id="gapLG" style="transition:opacity .15s" transform="translate(300,0)">
     <rect x="-42" y="172" width="84" height="32" rx="16" fill="#e9f5f9"/>
@@ -65,15 +74,15 @@ button:active{transform:translateY(1px)}
   <g id="weights"></g>
   <!-- 支点 -->
   <g id="pivot" class="pivot-hit" tabindex="0" role="slider" aria-label="混合後の濃度を決める支点" aria-valuemin="4.5" aria-valuemax="8.5" aria-valuenow="6" aria-valuetext="6パーセント" transform="translate(420,0)">
-    <rect x="-56" y="56" width="112" height="190" fill="transparent"/>
+    <rect x="-56" y="44" width="112" height="200" fill="transparent"/>
     <path class="pv-tri" d="M0 161 L-22 203 L22 203 Z" fill="#90ee90" stroke="#90ee90" stroke-width="8" stroke-linejoin="round"/>
     <circle cx="0" cy="151" r="11" fill="#5cbf5c" stroke="#fff" stroke-width="3"/>
     <g fill="#8fcf8f" font-size="26" font-weight="800" text-anchor="middle">
       <text class="ar-l" x="-42" y="194">‹</text><text class="ar-r" x="42" y="194">›</text>
     </g>
-    <rect x="-60" y="68" width="120" height="44" rx="22" fill="#90ee90"/>
-    <path d="M-9 110 L0 122 L9 110 Z" fill="#90ee90"/>
-    <text id="pivotLabel" y="90" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#25642c">6.0％</text>
+    <rect x="-60" y="48" width="120" height="44" rx="22" fill="#90ee90"/>
+    <path d="M-9 90 L0 101 L9 90 Z" fill="#90ee90"/>
+    <text id="pivotLabel" y="70" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#25642c">6.0％</text>
   </g>
 </svg>
 <div class="panel-foot"><button id="reset">6％に戻す</button></div></section>
@@ -85,6 +94,15 @@ let conc=6,dragging=false;
 const fmt=n=>Number(n.toFixed(1)).toString();
 const C={l:{fill:'#add8e6',stroke:'#7fb8ca',ink:'#3f7f93',name:'4％の食塩水'},r:{fill:'#ffd1dc',stroke:'#e9a3b6',ink:'#b5607a',name:'10％の食塩水'}};
 /* おもり: ひも＋つり輪＋角丸の箱（面積が重さに比例）＋つや＋名前 */
+/* 比を整数にそろえる（0.1きざみ） */
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+function ratio(a,b){a=Math.round(a*10);b=Math.round(b*10);const g=gcd(a,b)||1;return [a/g,b/g];}
+const rfs=n=>String(n).length>1?18:22;
+/* 重さの比: おもりの外側（左のおもりは左、右のおもりは右）に置く */
+function wRatio(cx,cy,n,c){
+  return '<circle cx="'+cx+'" cy="'+cy+'" r="21" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="3"/>'+
+    '<text x="'+cx+'" y="'+(cy+1)+'" text-anchor="middle" dominant-baseline="central" font-size="'+rfs(n)+'" font-weight="800" fill="'+c.ink+'">'+n+'</text>';
+}
 function weight(cx,side,mass,c){
   const x=cx-side/2,r=Math.min(18,side/5),fs=Math.max(16,Math.min(30,side*.3));
   return '<line x1="'+cx+'" y1="157" x2="'+cx+'" y2="'+(TOP-16)+'" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>'+
@@ -99,7 +117,14 @@ function setConcentration(n){
   const x=x0+(conc-min)/(max-min)*(x1-x0);
   const rightMass=leftMass*(conc-min)/(max-conc);
   const side=leftSide*Math.sqrt(rightMass/leftMass);
-  $('weights').innerHTML=weight(x0,leftSide,leftMass,C.l)+weight(x1,side,rightMass,C.r);
+  const d=ratio(conc-min,max-conc);          // 濃度の差の比（左：右）
+  const w=[d[1],d[0]];                        // 重さの比は逆（左：右）
+  $('weights').innerHTML=weight(x0,leftSide,leftMass,C.l)+weight(x1,side,rightMass,C.r)+
+    wRatio(x0-leftSide/2-36,TOP+leftSide/2,w[0],C.l)+wRatio(x1+side/2+36,TOP+side/2,w[1],C.r);
+  $('ratL').textContent=d[0];$('ratR').textContent=d[1];
+  $('ratL').setAttribute('font-size',rfs(d[0]));$('ratR').setAttribute('font-size',rfs(d[1]));
+  $('ratLG').setAttribute('transform','translate('+(x0+x)/2+',0)');
+  $('ratRG').setAttribute('transform','translate('+(x+x1)/2+',0)');
   $('beamL').setAttribute('x2',x);$('beamR').setAttribute('x1',x);
   $('pivot').setAttribute('transform','translate('+x+',0)');
   $('gapLG').setAttribute('transform','translate('+(x0+x)/2+',0)');
