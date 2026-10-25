@@ -41,7 +41,7 @@ button:active{transform:translateY(1px)}
 </style></head><body><main><div class="head"><a class="back" href="../">← TOP</a><h1>天秤図の部屋</h1><span class="ver">v0.2</span></div>
 <div class="question"><small>問題 03｜食塩水を混ぜる</small><br>4％の食塩水100gに、10％の食塩水を加えたら6％になりました。何g加えた？</div>
 <section class="panel"><div class="panel-head"><strong>支点を左右に動かしてみよう</strong><span class="hint"><b>▲</b> を指でドラッグ</span></div>
-<svg class="diagram" id="diagram" viewBox="0 12 1100 524" role="img" aria-label="4パーセントと10パーセントの食塩水を混ぜる天秤図。支点を左右に動かせます">
+<svg class="diagram" id="diagram" viewBox="0 -4 1100 540" role="img" aria-label="4パーセントと10パーセントの食塩水を混ぜる天秤図。支点を左右に動かせます">
   <!-- うで（支点の左右で色分け） -->
   <line id="beamL" x1="210" y1="151" x2="437" y2="151" stroke="#add8e6" stroke-width="12" stroke-linecap="round"/>
   <line id="beamR" x1="437" y1="151" x2="890" y2="151" stroke="#ffd1dc" stroke-width="12" stroke-linecap="round"/>
@@ -56,28 +56,18 @@ button:active{transform:translateY(1px)}
     <text y="110" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#b5607a">10％</text>
   </g>
   <path id="tailR" d="" fill="#fff0f4" stroke="#ffd1dc" stroke-width="2" stroke-linejoin="round"/>
-  <!-- 濃度の差（濃度のふきだしと同じ高さ。「差」の下に数値）。色は同じ側の「差の比」とそろえる -->
-  <g id="gapLG" transform="translate(320,0)">
-    <rect x="-34" y="80" width="68" height="58" rx="18" fill="#e6defb" stroke="#a48fe0" stroke-width="2"/>
-    <text y="97" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="#6a4fc4">差</text>
-    <text id="leftGap" y="121" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#6a4fc4">2</text>
+  <!-- 濃度の差（黒い文字だけ。「差」の下に数値） -->
+  <g id="gapLG" transform="translate(320,0)" fill="#2f3437" font-weight="800" text-anchor="middle">
+    <text y="99" dominant-baseline="central" font-size="14">差</text>
+    <text id="leftGap" y="120" dominant-baseline="central" font-size="22">2</text>
   </g>
-  <g id="gapRG" transform="translate(660,0)">
-    <rect x="-34" y="80" width="68" height="58" rx="18" fill="#ffe7c4" stroke="#eeac5c" stroke-width="2"/>
-    <text y="97" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="#a8651a">差</text>
-    <text id="rightGap" y="121" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#a8651a">4</text>
+  <g id="gapRG" transform="translate(660,0)" fill="#2f3437" font-weight="800" text-anchor="middle">
+    <text y="99" dominant-baseline="central" font-size="14">差</text>
+    <text id="rightGap" y="120" dominant-baseline="central" font-size="22">4</text>
   </g>
-  <!-- 濃度の差の比（うでの下） -->
-  <g id="ratLG" transform="translate(320,0)">
-    <rect x="-34" y="167" width="68" height="58" rx="18" fill="#e6defb" stroke="#a48fe0" stroke-width="2"/>
-    <text y="184" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="#6a4fc4">比</text>
-    <text id="ratL" y="208" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#6a4fc4">1</text>
-  </g>
-  <g id="ratRG" transform="translate(660,0)">
-    <rect x="-34" y="167" width="68" height="58" rx="18" fill="#ffe7c4" stroke="#eeac5c" stroke-width="2"/>
-    <text y="184" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="#a8651a">比</text>
-    <text id="ratR" y="208" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#a8651a">2</text>
-  </g>
+  <!-- 濃度の差の比（「差」の上。JSで描く） -->
+  <g id="ratLG" transform="translate(320,0)"></g>
+  <g id="ratRG" transform="translate(660,0)"></g>
   <!-- おもり（JSで描く） -->
   <g id="weights"></g>
   <!-- 支点 -->
@@ -103,17 +93,23 @@ const x0=210,x1=890,min=4,max=10,leftMass=100,leftSide=130,TOP=272;
 let conc=6,dragging=false;
 const fmt=n=>Number(n.toFixed(1)).toString();
 /* 比の色: クロスで同じ色（左の差の比＝右の重さの比→むらさき、右の差の比＝左の重さの比→オレンジ） */
-const RA={fill:'#e6defb',stroke:'#a48fe0',ink:'#6a4fc4'},RB={fill:'#ffe7c4',stroke:'#eeac5c',ink:'#a8651a'};
+const RA={kind:'A',fill:'#efe9fd',stroke:'#9b84de',ink:'#5b3fb8'},RB={kind:'B',fill:'#fff1dc',stroke:'#e8a24f',ink:'#9a5a12'};
 const C={l:{fill:'#add8e6',stroke:'#7fb8ca',ink:'#3f7f93',name:'4％の食塩水'},r:{fill:'#ffd1dc',stroke:'#e9a3b6',ink:'#b5607a',name:'10％の食塩水'}};
 /* おもり: ひも＋つり輪＋角丸の箱（面積が重さに比例）＋つや＋名前 */
 /* 比を整数にそろえる（0.1きざみ） */
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 function ratio(a,b){a=Math.round(a*10);b=Math.round(b*10);const g=gcd(a,b)||1;return [a/g,b/g];}
 /* 重さの比: おもりの外側（左のおもりは左、右のおもりは右）に置く */
-function wRatio(cx,cy,n,c){
-  return '<rect x="'+(cx-34)+'" y="'+(cy-29)+'" width="68" height="58" rx="18" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="2"/>'+
-    '<text x="'+cx+'" y="'+(cy-12)+'" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="800" fill="'+c.ink+'">比</text>'+
-    '<text x="'+cx+'" y="'+(cy+12)+'" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="'+c.ink+'">'+n+'</text>';
+/* 比のしるし（大きな丸）。A＝太い一重丸、B＝ふつうの線の二重丸。クロスするペアは同じ形・同じ色 */
+const RR=38;
+function ratMark(cx,cy,n,c){
+  const ring=c.kind==='A'
+    ? '<circle cx="'+cx+'" cy="'+cy+'" r="'+(RR-3)+'" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="6"/>'
+    : '<circle cx="'+cx+'" cy="'+cy+'" r="'+(RR-1)+'" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="2.5"/>'+
+      '<circle cx="'+cx+'" cy="'+cy+'" r="'+(RR-8)+'" fill="none" stroke="'+c.stroke+'" stroke-width="2.5"/>';
+  return ring+
+    '<text x="'+cx+'" y="'+(cy-13)+'" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="800" fill="'+c.ink+'">比</text>'+
+    '<text x="'+cx+'" y="'+(cy+9)+'" text-anchor="middle" dominant-baseline="central" font-size="'+(String(n).length>1?26:30)+'" font-weight="800" fill="'+c.ink+'">'+n+'</text>';
 }
 function weight(cx,side,mass,c){
   const x=cx-side/2,r=Math.min(18,side/5),fs=Math.max(16,Math.min(30,side*.3));
@@ -122,7 +118,7 @@ function weight(cx,side,mass,c){
     '<rect x="'+x+'" y="'+TOP+'" width="'+side+'" height="'+side+'" rx="'+r+'" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="3"/>'+
     '<rect x="'+(x+Math.max(6,side*.1))+'" y="'+(TOP+Math.max(5,side*.08))+'" width="'+(side*.32)+'" height="'+Math.max(4,side*.06)+'" rx="3" fill="#fff" opacity=".7"/>'+
     '<text class="wt" x="'+cx+'" y="'+(TOP+side/2+2)+'" font-size="'+fs+'">'+fmt(mass)+'g</text>'+
-    '<text x="'+cx+'" y="'+(TOP+side+30)+'" text-anchor="middle" font-size="19" font-weight="700" fill="'+c.ink+'">'+c.name+'</text>';
+    '<text x="'+cx+'" y="'+(TOP+Math.max(side,64)+30)+'" text-anchor="middle" font-size="19" font-weight="700" fill="'+c.ink+'">'+c.name+'</text>';
 }
 function setConcentration(n){
   conc=Math.max(4.5,Math.min(8.5,Math.round(n*10)/10));
@@ -132,14 +128,7 @@ function setConcentration(n){
   const d=ratio(conc-min,max-conc);          // 濃度の差の比（左：右）
   const w=[d[1],d[0]];                        // 重さの比は逆（左：右）
   $('weights').innerHTML=weight(x0,leftSide,leftMass,C.l)+weight(x1,side,rightMass,C.r)+
-    wRatio(x0-leftSide/2-46,TOP+leftSide/2,w[0],RB)+wRatio(x1+side/2+46,TOP+side/2,w[1],RA);
-  $('ratL').textContent=d[0];$('ratR').textContent=d[1];
-  /* 差の比の丸: ふだんは区間のまん中。支点や糸に近すぎるときは外側へよける */
-  let rl=(x0+x)/2,rr=(x+x1)/2;
-  if(x-rl<62)rl=x-62; if(rl-x0<40)rl=x0-42;
-  if(rr-x<62)rr=x+62; if(x1-rr<40)rr=x1+42;
-  $('ratLG').setAttribute('transform','translate('+rl+',0)');
-  $('ratRG').setAttribute('transform','translate('+rr+',0)');
+    ratMark(x0-leftSide/2-12-RR,TOP+leftSide/2,w[0],RB)+ratMark(x1+side/2+12+RR,TOP+Math.max(side/2,RR),w[1],RA);
   /* 始点・終点のふきだし: 支点のふきだしと重なるときは、両方を少しずつ外へずらす */
   let eL=x0,eR=x1,pv=0;
   const ovL=(x0+48+8)-(x-60); if(ovL>0){const s=Math.min(ovL,32);eL-=s;pv+=ovL-s;}
@@ -151,14 +140,18 @@ function setConcentration(n){
   $('pvBubble').setAttribute('transform','translate('+pv+',0)');
   $('beamL').setAttribute('x2',x);$('beamR').setAttribute('x1',x);
   $('pivot').setAttribute('transform','translate('+x+',0)');
-  /* 差: 両どなりのふきだしのあいだのすき間のまん中に置く。
-     すき間が足りないときは、ふきだしの1段上（区間のまん中）へ逃がす */
-  const GW=34,M=6,UP=-62;
+  /* 差: 両どなりのふきだしのすき間のまん中に置き、その真上に「差の比」の丸を置く。
+     すき間が足りないときは、丸は区間のまん中、「差」は丸の外側の横に置く */
+  const GW=22,M=6,RY=88-6-RR;
   const lA=eL+48+M,lB=x+pv-60-M,rA=x+pv+60+M,rB=eR-56-M;
-  const gL=(lB-lA)>=GW*2?[(lA+lB)/2,0]:[(x0+x)/2,UP];
-  const gR=(rB-rA)>=GW*2?[(rA+rB)/2,0]:[(x+x1)/2,UP];
+  let cL,cR,gL,gR;
+  if(lB-lA>=GW*2){cL=(lA+lB)/2;gL=[cL,0];}else{cL=(x0+x)/2;gL=[cL-RR-26,RY-110];}
+  if(rB-rA>=GW*2){cR=(rA+rB)/2;gR=[cR,0];}else{cR=(x+x1)/2;gR=[cR+RR+26,RY-110];}
   $('gapLG').setAttribute('transform','translate('+gL[0]+','+gL[1]+')');
   $('gapRG').setAttribute('transform','translate('+gR[0]+','+gR[1]+')');
+  $('ratLG').setAttribute('transform','translate(0,0)');$('ratRG').setAttribute('transform','translate(0,0)');
+  $('ratLG').innerHTML=ratMark(cL,RY,d[0],RA);
+  $('ratRG').innerHTML=ratMark(cR,RY,d[1],RB);
   $('leftGap').textContent=fmt(conc-min);$('rightGap').textContent=fmt(max-conc);
   $('pivot').setAttribute('aria-valuenow',fmt(conc));$('pivot').setAttribute('aria-valuetext',fmt(conc)+'パーセント');
   $('pivotLabel').textContent=conc.toFixed(1)+'％';
