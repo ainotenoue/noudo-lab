@@ -14,7 +14,7 @@ main{max-width:1200px;margin:0 auto;padding:15px 28px 26px}
 .back{font-size:15px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;padding:9px 18px;background:#fff}
 h1{font-size:clamp(27px,3vw,39px);margin:0;text-align:center;font-weight:800;letter-spacing:.04em}
 .ver{font-size:12px;border:2px solid var(--edge);border-radius:20px;padding:4px 10px;background:#fff;white-space:nowrap;color:var(--ink2);font-weight:700}
-.question{margin:14px 0 10px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:26px 26px;line-height:1.7;font-size:clamp(17px,2vw,22px);font-weight:800}
+.question{margin:0 0 10px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:26px 26px;line-height:1.7;font-size:clamp(17px,2vw,22px);font-weight:800}
 .question small{display:inline-block;font-size:13px;color:var(--green-d);background:var(--green-s);border-radius:999px;padding:2px 12px;font-weight:800;margin-bottom:8px}
 .panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:10px 22px 12px}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -27,7 +27,9 @@ h1{font-size:clamp(27px,3vw,39px);margin:0;text-align:center;font-weight:800;let
 .pivot-hit:focus-visible .pv-tri{stroke:var(--green-d)}
 .wt{font-weight:800;fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
 .panel-foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-top:0;min-height:48px}
-.panel-foot .check{grid-column:2;text-align:center}
+.panel-foot .back{grid-column:1;justify-self:start;font-size:14px;padding:6px 14px}
+.panel-foot .check{grid-column:2;text-align:center;position:relative;top:-18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 .qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .qtop small{margin-bottom:0}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
@@ -66,7 +68,7 @@ button:active{transform:translateY(1px)}
 @media(max-width:760px){main{padding:12px}.question{margin:12px 0;padding:18px 16px}.panel{padding:10px}.hint{font-size:11px}.diagram{max-height:440px}}
 @media(orientation:landscape) and (max-height:760px){.question{margin:10px 0 8px;padding:16px 20px}.panel{padding:8px 18px}.diagram{max-height:400px}}
 @media(prefers-reduced-motion:reduce){.ar-r,.ar-l,.check.on,.grip{animation:none}}
-</style></head><body><main><div class="head"><a class="back" href="../">← TOP</a><h1>天秤図の部屋</h1><span class="ver">v0.4</span></div>
+</style></head><body><main><h1 class="sr">天秤図の部屋</h1>
 <div class="question"><div class="qtop"><small id="qTag">問題 03｜食塩水を混ぜる</small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
 <section class="panel"><div class="panel-head"><strong id="task">支点を左右に動かしてみよう</strong><span class="hint" id="hint"><b>▲</b> を指でドラッグ</span></div>
 <svg class="diagram" id="diagram" viewBox="-30 -4 1160 550" role="img" aria-label="4パーセントと10パーセントの食塩水を混ぜる天秤図。支点を左右に動かせます">
@@ -115,7 +117,7 @@ button:active{transform:translateY(1px)}
     <path d="M-9 130 L0 141 L9 130 Z" fill="#90ee90"/>
   </g>
 </svg>
-<div class="panel-foot"><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="reset">はじめに戻す</button></div></div></section>
+<div class="panel-foot"><a class="back" href="../">← TOP</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="reset">はじめに戻す</button></div></div></section>
 </main><script>
 (()=>{
 const $=id=>document.getElementById(id), svg=$('diagram');
@@ -218,7 +220,7 @@ function draw(){
   const w=knownMass?ratio(mL,mR):['？','？'];   // 重さの比（左：右）
   $('weights').innerHTML=
     weight(x0,sL,mL,CL,nameL(),dyL,P.ask==='L'?'wL':'')+weight(x1,sR,mR,CR,nameR(),dyR,P.ask==='R'?'wR':'')+
-    ratMark(x0-sL/2-12-RR,TOP+Math.max(sL/2,RR)+dyL,w[0],RB)+ratMark(x1+sR/2+12+RR,TOP+Math.max(sR/2,RR)+dyR,w[1],RA);
+    ratMark(x0-sL/2-24-RR,TOP+Math.max(sL/2,RR)+dyL,w[0],RB)+ratMark(x1+sR/2+24+RR,TOP+Math.max(sR/2,RR)+dyR,w[1],RA);
   $('beamG').setAttribute('transform','rotate('+ang+' '+x+' '+BY+')');
   $('beamG').classList.toggle('balanced',ok);
   /* 始点・終点のふきだし: 支点のふきだしと重なるときは、両方を少しずつ外へずらす */
