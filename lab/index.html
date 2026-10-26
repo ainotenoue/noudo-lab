@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>食塩水の部屋 v4.2｜濃度ラボ</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>食塩水の部屋 v4.3｜濃度ラボ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -88,7 +88,12 @@ const PROBLEMS=[
   {kind:'water',tag:'水を加えて薄める',g0:150,c0:8,amt:50,range:[0,150],step:5,start:0,
    text:'8％の食塩水150gに水を50g加えると、濃度は何％になりますか？'},
   {kind:'evap',tag:'水を蒸発させて濃くする',g0:300,c0:4,amt:100,range:[0,200],step:5,start:0,
-   text:'4％の食塩水300gから水を100g蒸発させると、濃度は何％になりますか？'}
+   text:'4％の食塩水300gから水を100g蒸発させると、濃度は何％になりますか？'},
+  /* ask:'amt' … 逆算型。めあての濃度 ct が分かっていて、加える（蒸発させる）量を求める */
+  {kind:'water',ask:'amt',ct:4,tag:'水を加えて薄める｜量を求める',g0:300,c0:6,amt:150,range:[0,300],step:5,start:0,
+   text:'6％の食塩水300gに水を何g加えると、4％の食塩水になりますか？'},
+  {kind:'evap',ask:'amt',ct:8,tag:'水を蒸発させて濃くする｜量を求める',g0:240,c0:5,amt:90,range:[0,180],step:5,start:0,
+   text:'5％の食塩水240gから水を何g蒸発させると、8％の食塩水になりますか？'}
 ];
 let idx=0,P=PROBLEMS[0],v=0,drag=false;
 /* じゆうに試す: 食塩（上の辺）と水（右の辺）をどちらもドラッグで変えられる。
@@ -138,15 +143,16 @@ function dim(xa,xb,y,s,col,fs){
 function draw(){
   const {kx,ky}=scale(),n=now(),ok=solved(),b={g:P.g0,s:salt0(),c:P.c0};
   const wA=n.g*kx,hA=n.c*ky,wB=b.g*kx,hB=b.c*ky;
-  const unknownC=P.kind!=='base'&&!ok, unknownS=P.kind==='base'&&!ok;
+  const rev=P.ask==='amt';   // 逆算型: 濃度は見せて、量を「？」にする
+  const unknownC=P.kind!=='base'&&!rev&&!ok, unknownS=P.kind==='base'&&!ok, unknownA=rev&&!ok;
   let h='';
   // 地面
   h+='<line x1="'+(X0-30)+'" y1="'+Y0+'" x2="'+(X0+W+40)+'" y2="'+Y0+'" stroke="#9a9184" stroke-width="2"/>';
   // 01: めあての濃度の線
-  if(P.kind==='base'){
-    const yt=Y0-P.c0*ky;
-    h+='<line x1="'+(X0-10)+'" y1="'+yt+'" x2="'+(X0+wB+30)+'" y2="'+yt+'" stroke="#3f9b4a" stroke-width="2.5" stroke-dasharray="10 7"/>'+
-      txt(X0+wB+40,yt,'めあて '+P.c0+'％',{a:'start',fs:18,c:'#3f9b4a'});
+  if(P.kind==='base'||rev){
+    const ct=rev?P.ct:P.c0,yt=Y0-ct*ky,xe=Math.min(X0+W-80,X0+Math.max(wB,wA,(rev&&P.kind==='water')?(P.g0+P.amt)*kx:0)+30);
+    h+='<line x1="'+(X0-10)+'" y1="'+yt+'" x2="'+xe+'" y2="'+yt+'" stroke="#3f9b4a" stroke-width="2.5" stroke-dasharray="10 7"/>'+
+      txt(xe+10,yt,'めあて '+ct+'％',{a:'start',fs:18,c:'#3f9b4a'});
   }
   // 変えたあとの長方形（面積＝食塩）
   h+='<rect id="after" x="'+X0+'" y="'+(Y0-hA)+'" width="'+wA+'" height="'+hA+'" rx="4" fill="'+(ok?'#7cc6e0':tint(n.c))+'" stroke="'+(ok?'#2f86a8':'#7fb8ca')+'" stroke-width="'+(ok?4:3)+'"/>';
@@ -160,24 +166,24 @@ function draw(){
   if(P.kind==='base')h+=dim(X0,X0+wA,Y0+34,fmt(n.g)+'g','#2f3437',22);
   else{
     h+=dim(X0,X0+wB,Y0+30,'はじめ '+fmt(b.g)+'g','#8a8478',17);
-    h+=dim(X0,X0+wA,Y0+68,fmt(n.g)+'g','#2f3437',22);
+    h+=dim(X0,X0+wA,Y0+68,(unknownA?'？':fmt(n.g))+'g','#2f3437',22);
   }
   // 濃度（左側）
   if(P.kind!=='base'){
     h+='<line x1="'+(X0-12)+'" y1="'+(Y0-hB)+'" x2="'+X0+'" y2="'+(Y0-hB)+'" stroke="#8a8478" stroke-width="2"/>'+txt(X0-18,Y0-hB,'はじめ '+P.c0+'％',{a:'end',fs:16,c:'#8a8478'});
   }
   let yc=Y0-hA; if(P.kind!=='base'&&Math.abs(yc-(Y0-hB))<30)yc=(Y0-hA)+(hA>hB?-30:30);
-  h+=pill(X0-80,Math.max(22,yc),(unknownC?'？':fmt(n.c))+'％','#90ee90','#25642c',null,24);
+  h+=pill(X0-80,Math.max(22,yc),(unknownC?'？':rev?ap(n.c,1):fmt(n.c))+'％','#90ee90','#25642c',null,24);
   // 操作した量（加えた・蒸発させた分）
   if(P.kind==='salt'||P.kind==='water'){
     if(v>0){
       h+='<rect x="'+(X0+wB)+'" y="'+(Y0-hA)+'" width="'+(wA-wB)+'" height="'+hA+'" fill="'+(P.kind==='salt'?'#ffd1dc':'#d7eef7')+'" opacity=".75"/>';
-      h+=txt(X0+wB+(wA-wB)/2,Y0-hA-22,'＋'+(P.kind==='salt'?'食塩':'水')+' '+fmt(v)+'g',{fs:18,c:P.kind==='salt'?'#b5607a':'#3f7f93'});
+      h+=txt(X0+wB+(wA-wB)/2,Y0-hA-22,'＋'+(P.kind==='salt'?'食塩':'水')+' '+(unknownA?'？':fmt(v))+'g',{fs:18,c:P.kind==='salt'?'#b5607a':'#3f7f93'});
     }
   }
   if(P.kind==='evap'&&v>0){
     h+='<rect x="'+(X0+wA)+'" y="'+(Y0-hB)+'" width="'+(wB-wA)+'" height="'+hB+'" fill="#fff" opacity=".7" stroke="#c9c3b8" stroke-dasharray="4 5"/>';
-    h+=txt(X0+wA+(wB-wA)/2,Y0-hB-22,'－水 '+fmt(v)+'g（蒸発）',{fs:18,c:'#3f7f93'});
+    h+=txt(X0+wA+(wB-wA)/2,Y0-hB-22,'－水 '+(unknownA?'？':fmt(v))+'g（蒸発）',{fs:18,c:'#3f7f93'});
   }
   // 取っ手
   if(P.kind==='base'){
@@ -199,7 +205,11 @@ function updateCheck(){
   if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
   const n=now(),s0=salt0();
   let head,ln;
-  if(P.kind==='base'){head='答え 食塩 '+fmt(n.s)+'g';ln='確かめ：'+P.g0+'g × '+fmt(P.c0/100)+' ＝ '+fmt(n.s)+'g（重さ × 濃度 ＝ 食塩）';}
+  if(P.ask==='amt'){
+    const T=n.s/(P.ct/100);
+    head='答え 水 '+fmt(v)+'g'+(P.kind==='evap'?'（蒸発）':'');
+    ln='確かめ：食塩 '+fmt(s0)+'g は変わらない ／ '+P.ct+'％になる全体は '+fmt(n.s)+'÷'+fmt(P.ct/100)+'＝'+fmt(T)+'g ／ '+(P.kind==='evap'?P.g0+'－'+fmt(T):fmt(T)+'－'+P.g0)+'＝'+fmt(v)+'g';
+  }else if(P.kind==='base'){head='答え 食塩 '+fmt(n.s)+'g';ln='確かめ：'+P.g0+'g × '+fmt(P.c0/100)+' ＝ '+fmt(n.s)+'g（重さ × 濃度 ＝ 食塩）';}
   else{
     head='答え '+fmt(n.c)+'％';
     const saltTxt=P.kind==='salt'?fmt(s0)+'g → '+fmt(s0)+'＋'+fmt(v)+'＝'+fmt(n.s)+'g':fmt(s0)+'g → '+fmt(n.s)+'g（変わらない）';
@@ -315,7 +325,7 @@ function load(i){
   idx=i;P=PROBLEMS[i];free=false;$('qText').hidden=false;$('snap').hidden=true;
   $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+P.tag;
   $('qText').textContent=P.text;
-  $('task').textContent=P.kind==='base'?'濃度を'+P.c0+'％にしよう':P.kind==='salt'?'食塩を加えよう':P.kind==='water'?'水を加えよう':'水を蒸発させよう';
+  $('task').textContent=P.ask==='amt'?'濃度を'+P.ct+'％にしよう':P.kind==='base'?'濃度を'+P.c0+'％にしよう':P.kind==='salt'?'食塩を加えよう':P.kind==='water'?'水を加えよう':'水を蒸発させよう';
   $('hint').innerHTML=P.kind==='base'?'<b>↕</b> 上の辺を指で上下にドラッグ':'<b>↔</b> 右の辺を指で左右にドラッグ';
   svg.classList.remove('moved');
   renderTabs();
