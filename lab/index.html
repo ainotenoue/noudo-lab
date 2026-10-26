@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>食塩水の部屋 v4.1｜濃度ラボ</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>食塩水の部屋 v4.2｜濃度ラボ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -80,7 +80,15 @@ const PROBLEMS=[
   {kind:'water',tag:'水を加えて薄める',g0:200,c0:6,amt:100,range:[0,200],step:5,start:0,
    text:'6％の食塩水200gに水を100g加えると、濃度は何％になりますか？'},
   {kind:'evap',tag:'水を蒸発させて濃くする',g0:200,c0:6,amt:50,range:[0,100],step:5,start:0,
-   text:'6％の食塩水200gから水を50g蒸発させると、濃度は何％になりますか？'}
+   text:'6％の食塩水200gから水を50g蒸発させると、濃度は何％になりますか？'},
+  {kind:'base',tag:'基本の濃度計算',g0:150,c0:8,amt:12,range:[0,30],step:1,start:24,
+   text:'8％の食塩水150gには、食塩が何g含まれていますか？'},
+  {kind:'salt',tag:'食塩を加える',g0:90,c0:10,amt:10,range:[0,30],step:1,start:0,
+   text:'10％の食塩水90gに食塩を10g加えると、濃度は何％になりますか？'},
+  {kind:'water',tag:'水を加えて薄める',g0:150,c0:8,amt:50,range:[0,150],step:5,start:0,
+   text:'8％の食塩水150gに水を50g加えると、濃度は何％になりますか？'},
+  {kind:'evap',tag:'水を蒸発させて濃くする',g0:300,c0:4,amt:100,range:[0,200],step:5,start:0,
+   text:'4％の食塩水300gから水を100g蒸発させると、濃度は何％になりますか？'}
 ];
 let idx=0,P=PROBLEMS[0],v=0,drag=false;
 /* じゆうに試す: 食塩（上の辺）と水（右の辺）をどちらもドラッグで変えられる。
