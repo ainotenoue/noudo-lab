@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>天秤図の部屋 v0.3｜濃度ラボ</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>天秤図の部屋 v0.4｜濃度ラボ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -21,7 +21,7 @@ h1{font-size:clamp(27px,3vw,39px);margin:0;text-align:center;font-weight:800;let
 .panel-head strong{font-size:17px;font-weight:800}
 .hint{font-size:13px;color:var(--ink2);font-weight:700}
 .hint b{color:var(--green-d)}
-.diagram{width:100%;height:auto;display:block;max-height:465px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
+.diagram{width:100%;height:auto;display:block;max-height:450px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
 .pivot-hit{cursor:grab;touch-action:none;outline:none}
 .pivot-hit:active{cursor:grabbing}
 .pivot-hit:focus-visible .pv-tri{stroke:var(--green-d)}
@@ -29,12 +29,18 @@ h1{font-size:clamp(27px,3vw,39px);margin:0;text-align:center;font-weight:800;let
 .panel-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:6px;min-height:48px}
 .qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .qtop small{margin-bottom:0}
-.tabs{display:flex;gap:6px}
-.tabs button{padding:5px 14px;font-size:14px;background:#fff;border-color:var(--edge);color:var(--ink2)}
-.tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#b9e6b9;color:#2f6f37}
-.check{visibility:hidden;background:var(--green-s);border-radius:16px;padding:8px 16px;font-size:15px;font-weight:700;line-height:1.6;color:#2f5f35}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{width:38px;height:38px;padding:0;font-size:15px;background:#fff;border-color:var(--edge);color:var(--ink2)}
+.tabs button.done{background:#f3f0e8;color:#9a9488;border-color:#e2dccf}
+.tabs button.done::after{content:"✓";font-size:10px;vertical-align:super;margin-left:1px;color:var(--green-d)}
+.tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#9fd99f;color:#2f6f37}
+.fbtns{display:flex;gap:8px;flex:none}
+#nextq{background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+.check .ln2{display:block;font-size:13px;font-weight:700;color:#3d6b42}
+.alldone{margin-left:12px;font-weight:800;color:#25642c}
+.check{visibility:hidden;background:var(--green-s);border-radius:16px;padding:6px 16px;font-size:15px;font-weight:700;line-height:1.5;color:#2f5f35}
 .check.on{visibility:visible;animation:pop .35s ease-out}
-.check b{font-size:18px;color:#25642c;margin-right:8px}
+.check b{font-size:18px;color:#25642c}
 @keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
 button{font:inherit;cursor:pointer;white-space:nowrap;flex:none;border:2px solid #b9e6b9;border-radius:999px;padding:10px 20px;background:var(--green-s);font-weight:800;color:#2f6f37}
 button:active{transform:translateY(1px)}
@@ -55,7 +61,7 @@ button:active{transform:translateY(1px)}
 @media(max-width:760px){main{padding:12px}.question{margin:12px 0;padding:18px 16px}.panel{padding:10px}.hint{font-size:11px}.diagram{max-height:440px}}
 @media(orientation:landscape) and (max-height:760px){.question{margin:10px 0 8px;padding:16px 20px}.panel{padding:8px 18px}.diagram{max-height:400px}}
 @media(prefers-reduced-motion:reduce){.ar-r,.ar-l,.check.on,.grip{animation:none}}
-</style></head><body><main><div class="head"><a class="back" href="../">← TOP</a><h1>天秤図の部屋</h1><span class="ver">v0.3</span></div>
+</style></head><body><main><div class="head"><a class="back" href="../">← TOP</a><h1>天秤図の部屋</h1><span class="ver">v0.4</span></div>
 <div class="question"><div class="qtop"><small id="qTag">問題 03｜食塩水を混ぜる</small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
 <section class="panel"><div class="panel-head"><strong id="task">支点を左右に動かしてみよう</strong><span class="hint" id="hint"><b>▲</b> を指でドラッグ</span></div>
 <svg class="diagram" id="diagram" viewBox="0 -4 1100 560" role="img" aria-label="4パーセントと10パーセントの食塩水を混ぜる天秤図。支点を左右に動かせます">
@@ -104,29 +110,45 @@ button:active{transform:translateY(1px)}
     <path d="M-9 130 L0 141 L9 130 Z" fill="#90ee90"/>
   </g>
 </svg>
-<div class="panel-foot"><div class="check" id="check" role="status" aria-live="polite"></div><button id="reset">6％に戻す</button></div></section>
+<div class="panel-foot"><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="reset">はじめに戻す</button></div></div></section>
 </main><script>
 (()=>{
 const $=id=>document.getElementById(id), svg=$('diagram');
-const x0=210,x1=890,leftSide=130,TOP=272,BY=151;
+const x0=210,x1=890,TOP=272,BY=151,BASE=150,SMAX=190;
 const fmt=n=>Number(n.toFixed(2)).toString();
 const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ===== 問題 =====
-   mode 'mass': 混ぜたあとの濃度（支点）が分かっていて、右の重さを求める
-                → 支点は固定。右のおもりを上下にドラッグして重さを変え、つりあわせる
-   mode 'conc': 両方の重さが分かっていて、混ぜたあとの濃度を求める
-                → おもりは固定。支点を左右に動かしてつりあわせる */
+   左は濃度の低い方（水は0％）、右は濃度の高い方（食塩は100％）。
+   ask:'conc' … 両方の重さが分かっていて、混ぜたあとの濃度を求める → おもりは固定、支点を動かす
+   ask:'L'/'R' … 混ぜたあとの濃度が分かっていて、左／右の重さを求める → 支点は固定、そのおもりをドラッグ
+   ans … 混ぜたあとの濃度（％） */
 const PROBLEMS=[
-  {no:'03',tag:'食塩水を加える',mode:'mass',cL:4,cR:10,mL:100,ans:6,startM:120,
-   text:'4％の食塩水100gに、10％の食塩水を加えたら6％になりました。何g加えた？',
-   task:'おもりの重さを変えて、天秤をつりあわせよう',hint:'<b>↕</b> 右のおもりを指で上下にドラッグ',reset:'はじめに戻す'},
-  {no:'04',tag:'2種類の食塩水を混ぜる',mode:'conc',cL:4,cR:10,mL:100,mR:50,ans:6,start:7.5,
-   text:'4％の食塩水100gと10％の食塩水50gを混ぜると、濃度は何％になりますか？',
-   task:'支点を動かして、天秤をつりあわせよう',hint:'<b>▲</b> を指でドラッグ',reset:'はじめに戻す'}
+  {tag:'混ぜる｜濃度を求める',ask:'conc',cL:4,cR:10,mL:100,mR:50,ans:6,start:7.5,
+   text:'4％の食塩水100gと10％の食塩水50gを混ぜると、濃度は何％になりますか？'},
+  {tag:'混ぜる｜重さを求める',ask:'R',cL:4,cR:10,mL:100,ans:6,start:120,
+   text:'4％の食塩水100gに10％の食塩水を加えたら、6％になりました。10％の食塩水を何g加えましたか？'},
+  {tag:'混ぜる｜濃度を求める',ask:'conc',cL:3,cR:8,mL:150,mR:100,ans:5,start:6.5,
+   text:'3％の食塩水150gと8％の食塩水100gを混ぜると、濃度は何％になりますか？'},
+  {tag:'混ぜる｜濃度を求める',ask:'conc',cL:5,cR:15,mL:200,mR:300,ans:11,start:8,
+   text:'5％の食塩水200gと15％の食塩水300gを混ぜると、濃度は何％になりますか？'},
+  {tag:'混ぜる｜重さを求める',ask:'R',cL:6,cR:12,mL:120,ans:8,start:120,
+   text:'6％の食塩水120gに12％の食塩水を混ぜて、8％の食塩水を作ります。12％の食塩水は何g必要ですか？'},
+  {tag:'混ぜる｜重さを求める',ask:'L',cL:5,cR:11,mR:100,ans:9,start:120,
+   text:'11％の食塩水100gに5％の食塩水を混ぜて、9％の食塩水を作ります。5％の食塩水は何g必要ですか？'},
+  {tag:'水を加える｜濃度を求める',ask:'conc',cL:0,cR:12,mL:100,mR:200,ans:8,start:4,nameL:'水',
+   text:'12％の食塩水200gに水を100g加えると、濃度は何％になりますか？'},
+  {tag:'水を加える｜重さを求める',ask:'L',cL:0,cR:8,mR:150,ans:6,start:120,nameL:'水',
+   text:'8％の食塩水150gに水を何g加えると、6％の食塩水になりますか？'},
+  {tag:'食塩を加える｜濃度を求める',ask:'conc',cL:10,cR:100,mL:180,mR:20,ans:19,start:45,nameR:'食塩',
+   text:'10％の食塩水180gに食塩を20g加えると、濃度は何％になりますか？'},
+  {tag:'食塩を加える｜重さを求める',ask:'R',cL:10,cR:100,mL:180,ans:28,start:100,nameR:'食塩',
+   text:'10％の食塩水180gに食塩を何g加えると、28％の食塩水になりますか？'}
 ];
-const MSTEP=5,MMIN=5,MMAX=200;
-let P=PROBLEMS[0],conc=6,mRv=0,dragging=false,dragW=false,ang=0,angTarget=0,raf=0;
+const MSTEP=5,MMIN=5;
+let idx=0,P=PROBLEMS[0],conc=6,mv=0,dragging=false,dragW=false,ang=0,angTarget=0,raf=0;
+let done={};try{done=JSON.parse(localStorage.getItem('balance-done')||'{}')||{};}catch(e){done={};}
+const saveDone=()=>{try{localStorage.setItem('balance-done',JSON.stringify(done));}catch(e){}};
 
 /* 比の色と形: クロスで同じ（左の差の比＝右の重さの比→むらさき一重丸、右の差の比＝左の重さの比→オレンジ二重丸） */
 const RA={kind:'A',fill:'#efe9fd',stroke:'#9b84de',ink:'#5b3fb8'},RB={kind:'B',fill:'#fff1dc',stroke:'#e8a24f',ink:'#9a5a12'};
@@ -144,44 +166,52 @@ function ratMark(cx,cy,n,c){
     '<text x="'+cx+'" y="'+(cy+9)+'" text-anchor="middle" dominant-baseline="central" font-size="'+(String(n).length>1?26:30)+'" font-weight="800" fill="'+c.ink+'">'+n+'</text>';
 }
 /* おもり: ひも＋つり輪＋角丸の箱（面積が重さに比例）＋つや＋名前。dy は天秤の傾きによる上下。
-   grip=true のときは、ドラッグできることを示す取っ手を下の辺に付ける */
-function weight(cx,side,mass,c,name,dy,grip){
+   gid があるときは、ドラッグできるおもり（下の辺に取っ手を付ける） */
+function weight(cx,side,mass,c,name,dy,gid){
   const x=cx-side/2,r=Math.min(18,side/5),fs=Math.max(16,Math.min(30,side*.3));
-  let h='<g transform="translate(0,'+dy+')"'+(grip?' id="wR" class="wdrag"':'')+'>'+
+  let h='<g transform="translate(0,'+dy+')"'+(gid?' id="'+gid+'" class="wdrag"':'')+'>'+
     '<line x1="'+cx+'" y1="'+(BY+6)+'" x2="'+cx+'" y2="'+(TOP-16)+'" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>'+
     '<circle cx="'+cx+'" cy="'+(TOP-9)+'" r="8" fill="none" stroke="'+c.stroke+'" stroke-width="4"/>'+
-    (grip?'<rect x="'+(x-30)+'" y="'+(TOP-6)+'" width="'+(side+60)+'" height="'+(side+46)+'" fill="transparent"/>':'')+
+    (gid?'<rect x="'+(x-30)+'" y="'+(TOP-6)+'" width="'+(side+60)+'" height="'+(side+46)+'" fill="transparent"/>':'')+
     '<rect x="'+x+'" y="'+TOP+'" width="'+side+'" height="'+side+'" rx="'+r+'" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="3"/>'+
     '<rect x="'+(x+Math.max(6,side*.1))+'" y="'+(TOP+Math.max(5,side*.08))+'" width="'+(side*.32)+'" height="'+Math.max(4,side*.06)+'" rx="3" fill="#fff" opacity=".7"/>'+
     '<text class="wt" x="'+cx+'" y="'+(TOP+side/2+2)+'" font-size="'+fs+'">'+fmt(mass)+'g</text>';
-  if(grip)h+='<g class="grip"><circle cx="'+cx+'" cy="'+(TOP+side)+'" r="15" fill="#fff" stroke="'+c.stroke+'" stroke-width="3"/>'+
+  if(gid)h+='<g class="grip"><circle cx="'+cx+'" cy="'+(TOP+side)+'" r="15" fill="#fff" stroke="'+c.stroke+'" stroke-width="3"/>'+
     '<text x="'+cx+'" y="'+(TOP+side+1)+'" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="'+c.ink+'">↕</text></g>';
-  return h+'<text x="'+cx+'" y="'+(TOP+Math.max(side,64)+(grip?42:30))+'" text-anchor="middle" font-size="19" font-weight="700" fill="'+c.ink+'">'+name+'</text></g>';
+  return h+'<text x="'+cx+'" y="'+(TOP+Math.max(side,64)+(gid?42:30))+'" text-anchor="middle" font-size="19" font-weight="700" fill="'+c.ink+'">'+name+'</text></g>';
 }
-const lo=()=>P.cL+0.5, hi=()=>P.cR-1.5;
-const xOf=c=>x0+(c-P.cL)/(P.cR-P.cL)*(x1-x0);
-const ansMass=()=>P.mL*(P.ans-P.cL)/(P.cR-P.ans);
-function rightMass(){return P.mode==='mass'?mRv:P.mR;}
-const solved=()=>P.mode==='mass'?Math.abs(mRv-ansMass())<0.01:Math.abs(conc-P.ans)<0.05;
+/* ===== 問題ごとの計算 ===== */
+const span=()=>P.cR-P.cL;
+const lo=()=>Math.round((P.cL+span()*0.08)*10)/10, hi=()=>Math.round((P.cR-span()*0.08)*10)/10;
+const xOf=c=>x0+(c-P.cL)/span()*(x1-x0);
+const nameL=()=>P.nameL||P.cL+'％の食塩水', nameR=()=>P.nameR||P.cR+'％の食塩水';
+function ansMass(){return P.ask==='R'?P.mL*(P.ans-P.cL)/(P.cR-P.ans):P.mR*(P.cR-P.ans)/(P.ans-P.cL);}
+const massL=()=>P.ask==='L'?mv:P.mL, massR=()=>P.ask==='R'?mv:P.mR;
+/* おもりの大きさの基準: この問題に出てくるいちばん重いもの */
+function refMass(){return Math.max(P.mL||0,P.mR||0,P.ask==='conc'?0:Math.max(ansMass(),P.start));}
+const sideOf=m=>Math.max(24,BASE*Math.sqrt(m/refMass()));
+const maxMass=()=>Math.floor(refMass()*(SMAX/BASE)*(SMAX/BASE)/MSTEP)*MSTEP;
+const solved=()=>P.ask==='conc'?Math.abs(conc-P.ans)<0.05:Math.abs(mv-ansMass())<0.01;
 
 /* 傾き: 左右の「重さ×支点からの長さ」の差で決める。つりあえば水平 */
 function targetAngle(){
   if(solved())return 0;
-  const x=xOf(conc),dl=x-x0,dr=x1-x,tl=P.mL*dl,tr=rightMass()*dr;
+  const x=xOf(conc),tl=massL()*(x-x0),tr=massR()*(x1-x);
   const t=Math.max(-1,Math.min(1,3*(tl-tr)/(tl+tr)));
   return -5*t;   // 左が重い → 左が下がる（反時計回り）
 }
 
 function draw(){
-  const x=xOf(conc),mR=rightMass(),ok=solved();
-  const side=leftSide*Math.sqrt(mR/P.mL);
+  const x=xOf(conc),mL=massL(),mR=massR(),ok=solved();
+  const sL=sideOf(mL),sR=sideOf(mR);
   const rad=ang*Math.PI/180,dyL=-(x-x0)*Math.sin(rad),dyR=(x1-x)*Math.sin(rad);
-  const knownPivot=P.mode==='mass'||ok;        // 支点まわり（濃度・差・差の比）が分かっているか
+  const knownPivot=P.ask!=='conc'||ok;          // 濃度・差・差の比が分かっているか
+  const knownMass=P.ask==='conc'||ok;           // 重さの比が分かっているか
   const d=ratio(conc-P.cL,P.cR-conc);          // 濃度の差の比（左：右）
-  const w=(P.mode==='conc'||ok)?ratio(P.mL,mR):['？','？']; // 重さの比（左：右）
+  const w=knownMass?ratio(mL,mR):['？','？'];   // 重さの比（左：右）
   $('weights').innerHTML=
-    weight(x0,leftSide,P.mL,CL,P.cL+'％の食塩水',dyL,false)+weight(x1,side,mR,CR,P.cR+'％の食塩水',dyR,P.mode==='mass')+
-    ratMark(x0-leftSide/2-12-RR,TOP+leftSide/2+dyL,w[0],RB)+ratMark(x1+side/2+12+RR,TOP+Math.max(side/2,RR)+dyR,w[1],RA);
+    weight(x0,sL,mL,CL,nameL(),dyL,P.ask==='L'?'wL':'')+weight(x1,sR,mR,CR,nameR(),dyR,P.ask==='R'?'wR':'')+
+    ratMark(x0-sL/2-12-RR,TOP+Math.max(sL/2,RR)+dyL,w[0],RB)+ratMark(x1+sR/2+12+RR,TOP+Math.max(sR/2,RR)+dyR,w[1],RA);
   $('beamG').setAttribute('transform','rotate('+ang+' '+x+' '+BY+')');
   /* 始点・終点のふきだし: 支点のふきだしと重なるときは、両方を少しずつ外へずらす */
   let eL=x0,eR=x1,pv=0;
@@ -206,20 +236,24 @@ function draw(){
   $('ratLG').innerHTML=ratMark(cL,RY,knownPivot?d[0]:'？',RA);
   $('ratRG').innerHTML=ratMark(cR,RY,knownPivot?d[1]:'？',RB);
   $('leftGap').textContent=knownPivot?fmt(conc-P.cL):'？';$('rightGap').textContent=knownPivot?fmt(P.cR-conc):'？';
-  $('pivotLabel').textContent=knownPivot?conc.toFixed(1)+'％':'？％';
+  $('pivotLabel').textContent=knownPivot?fmt(conc)+'％':'？％';
   $('pivot').setAttribute('aria-valuenow',fmt(conc));
   $('pivot').setAttribute('aria-valuetext',knownPivot?fmt(conc)+'パーセント':'まだつりあっていません');
 }
 
-/* つりあったら、食塩の量で確かめる */
+/* つりあったら、答えと、食塩の量での確かめを出す */
 function updateCheck(){
   const ok=solved(),el=$('check');
-  if(!ok){el.classList.remove('on');el.innerHTML='';return;}
+  if(!ok){el.classList.remove('on');el.innerHTML='';$('nextq').hidden=true;return;}
   if(el.classList.contains('on'))return;
-  const mR=rightMass(),sL=P.mL*P.cL/100,sR=mR*P.cR/100,S=sL+sR,T=P.mL+mR;
-  const head=P.mode==='conc'?'つりあった！':'つりあった！ 加えたのは '+fmt(mR)+'g';
-  el.innerHTML='<b>'+head+'</b>確かめ：食塩 '+fmt(sL)+'g＋'+fmt(sR)+'g＝'+fmt(S)+'g ／ 全体 '+fmt(P.mL)+'g＋'+fmt(mR)+'g＝'+fmt(T)+'g ／ '+fmt(S)+'÷'+fmt(T)+'＝'+fmt(S/T)+' → '+fmt(S/T*100)+'％';
+  if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
+  const mL=massL(),mR=massR(),sL=mL*P.cL/100,sR=mR*P.cR/100,S=sL+sR,T=mL+mR;
+  const ans=P.ask==='conc'?'答え '+fmt(P.ans)+'％':'答え '+(P.ask==='L'?nameL():nameR())+' '+fmt(mv)+'g';
+  const all=PROBLEMS.every((q,j)=>done[j]);
+  el.innerHTML='<b>つりあった！ '+ans+'</b>'+(all?'<span class="alldone">10問クリア！</span>':'')+
+    '<span class="ln2">確かめ：食塩 '+fmt(sL)+'g＋'+fmt(sR)+'g＝'+fmt(S)+'g ／ 全体 '+fmt(mL)+'g＋'+fmt(mR)+'g＝'+fmt(T)+'g ／ '+fmt(S)+'÷'+fmt(T)+'＝'+fmt(S/T)+' → '+fmt(S/T*100)+'％</span>';
   el.classList.add('on');
+  $('nextq').hidden=idx>=PROBLEMS.length-1;
 }
 
 function animate(){
@@ -233,49 +267,55 @@ function animate(){
 }
 function update(){angTarget=targetAngle();draw();animate();updateCheck();}
 function setConcentration(n){conc=Math.max(lo(),Math.min(hi(),Math.round(n*10)/10));update();}
-function setMass(m){mRv=Math.max(MMIN,Math.min(MMAX,Math.round(m/MSTEP)*MSTEP));update();}
+function setMass(m){mv=Math.max(MMIN,Math.min(maxMass(),Math.round(m/MSTEP)*MSTEP));update();}
 function resetProblem(){
-  if(P.mode==='mass'){conc=P.ans;mRv=P.startM;}else{conc=P.start;}
+  if(P.ask==='conc')conc=P.start;else{conc=P.ans;mv=P.start;}
   ang=targetAngle();angTarget=ang;update();
 }
+function renderTabs(){
+  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+' aria-label="問題'+(j+1)+(done[j]?'（クリア）':'')+'">'+(j+1)+'</button>').join('');
+}
 function loadProblem(i){
-  P=PROBLEMS[i];
-  $('qTag').textContent='問題 '+P.no+'｜'+P.tag;
+  idx=i;P=PROBLEMS[i];
+  const no=String(i+1).padStart(2,'0');
+  $('qTag').textContent='問題 '+no+'｜'+P.tag;
   $('qText').textContent=P.text;
-  $('task').textContent=P.task;
-  $('hint').innerHTML=P.hint;
-  $('reset').textContent=P.reset;
+  $('task').textContent=P.ask==='conc'?'支点を動かして、天秤をつりあわせよう':'おもりの重さを変えて、天秤をつりあわせよう';
+  $('hint').innerHTML=P.ask==='conc'?'<b>▲</b> を指でドラッグ':'<b>↕</b> '+(P.ask==='L'?'左':'右')+'のおもりを指で上下にドラッグ';
+  $('reset').textContent='はじめに戻す';
   $('endLT').textContent=P.cL+'％';$('endRT').textContent=P.cR+'％';
-  svg.classList.toggle('fixedpivot',P.mode==='mass');
+  svg.classList.toggle('fixedpivot',P.ask!=='conc');
   svg.classList.remove('moved');
-  $('pivot').setAttribute('tabindex',P.mode==='mass'?'-1':'0');
+  $('pivot').setAttribute('tabindex',P.ask!=='conc'?'-1':'0');
   $('pivot').setAttribute('aria-valuemin',lo());$('pivot').setAttribute('aria-valuemax',hi());
-  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===i)+'">問題'+q.no+'</button>').join('');
-  $('check').classList.remove('on');
+  renderTabs();
+  $('check').classList.remove('on');$('nextq').hidden=true;
   resetProblem();
 }
 
 function localPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;}
-function concFromEvent(e){const l=localPt(e);return l?P.cL+(l.x-x0)/(x1-x0)*(P.cR-P.cL):conc;}
-/* 右のおもり: 指の高さに下の辺がついてくる（面積＝重さなので、辺の長さの2乗で重さを出す） */
+function concFromEvent(e){const l=localPt(e);return l?P.cL+(l.x-x0)/(x1-x0)*span():conc;}
+/* おもり: 指の高さに下の辺がついてくる（面積＝重さなので、辺の長さの2乗で重さを出す） */
 function massFromEvent(e){
-  const l=localPt(e);if(!l)return mRv;
-  const x=xOf(conc),dyR=(x1-x)*Math.sin(ang*Math.PI/180);
-  const s=Math.max(10,l.y-dyR-TOP);
-  return P.mL*(s/leftSide)*(s/leftSide);
+  const l=localPt(e);if(!l)return mv;
+  const x=xOf(conc),rad=ang*Math.PI/180;
+  const dy=P.ask==='L'?-(x-x0)*Math.sin(rad):(x1-x)*Math.sin(rad);
+  const s=Math.max(10,l.y-dy-TOP);
+  return refMass()*(s/BASE)*(s/BASE);
 }
 const moved=()=>svg.classList.add('moved');
-$('pivot').addEventListener('pointerdown',e=>{if(P.mode==='mass')return;dragging=true;moved();$('pivot').setPointerCapture(e.pointerId);setConcentration(concFromEvent(e));e.preventDefault();});
+$('pivot').addEventListener('pointerdown',e=>{if(P.ask!=='conc')return;dragging=true;moved();$('pivot').setPointerCapture(e.pointerId);setConcentration(concFromEvent(e));e.preventDefault();});
 $('pivot').addEventListener('pointermove',e=>{if(dragging)setConcentration(concFromEvent(e));});
 $('pivot').addEventListener('pointerup',()=>dragging=false);$('pivot').addEventListener('pointercancel',()=>dragging=false);
-$('pivot').addEventListener('keydown',e=>{if(P.mode==='mass')return;if(e.key==='ArrowLeft'||e.key==='ArrowDown'){moved();setConcentration(conc-.1);e.preventDefault();}if(e.key==='ArrowRight'||e.key==='ArrowUp'){moved();setConcentration(conc+.1);e.preventDefault();}});
-svg.addEventListener('pointerdown',e=>{if(P.mode!=='mass'||!e.target.closest('#wR'))return;dragW=true;moved();svg.setPointerCapture(e.pointerId);setMass(massFromEvent(e));e.preventDefault();});
+$('pivot').addEventListener('keydown',e=>{if(P.ask!=='conc')return;if(e.key==='ArrowLeft'||e.key==='ArrowDown'){moved();setConcentration(conc-.1);e.preventDefault();}if(e.key==='ArrowRight'||e.key==='ArrowUp'){moved();setConcentration(conc+.1);e.preventDefault();}});
+svg.addEventListener('pointerdown',e=>{if(P.ask==='conc'||!e.target.closest('.wdrag'))return;dragW=true;moved();svg.setPointerCapture(e.pointerId);setMass(massFromEvent(e));e.preventDefault();});
 svg.addEventListener('pointermove',e=>{if(dragW)setMass(massFromEvent(e));});
 svg.addEventListener('pointerup',()=>dragW=false);svg.addEventListener('pointercancel',()=>dragW=false);
-/* キーボード: 問題03では上下キーで重さを5gずつ変える */
+/* キーボード: 重さを求める問題では上下キーで5gずつ変える */
 svg.setAttribute('tabindex','0');
-svg.addEventListener('keydown',e=>{if(P.mode!=='mass')return;if(e.key==='ArrowUp'){moved();setMass(mRv+MSTEP);e.preventDefault();}if(e.key==='ArrowDown'){moved();setMass(mRv-MSTEP);e.preventDefault();}});
+svg.addEventListener('keydown',e=>{if(P.ask==='conc')return;if(e.key==='ArrowUp'){moved();setMass(mv+MSTEP);e.preventDefault();}if(e.key==='ArrowDown'){moved();setMass(mv-MSTEP);e.preventDefault();}});
 $('reset').addEventListener('click',resetProblem);
+$('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)loadProblem(idx+1);});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)loadProblem(+b.getAttribute('data-i'));});
 loadProblem(0);
 })();
