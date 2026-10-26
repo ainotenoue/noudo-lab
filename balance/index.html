@@ -14,19 +14,20 @@ main{max-width:1200px;margin:0 auto;padding:15px 28px 26px}
 .back{font-size:15px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;padding:9px 18px;background:#fff}
 h1{font-size:clamp(27px,3vw,39px);margin:0;text-align:center;font-weight:800;letter-spacing:.04em}
 .ver{font-size:12px;border:2px solid var(--edge);border-radius:20px;padding:4px 10px;background:#fff;white-space:nowrap;color:var(--ink2);font-weight:700}
-.question{margin:20px 0 12px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:26px 26px;line-height:1.7;font-size:clamp(17px,2vw,22px);font-weight:800}
+.question{margin:14px 0 10px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:26px 26px;line-height:1.7;font-size:clamp(17px,2vw,22px);font-weight:800}
 .question small{display:inline-block;font-size:13px;color:var(--green-d);background:var(--green-s);border-radius:999px;padding:2px 12px;font-weight:800;margin-bottom:8px}
-.panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:14px 22px 18px}
+.panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:10px 22px 12px}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .panel-head strong{font-size:17px;font-weight:800}
 .hint{font-size:13px;color:var(--ink2);font-weight:700}
 .hint b{color:var(--green-d)}
-.diagram{width:100%;height:auto;display:block;max-height:450px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
+.diagram{width:100%;height:auto;display:block;max-height:458px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
 .pivot-hit{cursor:grab;touch-action:none;outline:none}
 .pivot-hit:active{cursor:grabbing}
 .pivot-hit:focus-visible .pv-tri{stroke:var(--green-d)}
 .wt{font-weight:800;fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
-.panel-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:6px;min-height:48px}
+.panel-foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-top:0;min-height:48px}
+.panel-foot .check{grid-column:2;text-align:center}
 .qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .qtop small{margin-bottom:0}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
@@ -34,10 +35,10 @@ h1{font-size:clamp(27px,3vw,39px);margin:0;text-align:center;font-weight:800;let
 .tabs button.done{background:#f3f0e8;color:#9a9488;border-color:#e2dccf}
 .tabs button.done::after{content:"✓";font-size:10px;vertical-align:super;margin-left:1px;color:var(--green-d)}
 .tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#9fd99f;color:#2f6f37}
-.fbtns{display:flex;gap:8px;flex:none}
+.fbtns{grid-column:3;justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.fbtns button{padding:5px 14px;font-size:14px}
 #nextq{background:#90ee90;border-color:#6fd16f;color:#1f5a26}
 .check .ln2{display:block;font-size:13px;font-weight:700;color:#3d6b42}
-.alldone{margin-left:12px;font-weight:800;color:#25642c}
 .check{visibility:hidden;background:var(--green-s);border-radius:16px;padding:6px 16px;font-size:15px;font-weight:700;line-height:1.5;color:#2f5f35}
 .check.on{visibility:visible;animation:pop .35s ease-out}
 .check b{font-size:18px;color:#25642c}
@@ -68,11 +69,11 @@ button:active{transform:translateY(1px)}
 </style></head><body><main><div class="head"><a class="back" href="../">← TOP</a><h1>天秤図の部屋</h1><span class="ver">v0.4</span></div>
 <div class="question"><div class="qtop"><small id="qTag">問題 03｜食塩水を混ぜる</small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
 <section class="panel"><div class="panel-head"><strong id="task">支点を左右に動かしてみよう</strong><span class="hint" id="hint"><b>▲</b> を指でドラッグ</span></div>
-<svg class="diagram" id="diagram" viewBox="0 -4 1100 560" role="img" aria-label="4パーセントと10パーセントの食塩水を混ぜる天秤図。支点を左右に動かせます">
+<svg class="diagram" id="diagram" viewBox="-30 -4 1160 550" role="img" aria-label="4パーセントと10パーセントの食塩水を混ぜる天秤図。支点を左右に動かせます">
   <!-- うで（支点の左右で色分け） -->
   <g id="beamG">
-    <line id="beamL" x1="210" y1="151" x2="437" y2="151" stroke="#add8e6" stroke-width="12" stroke-linecap="round"/>
-    <line id="beamR" x1="437" y1="151" x2="890" y2="151" stroke="#ffd1dc" stroke-width="12" stroke-linecap="round"/>
+    <line id="beamL" x1="176" y1="151" x2="437" y2="151" stroke="#add8e6" stroke-width="12" stroke-linecap="round"/>
+    <line id="beamR" x1="437" y1="151" x2="924" y2="151" stroke="#ffd1dc" stroke-width="12" stroke-linecap="round"/>
   </g>
   <!-- 始点・終点の濃度（支点と同じふきだし） -->
   <g id="endL">
@@ -118,7 +119,7 @@ button:active{transform:translateY(1px)}
 </main><script>
 (()=>{
 const $=id=>document.getElementById(id), svg=$('diagram');
-const x0=210,x1=890,TOP=272,BY=151,BASE=150,SMAX=190;
+const x0=176,x1=924,TOP=272,BY=151,BASE=150,SMAX=190;
 const fmt=n=>Number(n.toFixed(2)).toString();
 const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -173,16 +174,18 @@ function ratMark(cx,cy,n,c){
    gid があるときは、ドラッグできるおもり（下の辺に取っ手を付ける） */
 function weight(cx,side,mass,c,name,dy,gid){
   const x=cx-side/2,r=Math.min(18,side/5),fs=Math.max(16,Math.min(30,side*.3));
+  const capY=TOP+Math.max(side,gid?72:64)+30,cw=name.length*19;   // 名前の位置と幅
   let h='<g transform="translate(0,'+dy+')"'+(gid?' id="'+gid+'" class="wdrag"':'')+'>'+
     '<line x1="'+cx+'" y1="'+(BY+6)+'" x2="'+cx+'" y2="'+(TOP-16)+'" stroke="#c9c3b8" stroke-width="3" stroke-linecap="round"/>'+
     '<circle cx="'+cx+'" cy="'+(TOP-9)+'" r="8" fill="none" stroke="'+c.stroke+'" stroke-width="4"/>'+
-    (gid?'<rect x="'+(x-30)+'" y="'+(TOP-6)+'" width="'+(side+60)+'" height="'+(side+46)+'" fill="transparent"/>':'')+
+    (gid?'<rect x="'+Math.min(x-30,cx-cw/2-10)+'" y="'+(TOP-6)+'" width="'+(Math.max(x+side+30,cx+cw/2+44)-Math.min(x-30,cx-cw/2-10))+'" height="'+(capY-TOP+20)+'" fill="transparent"/>':'')+
     '<rect x="'+x+'" y="'+TOP+'" width="'+side+'" height="'+side+'" rx="'+r+'" fill="'+c.fill+'" stroke="'+c.stroke+'" stroke-width="3"/>'+
     '<rect x="'+(x+Math.max(6,side*.1))+'" y="'+(TOP+Math.max(5,side*.08))+'" width="'+(side*.32)+'" height="'+Math.max(4,side*.06)+'" rx="3" fill="#fff" opacity=".7"/>'+
     '<text class="wt" x="'+cx+'" y="'+(TOP+side/2+2)+'" font-size="'+fs+'">'+fmt(mass)+'g</text>';
-  if(gid)h+='<g class="grip"><circle cx="'+cx+'" cy="'+(TOP+side)+'" r="15" fill="#fff" stroke="'+c.stroke+'" stroke-width="3"/>'+
-    '<text x="'+cx+'" y="'+(TOP+side+1)+'" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="'+c.ink+'">↕</text></g>';
-  return h+'<text x="'+cx+'" y="'+(TOP+Math.max(side,64)+(gid?42:30))+'" text-anchor="middle" font-size="19" font-weight="700" fill="'+c.ink+'">'+name+'</text></g>';
+  const gx=cx+cw/2+22,gy=capY-7;   // 取っ手は名前の右横（数字を指でかくさないように）
+  if(gid)h+='<g class="grip"><circle cx="'+gx+'" cy="'+gy+'" r="15" fill="#fff" stroke="'+c.stroke+'" stroke-width="3"/>'+
+    '<text x="'+gx+'" y="'+(gy+1)+'" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="'+c.ink+'">↕</text></g>';
+  return h+'<text x="'+cx+'" y="'+capY+'" text-anchor="middle" font-size="19" font-weight="700" fill="'+c.ink+'">'+name+'</text></g>';
 }
 /* ===== 問題ごとの計算 ===== */
 const span=()=>P.cR-P.cL;
@@ -254,8 +257,7 @@ function updateCheck(){
   if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
   const mL=massL(),mR=massR(),sL=mL*P.cL/100,sR=mR*P.cR/100,S=sL+sR,T=mL+mR;
   const ans=P.ask==='conc'?'答え '+fmt(P.ans)+'％':'答え '+(P.ask==='L'?nameL():nameR())+' '+fmt(mv)+'g';
-  const all=PROBLEMS.every((q,j)=>done[j]);
-  el.innerHTML='<b>つりあった！ '+ans+'</b>'+(all?'<span class="alldone">10問クリア！</span>':'')+
+  el.innerHTML='<b>つりあった！ '+ans+'</b>'+
     '<span class="ln2">確かめ：食塩 '+fmt(sL)+'g＋'+fmt(sR)+'g＝'+fmt(S)+'g ／ 全体 '+fmt(mL)+'g＋'+fmt(mR)+'g＝'+fmt(T)+'g ／ '+fmt(S)+'÷'+fmt(T)+'＝'+fmt(S/T)+' → '+fmt(S/T*100)+'％</span>';
   el.classList.add('on');
   $('nextq').hidden=idx>=PROBLEMS.length-1;
@@ -285,7 +287,7 @@ function loadProblem(i){
   const no=String(i+1).padStart(2,'0');
   $('qTag').textContent='問題 '+no+'｜'+P.tag;
   $('qText').textContent=P.text;
-  $('task').textContent=P.ask==='conc'?'支点を動かして、天秤をつりあわせよう':'おもりの重さを変えて、天秤をつりあわせよう';
+  $('task').textContent=P.ask==='conc'?'支点を動かそう':'重さを変えよう';
   $('hint').innerHTML=P.ask==='conc'?'<b>▲</b> を指でドラッグ':'<b>↕</b> '+(P.ask==='L'?'左':'右')+'のおもりを指で上下にドラッグ';
   $('reset').textContent='はじめに戻す';
   $('endLT').textContent=P.cL+'％';$('endRT').textContent=P.cR+'％';
@@ -305,15 +307,23 @@ function massFromEvent(e){
   const l=localPt(e);if(!l)return mv;
   const x=xOf(conc),rad=ang*Math.PI/180;
   const dy=P.ask==='L'?-(x-x0)*Math.sin(rad):(x1-x)*Math.sin(rad);
-  const s=Math.max(10,l.y-dy-TOP);
+  const s=Math.max(10,l.y-dy-TOP-grabOff);
   return refMass()*(s/BASE)*(s/BASE);
+}
+/* つかんだ位置と下の辺のずれ（つかんだ瞬間におもりが飛ばないように） */
+let grabOff=0;
+function startGrab(e){
+  const l=localPt(e);if(!l){grabOff=0;return;}
+  const x=xOf(conc),rad=ang*Math.PI/180;
+  const dy=P.ask==='L'?-(x-x0)*Math.sin(rad):(x1-x)*Math.sin(rad);
+  grabOff=(l.y-dy-TOP)-sideOf(mv);
 }
 const moved=()=>svg.classList.add('moved');
 $('pivot').addEventListener('pointerdown',e=>{if(P.ask!=='conc')return;dragging=true;moved();$('pivot').setPointerCapture(e.pointerId);setConcentration(concFromEvent(e));e.preventDefault();});
 $('pivot').addEventListener('pointermove',e=>{if(dragging)setConcentration(concFromEvent(e));});
 $('pivot').addEventListener('pointerup',()=>dragging=false);$('pivot').addEventListener('pointercancel',()=>dragging=false);
 $('pivot').addEventListener('keydown',e=>{if(P.ask!=='conc')return;if(e.key==='ArrowLeft'||e.key==='ArrowDown'){moved();setConcentration(conc-.1);e.preventDefault();}if(e.key==='ArrowRight'||e.key==='ArrowUp'){moved();setConcentration(conc+.1);e.preventDefault();}});
-svg.addEventListener('pointerdown',e=>{if(P.ask==='conc'||!e.target.closest('.wdrag'))return;dragW=true;moved();svg.setPointerCapture(e.pointerId);setMass(massFromEvent(e));e.preventDefault();});
+svg.addEventListener('pointerdown',e=>{if(P.ask==='conc'||!e.target.closest('.wdrag'))return;dragW=true;moved();svg.setPointerCapture(e.pointerId);startGrab(e);e.preventDefault();});
 svg.addEventListener('pointermove',e=>{if(dragW)setMass(massFromEvent(e));});
 svg.addEventListener('pointerup',()=>dragW=false);svg.addEventListener('pointercancel',()=>dragW=false);
 /* キーボード: 重さを求める問題では上下キーで5gずつ変える */
