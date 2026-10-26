@@ -318,6 +318,7 @@ $('reset').addEventListener('click',()=>{if(free){F={s:FDEF.s,w:FDEF.w};snap=nul
 $('snap').addEventListener('click',()=>{snap={s:F.s,w:F.w};fitZoom(false);drawFree();});
 $('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b)return;const i=b.getAttribute('data-i');if(i==='free')loadFree();else load(+i);});
-load(0);
+/* #free で開いたときは「じゆうに試す」から始める */
+if(location.hash==='#free')loadFree();else load(0);
 })();
 </script></body></html>
