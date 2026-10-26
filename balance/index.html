@@ -191,7 +191,11 @@ function weight(cx,side,mass,c,name,dy,gid){
 }
 /* ===== 問題ごとの計算 ===== */
 const span=()=>P.cR-P.cL;
-const lo=()=>Math.round((P.cL+span()*0.08)*10)/10, hi=()=>Math.round((P.cR-span()*0.08)*10)/10;
+/* 支点のきざみ: 1目盛りが指で扱える幅（図の上で5以上）になる、いちばん細かいきざみ。
+   ふつうは0.1％。両はしの差が大きい問題（例: 10％〜100％）では1％など */
+function cstep(){for(const st of [0.1,0.5,1,2,5])if(st*(x1-x0)/span()>=5)return st;return 5;}
+const snapC=c=>{const st=cstep();return Math.round(Math.round(c/st)*st*10)/10;};
+const lo=()=>snapC(P.cL+span()*0.08), hi=()=>snapC(P.cR-span()*0.08);
 const xOf=c=>x0+(c-P.cL)/span()*(x1-x0);
 const nameL=()=>P.nameL||P.cL+'％の食塩水', nameR=()=>P.nameR||P.cR+'％の食塩水';
 function ansMass(){return P.ask==='R'?P.mL*(P.ans-P.cL)/(P.cR-P.ans):P.mR*(P.cR-P.ans)/(P.ans-P.cL);}
@@ -275,7 +279,7 @@ function animate(){
   step();
 }
 function update(){angTarget=targetAngle();draw();animate();updateCheck();}
-function setConcentration(n){conc=Math.max(lo(),Math.min(hi(),Math.round(n*10)/10));update();}
+function setConcentration(n){conc=Math.max(lo(),Math.min(hi(),snapC(n)));update();}
 function setMass(m){mv=Math.max(MMIN,Math.min(maxMass(),Math.round(m/MSTEP)*MSTEP));update();}
 function resetProblem(){
   if(P.ask==='conc')conc=P.start;else{conc=P.ans;mv=P.start;}
@@ -324,7 +328,7 @@ const moved=()=>svg.classList.add('moved');
 $('pivot').addEventListener('pointerdown',e=>{if(P.ask!=='conc')return;dragging=true;moved();$('pivot').setPointerCapture(e.pointerId);setConcentration(concFromEvent(e));e.preventDefault();});
 $('pivot').addEventListener('pointermove',e=>{if(dragging)setConcentration(concFromEvent(e));});
 $('pivot').addEventListener('pointerup',()=>dragging=false);$('pivot').addEventListener('pointercancel',()=>dragging=false);
-$('pivot').addEventListener('keydown',e=>{if(P.ask!=='conc')return;if(e.key==='ArrowLeft'||e.key==='ArrowDown'){moved();setConcentration(conc-.1);e.preventDefault();}if(e.key==='ArrowRight'||e.key==='ArrowUp'){moved();setConcentration(conc+.1);e.preventDefault();}});
+$('pivot').addEventListener('keydown',e=>{if(P.ask!=='conc')return;if(e.key==='ArrowLeft'||e.key==='ArrowDown'){moved();setConcentration(conc-cstep());e.preventDefault();}if(e.key==='ArrowRight'||e.key==='ArrowUp'){moved();setConcentration(conc+cstep());e.preventDefault();}});
 svg.addEventListener('pointerdown',e=>{if(P.ask==='conc'||!e.target.closest('.wdrag'))return;dragW=true;moved();svg.setPointerCapture(e.pointerId);startGrab(e);e.preventDefault();});
 svg.addEventListener('pointermove',e=>{if(dragW)setMass(massFromEvent(e));});
 svg.addEventListener('pointerup',()=>dragW=false);svg.addEventListener('pointercancel',()=>dragW=false);
