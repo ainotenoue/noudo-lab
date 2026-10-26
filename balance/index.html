@@ -58,6 +58,10 @@ button:active{transform:translateY(1px)}
 .grip{animation:nudgeY 1.4s ease-in-out infinite}
 .moved .grip{animation:none}
 .diagram:focus{outline:none}
+/* つりあったら、棒の色がくっきり濃くなる */
+#beamL,#beamR{transition:stroke .35s ease}
+.balanced #beamL{stroke:#3d9cc2}
+.balanced #beamR{stroke:#e2708f}
 @media(max-width:760px){main{padding:12px}.question{margin:12px 0;padding:18px 16px}.panel{padding:10px}.hint{font-size:11px}.diagram{max-height:440px}}
 @media(orientation:landscape) and (max-height:760px){.question{margin:10px 0 8px;padding:16px 20px}.panel{padding:8px 18px}.diagram{max-height:400px}}
 @media(prefers-reduced-motion:reduce){.ar-r,.ar-l,.check.on,.grip{animation:none}}
@@ -213,6 +217,7 @@ function draw(){
     weight(x0,sL,mL,CL,nameL(),dyL,P.ask==='L'?'wL':'')+weight(x1,sR,mR,CR,nameR(),dyR,P.ask==='R'?'wR':'')+
     ratMark(x0-sL/2-12-RR,TOP+Math.max(sL/2,RR)+dyL,w[0],RB)+ratMark(x1+sR/2+12+RR,TOP+Math.max(sR/2,RR)+dyR,w[1],RA);
   $('beamG').setAttribute('transform','rotate('+ang+' '+x+' '+BY+')');
+  $('beamG').classList.toggle('balanced',ok);
   /* 始点・終点のふきだし: 支点のふきだしと重なるときは、両方を少しずつ外へずらす */
   let eL=x0,eR=x1,pv=0;
   const ovL=(x0+48+8)-(x-60); if(ovL>0){const s=Math.min(ovL,32);eL-=s;pv+=ovL-s;}
