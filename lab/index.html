@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>食塩水の部屋 v4.0｜濃度ラボ</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>食塩水の部屋 v4.1｜濃度ラボ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -19,7 +19,8 @@ main{max-width:1200px;margin:0 auto;padding:15px 28px 26px}
 .tabs button.done{background:#f3f0e8;color:#9a9488;border-color:#e2dccf}
 .tabs button.done::after{content:"✓";font-size:10px;vertical-align:super;margin-left:1px;color:var(--green-d)}
 .tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#9fd99f;color:#2f6f37}
-.tabs a.freeb{margin-left:6px;display:inline-flex;align-items:center;height:38px;padding:0 14px;border:2px solid var(--edge);border-radius:999px;background:#fff;color:var(--ink2);font-size:15px;font-weight:800;text-decoration:none}
+.tabs button.freeb{width:auto;padding:0 14px;margin-left:6px}
+#snap{background:#fff}
 .panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:10px 22px 12px}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .panel-head strong{font-size:17px;font-weight:800}
@@ -57,7 +58,7 @@ button:active{transform:translateY(1px)}
 <svg class="diagram" id="diagram" viewBox="0 0 1100 500" role="img" aria-label="食塩水の面積図。横が食塩水の重さ、たてが濃度、面積が食塩の量">
   <g id="art"></g>
 </svg>
-<div class="panel-foot"><a class="back" href="../">← TOP</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="reset">はじめに戻す</button></div></div></section>
+<div class="panel-foot"><a class="back" href="../">← TOP</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="snap" hidden>いまを「はじめ」にする</button><button id="reset">はじめに戻す</button></div></div></section>
 </main><script>
 (()=>{
 const $=id=>document.getElementById(id), svg=$('diagram');
@@ -82,6 +83,18 @@ const PROBLEMS=[
    text:'6％の食塩水200gから水を50g蒸発させると、濃度は何％になりますか？'}
 ];
 let idx=0,P=PROBLEMS[0],v=0,drag=false;
+/* じゆうに試す: 食塩（上の辺）と水（右の辺）をどちらもドラッグで変えられる。
+   「いまを『はじめ』にする」で今の状態を点線で残し、そこからの変化を比べられる */
+const FDEF={s:10,w:190},FS={sMax:100,wMax:400,sStep:1,wStep:5};
+let free=false,F={s:10,w:190},snap=null,dragKind='';
+/* 目盛りの切りかえ（ズーム）: いまとはじめが収まる、いちばん大きく見える目盛り。ドラッグ中は固定し、はみ出したときだけ広げる */
+let Zc=10,Zg=300;
+function fitZoom(expandOnly){
+  const cs=[fC(F)].concat(snap?[fC(snap)]:[]),gs=[F.s+F.w].concat(snap?[snap.s+snap.w]:[]);
+  const nc=Math.max.apply(null,cs)*1.12,ng=Math.max.apply(null,gs)*1.04;
+  const c=[10,20,30,40,60,100].find(t=>t>=nc)||100,g=[300,400,500].find(t=>t>=ng)||500;
+  if(expandOnly){Zc=Math.max(Zc,c);Zg=Math.max(Zg,g);}else{Zc=c;Zg=g;}
+}
 let done={};try{done=JSON.parse(localStorage.getItem('lab-done')||'{}')||{};}catch(e){done={};}
 const saveDone=()=>{try{localStorage.setItem('lab-done',JSON.stringify(done));}catch(e){}};
 
@@ -103,6 +116,7 @@ function scale(){
 }
 function tint(c){const t=Math.max(0,Math.min(1,c/25));return 'hsl(197 '+(55+t*15)+'% '+(93-t*30)+'%)';}
 
+const tw=(s,fs)=>{let w=0;for(const ch of String(s))w+=/[ -~]/.test(ch)?0.6:1;return w*fs;};
 function txt(x,y,s,o){o=o||{};return '<text x="'+x+'" y="'+y+'" text-anchor="'+(o.a||'middle')+'" dominant-baseline="central" font-size="'+(o.fs||20)+'" font-weight="'+(o.fw||800)+'" fill="'+(o.c||'#2f3437')+'">'+s+'</text>';}
 function pill(x,y,s,bg,fg,stroke,fs){const w=Math.max(70,String(s).length*(fs||24)*0.62+30);return '<rect x="'+(x-w/2)+'" y="'+(y-21)+'" width="'+w+'" height="42" rx="21" fill="'+bg+'"'+(stroke?' stroke="'+stroke+'" stroke-width="2"':'')+'/>'+txt(x,y+1,s,{fs:fs||24,c:fg});}
 /* 寸法線（重さ）: 左右に小さな縦線、まん中に数字 */
@@ -110,7 +124,7 @@ function dim(xa,xb,y,s,col,fs){
   return '<line x1="'+xa+'" y1="'+y+'" x2="'+xb+'" y2="'+y+'" stroke="'+col+'" stroke-width="2"/>'+
     '<line x1="'+xa+'" y1="'+(y-8)+'" x2="'+xa+'" y2="'+(y+8)+'" stroke="'+col+'" stroke-width="2"/>'+
     '<line x1="'+xb+'" y1="'+(y-8)+'" x2="'+xb+'" y2="'+(y+8)+'" stroke="'+col+'" stroke-width="2"/>'+
-    '<rect x="'+((xa+xb)/2-(String(s).length*(fs||20)*0.62+16)/2)+'" y="'+(y-14)+'" width="'+(String(s).length*(fs||20)*0.62+16)+'" height="28" fill="#fff"/>'+txt((xa+xb)/2,y+1,s,{fs:fs||20,c:col});
+    '<rect x="'+((xa+xb)/2-(tw(s,fs||20)+16)/2)+'" y="'+(y-14)+'" width="'+(tw(s,fs||20)+16)+'" height="28" fill="#fff"/>'+txt((xa+xb)/2,y+1,s,{fs:fs||20,c:col});
 }
 
 function draw(){
@@ -200,26 +214,97 @@ function valueFromPt(l){
 }
 let off=0;
 svg.addEventListener('pointerdown',e=>{
+  if(free){
+    const hd=e.target.closest('#hS,#hW');if(!hd)return;
+    const l=localPt(e);if(!l)return;
+    dragKind=hd.id==='hS'?'S':'W';off=freeFromPt(dragKind,l)-(dragKind==='S'?F.s:F.w);
+    drag=true;svg.classList.add('moved');svg.setPointerCapture(e.pointerId);e.preventDefault();return;
+  }
   if(!e.target.closest('#handle'))return;
   const l=localPt(e);if(!l)return;
   off=valueFromPt(l)-v;drag=true;svg.classList.add('moved');svg.setPointerCapture(e.pointerId);e.preventDefault();
 });
-svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setV(valueFromPt(l)-off);});
-const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
+svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(!l)return;if(free)setFree(dragKind,freeFromPt(dragKind,l)-off);else setV(valueFromPt(l)-off);});
+const stop=()=>{if(drag&&free){drag=false;fitZoom(false);drawFree();}drag=false;};svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
 /* キーボード */
 svg.setAttribute('tabindex','0');
 svg.addEventListener('keydown',e=>{
+  if(free){
+    const m={ArrowUp:['S',1],ArrowDown:['S',-1],ArrowRight:['W',1],ArrowLeft:['W',-1]}[e.key];if(!m)return;
+    svg.classList.add('moved');setFree(m[0],(m[0]==='S'?F.s+FS.sStep*m[1]:F.w+FS.wStep*m[1]));e.preventDefault();return;
+  }
   const up=P.kind==='base'?['ArrowUp','ArrowRight']:P.kind==='evap'?['ArrowLeft','ArrowDown']:['ArrowRight','ArrowUp'];
   const all=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];if(all.indexOf(e.key)<0)return;
   svg.classList.add('moved');setV(v+(up.indexOf(e.key)>=0?P.step:-P.step));e.preventDefault();
 });
 
+const fC=(st)=>st.s+st.w>0?st.s/(st.s+st.w)*100:0;
+const ap=(v,d)=>{const r=Number(v.toFixed(d));return (Math.abs(r-v)>1e-9?'約':'')+r;};
+function drawFree(){
+  if(fC(F)>Zc||F.s+F.w>Zg)fitZoom(true);
+  const kx=W/Zg,ky=H/Zc;
+  const g=F.s+F.w,c=fC(F),wA=g*kx,hA=Math.min(c,Zc)*ky,over=c>Zc;
+  let h='<line x1="'+(X0-30)+'" y1="'+Y0+'" x2="'+(X0+W+40)+'" y2="'+Y0+'" stroke="#9a9184" stroke-width="2"/>';
+  h+='<line x1="'+X0+'" y1="'+(Y0-H)+'" x2="'+X0+'" y2="'+Y0+'" stroke="#e2dccf" stroke-width="2"/>'+txt(X0+8,Y0-H,'たて：'+Zc+'％まで',{a:'start',fs:14,c:'#a39d91',fw:700});
+  h+='<rect x="'+X0+'" y="'+(Y0-hA)+'" width="'+Math.max(2,wA)+'" height="'+Math.max(2,hA)+'" rx="4" fill="'+tint(c)+'" stroke="#7fb8ca" stroke-width="3"/>';
+  if(snap){
+    const gB=snap.s+snap.w,cB=fC(snap),wB=gB*kx,hB=Math.min(cB,Zc)*ky;
+    h+='<rect x="'+X0+'" y="'+(Y0-hB)+'" width="'+wB+'" height="'+hB+'" fill="none" stroke="#8a8478" stroke-width="2.5" stroke-dasharray="9 7"/>';
+    h+='<line x1="'+(X0-12)+'" y1="'+(Y0-hB)+'" x2="'+X0+'" y2="'+(Y0-hB)+'" stroke="#8a8478" stroke-width="2"/>'+txt(X0-18,Y0-hB,'はじめ '+ap(cB,1)+'％',{a:'end',fs:16,c:'#8a8478'});
+    h+=dim(X0,X0+wB,Y0+30,'はじめ '+fmt(gB)+'g','#8a8478',17);
+  }
+  const sLab='食塩 '+fmt(F.s)+'g';
+  if(hA>34&&wA>110)h+=txt(X0+wA/2,Y0-hA/2,sLab,{fs:Math.min(28,Math.max(18,hA*.35))});else h+=txt(X0+Math.max(wA,60)/2+10,Y0-hA-(over?40:20),sLab,{fs:18});
+  h+=dim(X0,X0+Math.max(wA,40),Y0+(snap?68:34),fmt(g)+'g（食塩 '+fmt(F.s)+'＋水 '+fmt(F.w)+'）','#2f3437',19);
+  let yc=Y0-hA;
+  if(snap){const hB=Math.min(fC(snap),Zc)*ky;if(Math.abs(yc-(Y0-hB))<30)yc=yc+(hA>hB?-30:30);}
+  h+=pill(X0-80,Math.max(22,Math.min(Y0-10,yc)),ap(c,1)+'％','#90ee90','#25642c',null,24);
+  // 取っ手: 上の辺＝食塩、右の辺＝水
+  const tx=X0+Math.max(wA,40)/2,ty=Y0-hA,rx=X0+wA,ry=Y0-Math.max(hA,40)/2;
+  h+='<g class="handle hy" id="hS"><rect x="'+X0+'" y="'+(ty-24)+'" width="'+Math.max(wA,60)+'" height="48" fill="transparent"/>'+
+    '<g class="hgrip"><circle cx="'+tx+'" cy="'+ty+'" r="17" fill="#fff" stroke="#e2708f" stroke-width="3"/>'+txt(tx,ty+1,'↕',{fs:20,c:'#b5607a'})+'</g>'+
+    txt(tx+26,ty-20,'食塩',{a:'start',fs:15,c:'#b5607a'})+'</g>';
+  h+='<g class="handle hx" id="hW"><rect x="'+(rx-24)+'" y="'+(Y0-Math.max(hA,40)-10)+'" width="48" height="'+(Math.max(hA,40)+20)+'" fill="transparent"/>'+
+    '<g class="hgrip"><circle cx="'+rx+'" cy="'+ry+'" r="17" fill="#fff" stroke="#2f86a8" stroke-width="3"/>'+txt(rx,ry+1,'↔',{fs:20,c:'#2f86a8'})+'</g>'+
+    txt(rx+24,ry-24,'水',{a:'start',fs:15,c:'#3f7f93'})+'</g>';
+  $('art').innerHTML=h;
+  // くらべる: はじめ → いま
+  const el=$('check');
+  if(snap){
+    const gB=snap.s+snap.w,d=(a,b)=>{const x=b-a;return x===0?'（変わらない）':'（'+(x>0?'＋':'－')+fmt(Math.abs(x))+'g）';};
+    el.innerHTML='<b>はじめ '+ap(fC(snap),1)+'％ → いま '+ap(c,1)+'％</b><span class="ln2">食塩 '+fmt(snap.s)+'g → '+fmt(F.s)+'g'+d(snap.s,F.s)+' ／ 水 '+fmt(snap.w)+'g → '+fmt(F.w)+'g'+d(snap.w,F.w)+' ／ 全体 '+fmt(gB)+'g → '+fmt(g)+'g</span>';
+  }else el.innerHTML='<b>'+ap(c,1)+'％</b><span class="ln2">食塩 '+fmt(F.s)+'g ÷ 全体 '+fmt(g)+'g ＝ '+ap(g?F.s/g:0,4)+'</span>';
+  el.classList.add('on');
+}
+/* 指の位置から値を出す: 上の辺→その濃度になる食塩の量（水はそのまま）、右の辺→その重さになる水の量（食塩はそのまま） */
+function freeFromPt(kind,l){
+  const kx=W/Zg,ky=H/Zc;
+  if(kind==='S'){const c=Math.max(0,Math.min(99,(Y0-l.y)/ky))/100;return c>=1?FS.sMax:c*F.w/(1-c);}
+  return (l.x-X0)/kx-F.s;
+}
+function setFree(kind,val){
+  if(kind==='S')F.s=Math.max(0,Math.min(FS.sMax,Math.round(val/FS.sStep)*FS.sStep));
+  else F.w=Math.max(0,Math.min(FS.wMax,Math.round(val/FS.wStep)*FS.wStep));
+  if(F.s+F.w<=0)F.w=FS.wStep;
+  drawFree();
+}
+function loadFree(){
+  free=true;F={s:FDEF.s,w:FDEF.w};snap=null;fitZoom(false);
+  $('qTag').textContent='じゆうに試す';
+  $('qText').textContent='';$('qText').hidden=true;
+  $('task').textContent='じゆうに動かそう';
+  $('hint').innerHTML='<b>↕</b> 上の辺＝食塩　<b>↔</b> 右の辺＝水 をドラッグ';
+  svg.classList.remove('moved');
+  $('nextq').hidden=true;$('snap').hidden=false;
+  $('check').classList.remove('on');
+  renderTabs();drawFree();
+}
 function renderTabs(){
-  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+' aria-label="問題'+(j+1)+(done[j]?'（クリア）':'')+'">'+(j+1)+'</button>').join('')+
-    '<a class="freeb" href="./free.html">じゆうに試す</a>';
+  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx&&!free)+'"'+(done[j]?' class="done"':'')+' aria-label="問題'+(j+1)+(done[j]?'（クリア）':'')+'">'+(j+1)+'</button>').join('')+
+    '<button data-i="free" class="freeb" aria-pressed="'+free+'">じゆうに試す</button>';
 }
 function load(i){
-  idx=i;P=PROBLEMS[i];
+  idx=i;P=PROBLEMS[i];free=false;$('qText').hidden=false;$('snap').hidden=true;
   $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+P.tag;
   $('qText').textContent=P.text;
   $('task').textContent=P.kind==='base'?'濃度を'+P.c0+'％にしよう':P.kind==='salt'?'食塩を加えよう':P.kind==='water'?'水を加えよう':'水を蒸発させよう';
@@ -229,9 +314,10 @@ function load(i){
   $('check').classList.remove('on');$('nextq').hidden=true;
   v=P.start;update();
 }
-$('reset').addEventListener('click',()=>{v=P.start;update();});
+$('reset').addEventListener('click',()=>{if(free){F={s:FDEF.s,w:FDEF.w};snap=null;fitZoom(false);drawFree();}else{v=P.start;update();}});
+$('snap').addEventListener('click',()=>{snap={s:F.s,w:F.w};fitZoom(false);drawFree();});
 $('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
-$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)load(+b.getAttribute('data-i'));});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b)return;const i=b.getAttribute('data-i');if(i==='free')loadFree();else load(+i);});
 load(0);
 })();
 </script></body></html>
