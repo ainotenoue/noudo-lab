@@ -17,9 +17,8 @@ a{color:inherit}
 
 /* ロゴ */
 .hero{text-align:center;margin:18px 0 26px}
-.logo{margin:0;font-size:clamp(52px,8vw,84px);font-weight:800;letter-spacing:.02em;line-height:1}
-.logo .m1{color:var(--pink-d)}.logo .m2{color:var(--blue-d)}
-.logo .dot{display:inline-block;width:.16em;height:.16em;border-radius:50%;background:var(--green);margin:0 .05em;vertical-align:.08em}
+.logo{margin:0 auto;max-width:640px;line-height:0}
+.logo img{display:block;width:100%;height:auto;border-radius:22px}
 .sub{margin:12px 0 0;font-size:clamp(15px,1.8vw,18px);color:var(--ink2);font-weight:700}
 
 /* フロア */
@@ -27,10 +26,7 @@ a{color:inherit}
 .fhead{display:flex;align-items:baseline;gap:12px;margin:0 4px 10px}
 .fno{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--ink2)}
 .fname{margin:0;font-size:22px;font-weight:800}
-.fdesc{font-size:13px;color:var(--ink2);font-weight:700}
-.rooms{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}
-.flow{align-self:center;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink2);font-size:12px;font-weight:800}
-.flow span{font-size:26px;line-height:1;color:#c9c3b8}
+.rooms{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
 .room{position:relative;display:flex;gap:18px;align-items:center;text-decoration:none;background:var(--card);border:2px solid var(--edge);border-radius:24px;padding:20px 22px;transition:transform .15s,box-shadow .15s}
 .room:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(80,70,50,.10)}
 .room .ic{flex:none;width:86px;height:86px;border-radius:20px;display:flex;align-items:center;justify-content:center}
@@ -53,41 +49,38 @@ a{color:inherit}
 @media(max-width:820px){
   main{padding:16px}
   .rooms{grid-template-columns:1fr}
-  .flow{flex-direction:row}
-  .flow span{transform:rotate(90deg)}
 }
 </style></head><body><main>
 <a class="plaza" href="https://ainotenoue.github.io/">← ひろばへ</a>
 
 <header class="hero">
-  <h1 class="logo"><span class="m1">miss</span><span class="dot"></span><span class="m2">maths</span></h1>
+  <h1 class="logo"><img src="./img/miss-maths-logo.webp" alt="miss maths" width="900" height="220"></h1>
   <p class="sub">算数の部屋</p>
 </header>
 
 <section class="floor">
-  <div class="fhead"><span class="fno">FLOOR 01</span><h2 class="fname">濃度</h2><span class="fdesc">食塩水の「量」と「濃度」</span></div>
+  <div class="fhead"><span class="fno">FLOOR 01</span><h2 class="fname">濃度</h2></div>
   <div class="rooms">
     <a class="room r-lab" href="./lab/">
       <div class="ic" aria-hidden="true">💧</div>
-      <div><div class="st">ROOM 01 · 面積図</div><h3>食塩水の部屋</h3><p>食塩や水を加えたり、蒸発させたり。<br>横＝重さ、たて＝濃度、面積＝食塩。</p></div>
-      <div class="pg"><svg class="ring" id="ringLab" viewBox="0 0 64 64"></svg><span class="enter">入る →</span></div>
+      <div><div class="st">ROOM 01 · 面積図</div><h3>食塩水の部屋</h3><p>食塩や水を加えたり、蒸発させたり。</p></div>
+      <div class="pg"><svg class="ring" id="ringLab" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
     </a>
-    <div class="flow" aria-hidden="true"><span>→</span>つぎは</div>
     <a class="room r-bal" href="./balance/">
       <div class="ic" aria-hidden="true">⚖️</div>
-      <div><div class="st">ROOM 02 · 天秤図</div><h3>天秤図の部屋</h3><p>2つの食塩水を混ぜる。<br>差の比と重さの比は、逆になる。</p></div>
-      <div class="pg"><svg class="ring" id="ringBal" viewBox="0 0 64 64"></svg><span class="enter">入る →</span></div>
+      <div><div class="st">ROOM 02 · 天秤図</div><h3>天秤図の部屋</h3><p>2つの食塩水を混ぜる。</p></div>
+      <div class="pg"><svg class="ring" id="ringBal" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
     </a>
   </div>
 </section>
 
 <section class="floor">
-  <div class="fhead"><span class="fno">FLOOR 02</span><h2 class="fname">数論</h2><span class="fdesc">数の性質・規則性</span></div>
+  <div class="fhead"><span class="fno">FLOOR 02</span><h2 class="fname">数論</h2></div>
   <div class="soon"><div class="ic">🔒</div><div><b>準備中</b><small>新しい部屋を準備しています</small></div></div>
 </section>
 
 <section class="floor">
-  <div class="fhead"><span class="fno">FLOOR 03</span><h2 class="fname">図形</h2><span class="fdesc">平面図形・立体図形</span></div>
+  <div class="fhead"><span class="fno">FLOOR 03</span><h2 class="fname">図形</h2></div>
   <div class="soon"><div class="ic">🔒</div><div><b>準備中</b><small>新しい部屋を準備しています</small></div></div>
 </section>
 
