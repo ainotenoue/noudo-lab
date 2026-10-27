@@ -52,13 +52,49 @@ button:active{transform:translateY(1px)}
 #nextq{background:#90ee90;border-color:#6fd16f;color:#1f5a26}
 @media(max-width:760px){main{padding:12px}.question{padding:18px 16px}.panel{padding:10px}.hint,.legend{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.hgrip,.check.on{animation:none}}
+
+/* はじめに（解説ページ） */
+.intro h2.ititle{margin:6px 0 0;font-size:clamp(19px,2.2vw,24px);font-weight:800;line-height:1.5}
+.introsvg{width:100%;height:auto;display:block;max-height:520px}
+.ifoot{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.ifoot a{font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+#introGo{font-size:16px;padding:8px 22px;background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+.tabs button.introb{width:auto;padding:0 14px;margin-right:6px;background:#fff}
 </style></head><body><main><h1 class="sr">食塩水の部屋</h1>
+<div id="intro" class="intro" hidden>
+<div class="question"><small>食塩水の部屋｜はじめに</small><h2 class="ititle">食塩水を「長方形」にすると、3つの量がひと目でわかる</h2></div>
+<section class="panel"><svg class="introsvg" viewBox="0 0 1100 440">
+<defs>
+  <marker id="ap" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L12 6 L0 12 Z" fill="#e2708f"/></marker>
+  <marker id="ag" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L12 6 L0 12 Z" fill="#3f9b4a"/></marker>
+</defs>
+<!-- 左半分: 図（x 20〜530） -->
+<line x1="130" y1="300" x2="530" y2="300" stroke="#9a9184" stroke-width="2"/>
+<rect x="160" y="160" width="350" height="140" rx="5" fill="#7cc6e0" stroke="#2f86a8" stroke-width="4"/>
+<text x="335" y="230" text-anchor="middle" dominant-baseline="central" font-size="34" font-weight="800">食塩 10g</text>
+<!-- 食塩水（横） -->
+<line x1="166" y1="340" x2="504" y2="340" stroke="#e2708f" stroke-width="4" marker-start="url(#ap)" marker-end="url(#ap)"/>
+<rect x="240" y="320" width="190" height="40" fill="#fff"/><text x="335" y="341" text-anchor="middle" dominant-baseline="central" font-size="28" font-weight="800" fill="#b5607a">食塩水 200g</text>
+<!-- 濃度（たて） -->
+<line x1="125" y1="166" x2="125" y2="294" stroke="#3f9b4a" stroke-width="4" marker-start="url(#ag)" marker-end="url(#ag)"/>
+<rect x="71" y="96" width="108" height="44" rx="22" fill="#90ee90"/><text x="125" y="119" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#25642c">5％</text>
+<rect x="14" y="206" width="94" height="48" rx="14" fill="#ebfbea"/><text x="61" y="231" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#2f6f37">濃度</text>
+<!-- 右半分: 解説（x 570〜1080、図と同じ高さ） -->
+<rect x="570" y="96" width="510" height="268" rx="24" fill="#f7f5ef" stroke="#ebe5da" stroke-width="2"/>
+<text x="825" y="170" text-anchor="middle" font-size="30" font-weight="800"><tspan fill="#b5607a">食塩水</tspan> × <tspan fill="#3f9b4a">濃度</tspan> ＝ <tspan fill="#2f86a8">食塩</tspan></text>
+<text x="825" y="240" text-anchor="middle" font-size="30" font-weight="800"><tspan fill="#b5607a">横</tspan> × <tspan fill="#3f9b4a">たて</tspan> ＝ <tspan fill="#2f86a8">面積</tspan></text>
+<text x="825" y="310" text-anchor="middle" font-size="30" font-weight="800"><tspan fill="#b5607a">200g</tspan> × <tspan fill="#3f9b4a">0.05</tspan> ＝ <tspan fill="#2f86a8">10g</tspan></text>
+</svg>
+<div class="ifoot"><a href="../">← ラウンジ</a><button id="introGo">問題へ →</button></div></section>
+</div>
+<div id="roomMain">
 <div class="question"><div class="qtop"><small id="qTag"></small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
 <section class="panel"><div class="panel-head"><strong id="task"></strong><span class="legend">横＝<b>食塩水の重さ</b>　たて＝<b>濃度</b>　面積＝<b>食塩の量</b></span><span class="hint" id="hint"></span></div>
 <svg class="diagram" id="diagram" viewBox="0 0 1100 500" role="img" aria-label="食塩水の面積図。横が食塩水の重さ、たてが濃度、面積が食塩の量">
   <g id="art"></g>
 </svg>
 <div class="panel-foot"><a class="back" href="../">← ラウンジ</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="snap" hidden>いまを「はじめ」にする</button><button id="reset">はじめに戻す</button></div></div></section>
+</div>
 </main><script>
 (()=>{
 const $=id=>document.getElementById(id), svg=$('diagram');
@@ -321,7 +357,7 @@ function loadFree(){
   renderTabs();drawFree();
 }
 function renderTabs(){
-  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx&&!free)+'"'+(done[j]?' class="done"':'')+' aria-label="問題'+(j+1)+(done[j]?'（クリア）':'')+'">'+(j+1)+'</button>').join('')+
+  $('tabs').innerHTML='<button class="introb" id="introOpen">はじめに</button>'+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx&&!free)+'"'+(done[j]?' class="done"':'')+' aria-label="問題'+(j+1)+(done[j]?'（クリア）':'')+'">'+(j+1)+'</button>').join('')+
     '<button data-i="free" class="freeb" aria-pressed="'+free+'">じゆうに試す</button>';
 }
 function load(i){
@@ -341,7 +377,15 @@ $('snap').addEventListener('click',()=>{snap={s:F.s,w:F.w};fitZoom(false);drawFr
 $('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b)return;const i=b.getAttribute('data-i');if(i==='free')loadFree();else load(+i);});
 /* #free で開いたときは「じゆうに試す」から始める */
-const hq=/^#q(\d+)$/.exec(location.hash);
-if(location.hash==='#free')loadFree();else load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);
+/* はじめに: 初回だけ自動で出す。2回目からは「はじめに」ボタンで開く */
+const INTRO_KEY='mm-intro-lab';
+let started=false;
+function startRoom(){started=true;const hq=/^#q(\d+)$/.exec(location.hash);if(location.hash==='#free')loadFree();else load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);}
+function showIntro(){$('intro').hidden=false;$('roomMain').hidden=true;window.scrollTo(0,0);}
+function hideIntro(){$('intro').hidden=true;$('roomMain').hidden=false;try{localStorage.setItem(INTRO_KEY,'1');}catch(e){}if(!started)startRoom();}
+$('introGo').addEventListener('click',hideIntro);
+document.addEventListener('click',e=>{if(e.target.closest('#introOpen'))showIntro();});
+let seen=false;try{seen=localStorage.getItem(INTRO_KEY)==='1';}catch(e){}
+if(seen)startRoom();else showIntro();
 })();
 </script></body></html>
