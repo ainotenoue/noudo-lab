@@ -228,8 +228,8 @@ const PROBLEMS=[
    text:'10％の食塩水180gに食塩を何g加えると、28％の食塩水になりますか？'}
 ];
 /* じゆうに試す: 左右の濃度・支点・左右の重さをすべてドラッグで変えられる */
-const FREE_DEF={cL:4,cR:10,mL:100,mR:50,c:7.5};
-const FREE={free:true,ask:'free',cL:4,cR:10,mL:100,mR:50};
+const FREE_DEF={cL:4,cR:10,mL:100,mR:100,c:7};
+const FREE={free:true,ask:'free',cL:4,cR:10,mL:100,mR:100};
 const isFree=()=>P.free===true;
 const MSTEP=5,MMIN=5,CSTEP_END=1,CDRAG=5;   // 両はしの濃度は1％きざみ（指を5動かすごとに1％）
 let idx=0,P=PROBLEMS[0],conc=6,mv=0,dragging=false,dragW=false,dSide='R',endDrag=null,ang=0,angTarget=0,raf=0;
