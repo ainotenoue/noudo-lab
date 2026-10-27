@@ -126,7 +126,7 @@ button:active{transform:translateY(1px)}
     <path d="M-9 130 L0 141 L9 130 Z" fill="#90ee90"/>
   </g>
 </svg>
-<div class="panel-foot"><a class="back" href="../">← TOP</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="reset">はじめに戻す</button></div></div></section>
+<div class="panel-foot"><a class="back" href="../">← ラウンジ</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="reset">はじめに戻す</button></div></div></section>
 </main><script>
 (()=>{
 const $=id=>document.getElementById(id), svg=$('diagram');
@@ -321,7 +321,10 @@ function renderTabs(){
   $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx&&!isFree())+'"'+(done[j]?' class="done"':'')+' aria-label="問題'+(j+1)+(done[j]?'（クリア）':'')+'">'+(j+1)+'</button>').join('')+
     '<button data-i="free" class="freeb" aria-pressed="'+isFree()+'">じゆうに試す</button>';
 }
+/* ラウンジの「つづきから」用に、最後に開いた問題を覚えておく */
+function remember(i){try{localStorage.setItem('mm-last',JSON.stringify({room:'balance',name:'天秤図の部屋',i:i,t:Date.now()}));}catch(e){}}
 function loadFree(){
+  remember('free');
   P=FREE;
   $('qTag').textContent='じゆうに試す';
   $('qText').textContent='';$('qText').hidden=true;
@@ -334,6 +337,7 @@ function loadFree(){
   resetProblem();
 }
 function loadProblem(i){
+  remember(i);
   idx=i;P=PROBLEMS[i];
   svg.classList.remove('free');$('qText').hidden=false;
   const no=String(i+1).padStart(2,'0');
@@ -393,6 +397,8 @@ svg.addEventListener('keydown',e=>{if(P.ask==='conc'||isFree())return;if(e.key==
 $('reset').addEventListener('click',resetProblem);
 $('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)loadProblem(idx+1);});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b)return;const i=b.getAttribute('data-i');if(i==='free')loadFree();else loadProblem(+i);});
-loadProblem(0);
+/* #free … じゆうに試す、#q3 … 問題3 から始める */
+const hq=/^#q(\d+)$/.exec(location.hash);
+if(location.hash==='#free')loadFree();else loadProblem(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);
 })();
 </script></body></html>

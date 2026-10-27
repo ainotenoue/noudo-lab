@@ -1,4 +1,4 @@
-# 濃度ラボ
+# miss maths（算数の部屋があつまるラウンジ）
 TOP
 https://ainotenoue.github.io/noudo-lab/
 
