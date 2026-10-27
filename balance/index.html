@@ -350,7 +350,7 @@ function updateCheck(){
   const near=isFree()&&Math.abs(balancePoint()-conc)>1e-9?'約':'';   // ぴったりでないときは「約」
   const ans=isFree()?'混ぜると '+near+fmt(conc)+'％':P.ask==='conc'?'答え '+fmt(P.ans)+'％':'答え '+(P.ask==='L'?nameL():nameR())+' '+fmt(mv)+'g';
   el.innerHTML='<b>つりあった！ '+ans+'</b>'+
-    '<span class="ln2">確かめ：食塩 '+fmt(sL)+'g＋'+fmt(sR)+'g＝'+fmt(S)+'g ／ 全体 '+fmt(mL)+'g＋'+fmt(mR)+'g＝'+fmt(T)+'g ／ '+fmt(S)+'÷'+fmt(T)+'＝'+ap(S/T,4)+' → '+ap(S/T*100,2)+'％</span>';
+    '<span class="ln2">食塩 '+fmt(sL)+'g＋'+fmt(sR)+'g＝'+fmt(S)+'g ／ 全体 '+fmt(mL)+'g＋'+fmt(mR)+'g＝'+fmt(T)+'g ／ '+fmt(S)+'÷'+fmt(T)+'＝'+ap(S/T,4)+' → '+ap(S/T*100,2)+'％</span>';
   el.classList.add('on');
   $('nextq').hidden=isFree()||idx>=PROBLEMS.length-1;
 }
