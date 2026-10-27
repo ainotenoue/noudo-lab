@@ -83,6 +83,8 @@ button:active{transform:translateY(1px)}
 .ifoot a{font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
 #introGo{font-size:16px;padding:8px 22px;background:#90ee90;border-color:#6fd16f;color:#1f5a26}
 .tabs button.introb{width:auto;padding:0 14px;margin-right:6px;background:#fff}
+.rnote{text-align:center;font-size:12px;color:var(--ink2);font-weight:700;margin:12px 0 0}
+.clearrec{margin-left:10px;background:none;border:0;padding:0;font-size:12px;color:var(--ink2);text-decoration:underline;font-weight:700}
 </style></head><body><main><h1 class="sr">天秤図の部屋</h1>
 <div id="intro" class="intro" hidden>
 <div class="question"><small>天秤図の部屋｜はじめに</small><h2 class="ititle">食塩水の混ぜ方は「てんびんの比」で測る</h2></div>
@@ -135,7 +137,7 @@ button:active{transform:translateY(1px)}
 <text x="880" y="414" text-anchor="middle" font-size="24" fill="#2f6f37">比は「逆」になる</text>
 </g>
 </svg>
-<div class="ifoot"><a href="../">← ラウンジ</a><button id="introGo">問題へ →</button></div></section>
+<div class="ifoot"><a href="../">← 部屋への扉</a><button id="introGo">問題へ →</button></div></section>
 </div>
 <div id="roomMain">
 <div class="question"><div class="qtop"><small id="qTag">問題 03｜食塩水を混ぜる</small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
@@ -188,7 +190,8 @@ button:active{transform:translateY(1px)}
     <path d="M-9 130 L0 141 L9 130 Z" fill="#90ee90"/>
   </g>
 </svg>
-<div class="panel-foot"><a class="back" href="../">← ラウンジ</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="reset">はじめに戻す</button></div></div></section>
+<div class="panel-foot"><a class="back" href="../">← 部屋への扉</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題へ →</button><button id="reset">はじめに戻す</button></div></div></section>
+<p class="rnote">記録はこのiPadのブラウザに保存されます。<button id="clearRec" class="clearrec">記録をリセット</button></p>
 </div>
 </main><script>
 (()=>{
@@ -461,6 +464,12 @@ $('reset').addEventListener('click',resetProblem);
 $('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)loadProblem(idx+1);});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b)return;const i=b.getAttribute('data-i');if(i==='free')loadFree();else loadProblem(+i);});
 /* #free … じゆうに試す、#q3 … 問題3 から始める */
+/* 記録をリセット: この部屋のクリア記録（✓）を消して、問題01から */
+document.getElementById('clearRec').addEventListener('click',()=>{
+  if(!window.confirm('この部屋の記録（クリアした問題の✓）を消して、はじめからにします。\nよろしいですか？'))return;
+  done={};try{localStorage.removeItem('balance-done');localStorage.removeItem('mm-last');}catch(e){}
+  loadProblem(0);
+});
 /* はじめに: 初回だけ自動で出す。2回目からは「はじめに」ボタンで開く */
 const INTRO_KEY='mm-intro-balance';
 let started=false;

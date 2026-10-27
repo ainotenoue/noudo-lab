@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>miss maths｜算数の部屋があつまるラウンジ</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>miss maths｜算数の部屋</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -13,7 +13,7 @@ html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-fa
 main{max-width:1080px;margin:0 auto;padding:22px 28px 40px}
 a{color:inherit}
 .plaza{display:inline-flex;align-items:center;height:36px;padding:0 16px;border-radius:999px;background:#fff;border:2px solid var(--edge);color:#6b6760;font-size:14px;font-weight:800;text-decoration:none}
-.plaza:focus-visible,.room:focus-visible,.cont:focus-visible{outline:3px solid #8cbfd0;outline-offset:3px}
+.plaza:focus-visible,.room:focus-visible{outline:3px solid #8cbfd0;outline-offset:3px}
 
 /* ロゴ */
 .hero{text-align:center;margin:18px 0 26px}
@@ -21,13 +21,6 @@ a{color:inherit}
 .logo .m1{color:var(--pink-d)}.logo .m2{color:var(--blue-d)}
 .logo .dot{display:inline-block;width:.16em;height:.16em;border-radius:50%;background:var(--green);margin:0 .05em;vertical-align:.08em}
 .sub{margin:12px 0 0;font-size:clamp(15px,1.8vw,18px);color:var(--ink2);font-weight:700}
-
-/* つづきから */
-.cont{display:flex;align-items:center;gap:14px;text-decoration:none;background:var(--green-s);border:2px solid #b9e6b9;border-radius:20px;padding:14px 20px;margin:0 0 26px}
-.cont .lb{font-size:13px;font-weight:800;color:var(--green-d)}
-.cont .tt{font-size:19px;font-weight:800}
-.cont .go{margin-left:auto;font-size:15px;font-weight:800;color:#2f6f37;white-space:nowrap}
-.cont[hidden]{display:none}
 
 /* フロア */
 .floor{margin:0 0 26px}
@@ -41,7 +34,7 @@ a{color:inherit}
 .room{position:relative;display:flex;gap:18px;align-items:center;text-decoration:none;background:var(--card);border:2px solid var(--edge);border-radius:24px;padding:20px 22px;transition:transform .15s,box-shadow .15s}
 .room:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(80,70,50,.10)}
 .room .ic{flex:none;width:86px;height:86px;border-radius:20px;display:flex;align-items:center;justify-content:center}
-.room .ic svg{width:64px;height:64px}
+.room .ic{font-size:46px}
 .room .st{font-size:12px;font-weight:800;color:var(--ink2)}
 .room h3{margin:2px 0 6px;font-size:22px;font-weight:800}
 .room p{margin:0;font-size:14px;line-height:1.6;color:var(--ink2);font-weight:700}
@@ -68,25 +61,20 @@ a{color:inherit}
 
 <header class="hero">
   <h1 class="logo"><span class="m1">miss</span><span class="dot"></span><span class="m2">maths</span></h1>
-  <p class="sub">算数の部屋があつまるラウンジ</p>
+  <p class="sub">算数の部屋</p>
 </header>
-
-<a class="cont" id="cont" href="#" hidden>
-  <div><div class="lb">つづきから</div><div class="tt" id="contT"></div></div>
-  <span class="go">入る →</span>
-</a>
 
 <section class="floor">
   <div class="fhead"><span class="fno">FLOOR 01</span><h2 class="fname">濃度</h2><span class="fdesc">食塩水の「量」と「濃度」</span></div>
   <div class="rooms">
     <a class="room r-lab" href="./lab/">
-      <div class="ic"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="8" y="22" width="40" height="30" rx="3" fill="#add8e6" stroke="#5f9fb3" stroke-width="2.5"/><rect x="8" y="12" width="26" height="40" fill="none" stroke="#8a8478" stroke-width="2" stroke-dasharray="4 3"/><line x1="4" y1="52" x2="58" y2="52" stroke="#9a9184" stroke-width="2.5"/><circle cx="48" cy="37" r="5" fill="#fff" stroke="#2f86a8" stroke-width="2"/></svg></div>
+      <div class="ic" aria-hidden="true">💧</div>
       <div><div class="st">ROOM 01 · 面積図</div><h3>食塩水の部屋</h3><p>食塩や水を加えたり、蒸発させたり。<br>横＝重さ、たて＝濃度、面積＝食塩。</p></div>
       <div class="pg"><svg class="ring" id="ringLab" viewBox="0 0 64 64"></svg><span class="enter">入る →</span></div>
     </a>
     <div class="flow" aria-hidden="true"><span>→</span>つぎは</div>
     <a class="room r-bal" href="./balance/">
-      <div class="ic"><svg viewBox="0 0 64 64" aria-hidden="true"><line x1="8" y1="22" x2="26" y2="22" stroke="#add8e6" stroke-width="5" stroke-linecap="round"/><line x1="26" y1="22" x2="56" y2="22" stroke="#ffd1dc" stroke-width="5" stroke-linecap="round"/><path d="M26 25 L20 36 L32 36 Z" fill="#90ee90" stroke="#90ee90" stroke-width="3" stroke-linejoin="round"/><circle cx="26" cy="22" r="3.5" fill="#5cbf5c"/><line x1="8" y1="22" x2="8" y2="38" stroke="#c9c3b8" stroke-width="2"/><rect x="2" y="38" width="12" height="12" rx="3" fill="#add8e6" stroke="#7fb8ca" stroke-width="2"/><line x1="56" y1="22" x2="56" y2="38" stroke="#c9c3b8" stroke-width="2"/><rect x="51" y="38" width="10" height="10" rx="3" fill="#ffd1dc" stroke="#e9a3b6" stroke-width="2"/></svg></div>
+      <div class="ic" aria-hidden="true">⚖️</div>
       <div><div class="st">ROOM 02 · 天秤図</div><h3>天秤図の部屋</h3><p>2つの食塩水を混ぜる。<br>差の比と重さの比は、逆になる。</p></div>
       <div class="pg"><svg class="ring" id="ringBal" viewBox="0 0 64 64"></svg><span class="enter">入る →</span></div>
     </a>
@@ -121,14 +109,6 @@ function ring(id,n,total,col){
   $(id).setAttribute('aria-label','クリア '+n+' / '+total);
 }
 for(const k in ROOMS){const R=ROOMS[k],d=read(R.key)||{};ring(R.ring,Object.keys(d).filter(x=>d[x]).length,R.total,R.col);}
-/* つづきから */
-const last=read('mm-last');
-if(last&&ROOMS[last.room]){
-  const R=ROOMS[last.room],free=last.i==='free';
-  $('contT').textContent=R.name+'　'+(free?'じゆうに試す':'問題'+String(+last.i+1).padStart(2,'0'));
-  $('cont').href=R.path+(free?'#free':'#q'+(+last.i+1));
-  $('cont').hidden=false;
-}
 })();
 </script>
 </body></html>
