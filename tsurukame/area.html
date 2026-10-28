@@ -7,7 +7,7 @@
 <section class="panel"><p class="guide">タイルをタップして、足の数をゴールに合わせよう。</p>
 <div class="layout"><div class="diagram"><svg id="area" viewBox="0 0 850 245" role="img" aria-label="足の本数を表す面積図。各列をタップするとかめに入れ替わります"></svg></div>
 <div class="side"><div class="label">いまの足の数 / ゴール</div><div class="big" id="legs"></div><div class="difference" id="difference"></div><div class="actions"><button id="minus">− 1匹</button><button class="primary" id="plus">＋ 1匹</button></div><div class="count" id="count"></div></div></div>
-<div class="formula" id="formula"></div><div class="hint hidden" id="hint"><strong>考え方：</strong><span class="hintText" id="hintText"></span></div><div class="footer"><a class="back" href="./index.html">← STAGE A 動かして発見</a><button id="reset">はじめに戻す</button><button id="next" class="primary hidden">次の問題 →</button></div></section><p class="note">STAGE Bのクリア記録は、このブラウザに別々に保存されます。</p>
+<div class="formula" id="formula"></div><div class="hint hidden" id="hint"><strong>考え方：</strong><span class="hintText" id="hintText"></span></div><div class="footer"><a class="back" href="../">← ひろばに戻る</a><a class="back" href="./index.html">STAGE A｜動かして発見</a><button id="reset">はじめに戻す</button><button id="next" class="primary hidden">次の問題 →</button></div></section><p class="note">STAGE Bのクリア記録は、このブラウザに別々に保存されます。</p>
 </main><script>
 (()=>{'use strict';
 const P=[{"n":10,"legs":28},{"n":8,"legs":24},{"n":12,"legs":34},{"n":15,"legs":42},{"n":9,"legs":26},{"n":14,"legs":40},{"n":20,"legs":56},{"n":18,"legs":48},{"n":16,"legs":44},{"n":25,"legs":70}],$=id=>document.getElementById(id);let idx=0,k=0,wasCorrect=false;let done={};try{done=JSON.parse(localStorage.getItem('tsurukame-area-done')||'{}')||{}}catch(e){}
