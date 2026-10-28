@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>旅人算の部屋 v0.1｜miss maths</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f7f5ef;--ink:#2f3437;--ink2:#7b766d;--card:#fff;--edge:#ebe5da;--green-d:#3f9b4a;--green-s:#ebfbea}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Maru Gothic ProN','M PLUS Rounded 1c',-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:15px 28px 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.question{margin:0 0 10px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:20px 26px;line-height:1.7;font-size:clamp(17px,2vw,21px);font-weight:800}
+.question small{display:inline-block;font-size:13px;color:var(--green-d);background:var(--green-s);border-radius:999px;padding:2px 12px;font-weight:800}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;white-space:nowrap;border:2px solid #b9e6b9;border-radius:999px;padding:5px 14px;font-size:14px;background:var(--green-s);font-weight:800;color:#2f6f37;touch-action:manipulation}
+button:active{transform:translateY(1px)}
+.tabs button{width:38px;height:38px;padding:0;font-size:15px;background:#fff;border-color:var(--edge);color:var(--ink2)}
+.tabs button.done{background:#f3f0e8;color:#9a9488;border-color:#e2dccf}
+.tabs button.done::after{content:"✓";font-size:10px;vertical-align:super;margin-left:1px;color:var(--green-d)}
+.tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#9fd99f;color:#2f6f37}
+.panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:12px 22px 12px}
+/* 初動: まず「たす？ひく？」を決める */
+.first{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff7e9;border-radius:18px;padding:10px 16px}
+.first .q1{font-size:18px;font-weight:800}
+.first .opts{display:flex;gap:10px}
+.first .opts button{font-size:18px;padding:8px 18px;background:#fff;border-color:#e8c48a;color:#7a4f12}
+.first .msg{font-size:15px;font-weight:700;color:#9a5a12}
+.first.ok{background:var(--green-s)}
+.first.ok .q1{color:#25642c}
+.first .shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.diagram{width:100%;height:auto;display:block;max-height:430px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
+.diagram:focus{outline:none}
+.locked .thandle{opacity:.35}
+.thandle{cursor:grab}
+.panel-foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;min-height:48px}
+.back{justify-self:start;font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+.check{visibility:hidden;background:var(--green-s);border-radius:16px;padding:8px 22px;text-align:center;color:#2f5f35;line-height:1.5}
+.check.on{visibility:visible;animation:pop .35s ease-out}
+.check b{display:block;font-size:22px;color:#25642c}
+.check span{display:block;font-size:18px;font-weight:700;margin-top:2px}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.fbtns{justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+#nextq{background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+#reset{background:#fff}
+.rnote{text-align:center;font-size:12px;color:var(--ink2);font-weight:700;margin:10px 0 0}
+.clearrec{margin-left:10px;background:none;border:0;padding:0;font-size:12px;color:var(--ink2);text-decoration:underline;font-weight:700}
+@media(max-width:760px){main{padding:12px}.question{padding:16px}.panel{padding:10px}}
+@media(prefers-reduced-motion:reduce){.check.on,.first .shake{animation:none}}
+</style></head><body><main><h1 class="sr">旅人算の部屋</h1>
+<div class="question"><div class="qtop"><small id="qTag"></small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
+<section class="panel">
+  <div class="first" id="first">
+    <span class="q1" id="q1">2人のあいだは、1分間に何mちぢまる？</span>
+    <span class="opts" id="opts"></span>
+    <span class="msg" id="msg"></span>
+  </div>
+  <svg class="diagram locked" id="diagram" viewBox="0 0 1100 400" role="img" aria-label="旅人算の線分図。時間を進めると2人が動きます"><g id="art"></g></svg>
+  <div class="panel-foot"><a class="back" href="../">← 部屋への扉</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題 →</button><button id="reset">はじめに戻す</button></div></div>
+</section>
+<p class="rnote">記録はこのiPadのブラウザに保存されます。<button id="clearRec" class="clearrec">記録をリセット</button></p>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id), svg=$('diagram');
+/* ===== 問題 =====
+   kind 'meet'  … 出会い（向かい合って進む）→ 1分で「速さの和」だけ ちぢまる
+   kind 'chase' … 追いかけ（同じ向きに進む）→ 1分で「速さの差」だけ ちぢまる
+   a … 兄（青）の速さ　b … 弟（ピンク）の速さ（分速m）
+   d … 兄が出発するときの2人のあいだ（m）　pre … 追いかけで、弟が先に出た分数（あれば） */
+const PROBLEMS=[
+  {kind:'meet',tag:'出会い算',a:90,b:60,d:1200,
+   text:'兄と弟が1200mはなれた所から、向かい合って同時に出発しました。兄は分速90m、弟は分速60mです。2人は何分後に出会いますか？'},
+  {kind:'chase',tag:'追いかけ算',a:90,b:60,d:600,
+   text:'弟が兄より600m先にいます。同じ向きに同時に出発し、兄は分速90m、弟は分速60mで進みます。兄は何分後に弟に追いつきますか？'},
+  {kind:'meet',tag:'出会い算',a:80,b:70,d:1500,
+   text:'1500mはなれた2地点から、兄と弟が向かい合って同時に出発しました。兄は分速80m、弟は分速70mです。2人は何分後に出会いますか？'},
+  {kind:'chase',tag:'追いかけ算',a:80,b:50,d:900,
+   text:'弟が兄より900m先にいます。同じ向きに同時に出発し、兄は分速80m、弟は分速50mで進みます。兄は何分後に弟に追いつきますか？'},
+  {kind:'meet',tag:'出会い算',a:120,b:80,d:2000,
+   text:'兄と弟が2kmはなれた所から、向かい合って同時に出発しました。兄は分速120m、弟は分速80mです。2人は何分後に出会いますか？'},
+  {kind:'chase',tag:'追いかけ算｜あとから出発',a:100,b:60,pre:4,
+   text:'弟が家を出てから4分後に、兄が同じ道を追いかけました。弟は分速60m、兄は分速100mです。兄は家を出てから何分後に弟に追いつきますか？'}
+];
+let idx=0,P=PROBLEMS[0],t=0,picked=false,drag=false;
+let done={};try{done=JSON.parse(localStorage.getItem('tabibito-done')||'{}')||{};}catch(e){done={};}
+const saveDone=()=>{try{localStorage.setItem('tabibito-done',JSON.stringify(done));}catch(e){}};
+const gap0=()=>P.pre?P.b*P.pre:P.d;                       // 兄が出発するときのあいだ
+const rate=()=>P.kind==='meet'?P.a+P.b:P.a-P.b;          // 1分でちぢまる道のり
+const ans=()=>gap0()/rate();                              // 出会う（追いつく）までの分数
+const tmax=()=>Math.ceil(ans()*1.5);
+const gapAt=t=>Math.max(0,gap0()-rate()*t);
+const solved=()=>picked&&Math.abs(t-ans())<1e-9;
+
+const X0=80,X1=1020,RY=170;   // 道のはし・道の高さ
+const txt=(x,y,s,o={})=>'<text x="'+x+'" y="'+y+'" text-anchor="'+(o.a||'middle')+'" dominant-baseline="central" font-size="'+(o.fs||20)+'" font-weight="'+(o.fw||800)+'" fill="'+(o.c||'#2f3437')+'">'+s+'</text>';
+const tw=(s,fs)=>{let w=0;for(const ch of String(s))w+=/[ -~]/.test(ch)?0.6:1;return w*fs;};
+function dim(xa,xb,y,s,col,fs){
+  fs=fs||20;const w=tw(s,fs)+16;
+  if(xb-xa<4)return '';
+  return '<line x1="'+xa+'" y1="'+y+'" x2="'+xb+'" y2="'+y+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<line x1="'+xa+'" y1="'+(y-9)+'" x2="'+xa+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/><line x1="'+xb+'" y1="'+(y-9)+'" x2="'+xb+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<rect x="'+((xa+xb)/2-w/2)+'" y="'+(y-15)+'" width="'+w+'" height="30" rx="8" fill="#fff"/>'+txt((xa+xb)/2,y+1,s,{fs,c:col});
+}
+/* 人: まるい頭と体。dir=1 右向き */
+function person(x,y,col,dark,name,v,dir,la){
+  la=la||'middle';const lx=la==='end'?-8:la==='start'?8:0;
+  return '<g transform="translate('+x+','+y+')">'+
+    '<circle cx="0" cy="-46" r="13" fill="#fff" stroke="'+dark+'" stroke-width="3"/>'+
+    '<rect x="-14" y="-31" width="28" height="30" rx="12" fill="'+col+'" stroke="'+dark+'" stroke-width="3"/>'+
+    '<path d="M'+(dir*18)+' -16 l'+(dir*12)+' 0 m'+(-dir*5)+' -5 l'+(dir*5)+' 5 l'+(-dir*5)+' 5" fill="none" stroke="'+dark+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+
+    txt(lx,-76,name+' 分速'+v+'m',{a:la,fs:16,c:dark})+'</g>';
+}
+function draw(){
+  const g0=gap0(),r=rate(),T=tmax();
+  // 道の長さ（m）: 出会い＝d、追いかけ＝あいだ＋弟が進む分
+  const L=P.kind==='meet'?P.d:g0+P.b*T;
+  const k=(X1-X0)/L, X=m=>X0+m*k;
+  const ok=solved();
+  let h='';
+  // 道
+  h+='<line x1="'+X0+'" y1="'+RY+'" x2="'+X1+'" y2="'+RY+'" stroke="'+(ok?'#3f9b4a':'#cfc8bb')+'" stroke-width="'+(ok?8:6)+'" stroke-linecap="round"/>';
+  let xa,xb,startA=0,startB;
+  if(P.kind==='meet'){startB=P.d;xa=X(P.a*t);xb=X(P.d-P.b*t);}
+  else{startB=g0;xa=X(P.a*t);xb=X(g0+P.b*t);}
+  // 家・スタートの印
+  h+='<line x1="'+X0+'" y1="'+(RY-14)+'" x2="'+X0+'" y2="'+(RY+14)+'" stroke="#9a9184" stroke-width="3"/>';
+  if(P.kind==='meet')h+='<line x1="'+X1+'" y1="'+(RY-14)+'" x2="'+X1+'" y2="'+(RY+14)+'" stroke="#9a9184" stroke-width="3"/>';
+  if(P.pre)h+=txt(X0-12,RY,'家',{a:'end',fs:16,c:'#7b766d'});
+  // 進んだ道のり（色の帯）と1分ごとの目盛り
+  const band=(m0,m1,y,col)=>'<line x1="'+X(m0)+'" y1="'+y+'" x2="'+X(m1)+'" y2="'+y+'" stroke="'+col+'" stroke-width="10" stroke-linecap="round" opacity=".9"/>';
+  if(t>0){
+    h+=band(0,P.a*t,RY+26,'#add8e6');
+    if(P.kind==='meet')h+=band(P.d-P.b*t,P.d,RY+26,'#ffd1dc');
+    else h+=band(g0,g0+P.b*t,RY+42,'#ffd1dc');
+    if(P.pre)h+='<line x1="'+X(0)+'" y1="'+(RY+42)+'" x2="'+X(g0)+'" y2="'+(RY+42)+'" stroke="#ffd1dc" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 14"/>';
+    for(let i=1;i<=Math.floor(t+1e-9);i++){
+      h+='<circle cx="'+X(P.a*i)+'" cy="'+(RY+26)+'" r="3" fill="#3d9cc2"/>';
+      const mb=P.kind==='meet'?P.d-P.b*i:g0+P.b*i;
+      h+='<circle cx="'+X(mb)+'" cy="'+(RY+(P.kind==='meet'?26:42))+'" r="3" fill="#e2708f"/>';
+    }
+  }
+  // 追いかけ: 弟が先に出た分
+  if(P.pre)h+=dim(X0,X(g0),RY+82,'先に '+P.b+'×'+P.pre+'＝'+g0+'m','#b5607a',16);
+  // 2人のあいだ（いちばん大事な量）
+  const gp=gapAt(t),lo=Math.min(xa,xb),hi=Math.max(xa,xb);
+  if(gp>0)h+=dim(lo,hi,RY-112,'あいだ '+gp+'m','#9a5a12',22);
+  else h+='<rect x="'+(xa-90)+'" y="'+(RY-130)+'" width="180" height="40" rx="20" fill="#90ee90"/>'+txt(xa,RY-109,P.kind==='meet'?'出会った！':'追いついた！',{fs:22,c:'#25642c'});
+  // 人
+  /* 2人が近いときは、名前を左右に分けて重ならないようにする */
+  const near=Math.abs(xa-xb)<150;
+  h+=person(xb,RY-4,'#ffd1dc','#d9849b','弟',P.b,P.kind==='meet'?-1:1,near?'start':'middle');
+  h+=person(xa,RY-4,'#add8e6','#3d9cc2','兄',P.a,1,near?'end':'middle');
+  // はじめのあいだ（道の下）
+  if(!P.pre)h+=dim(X(0),X(g0),RY+82,'はじめのあいだ '+g0+'m','#7b766d',16);
+  // 時間のつまみ
+  const TX0=160,TX1=940,TY=345,tx=TX0+(TX1-TX0)*t/T;
+  h+=txt(TX0-20,TY,'時間',{a:'end',fs:18,c:'#7b766d'});
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+TX1+'" y2="'+TY+'" stroke="#e2dccf" stroke-width="10" stroke-linecap="round"/>';
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+tx+'" y2="'+TY+'" stroke="#90ee90" stroke-width="10" stroke-linecap="round"/>';
+  for(let i=0;i<=T;i++){const x=TX0+(TX1-TX0)*i/T;h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
+  h+='<g class="thandle" id="th"><rect x="'+(tx-40)+'" y="'+(TY-30)+'" width="80" height="60" fill="transparent"/>'+
+    '<circle cx="'+tx+'" cy="'+TY+'" r="18" fill="#fff" stroke="#3f9b4a" stroke-width="4"/>'+txt(tx,TY+1,'↔',{fs:18,c:'#3f9b4a'})+'</g>';
+  h+='<rect x="'+(tx-48)+'" y="'+(TY-64)+'" width="96" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,fmt(t)+'分後',{fs:19,c:'#25642c'});
+  $('art').innerHTML=h;
+}
+const fmt=n=>Number(n.toFixed(2)).toString();
+
+/* 初動: たす？ひく？ */
+function renderFirst(){
+  const A=P.a,B=P.b,el=$('first');
+  el.classList.toggle('ok',picked);
+  if(picked){
+    $('q1').textContent='1分間に '+(P.kind==='meet'?A+'＋'+B:A+'－'+B)+'＝'+rate()+'m ちぢまる';
+    $('opts').innerHTML='';
+    $('msg').textContent='時間を進めて、あいだが0mになるところをさがそう';
+  }else{
+    $('q1').textContent='2人のあいだは、1分間に何mちぢまる？';
+    $('opts').innerHTML='<button data-op="add">'+A+'＋'+B+'＝'+(A+B)+'m</button><button data-op="sub">'+A+'－'+B+'＝'+(A-B)+'m</button>';
+    $('msg').textContent='';
+  }
+  svg.classList.toggle('locked',!picked);
+}
+$('opts').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-op]');if(!b)return;
+  const right=(b.dataset.op==='add')===(P.kind==='meet');
+  if(right){picked=true;renderFirst();update();}
+  else{
+    b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
+    $('msg').textContent=P.kind==='meet'?'向かい合っているね。2人とも近づくよ':'同じ向きだね。兄が速い分だけ近づくよ';
+  }
+});
+
+function updateCheck(){
+  const el=$('check');
+  if(!solved()){el.classList.remove('on');el.innerHTML='';$('nextq').hidden=true;return;}
+  if(el.classList.contains('on'))return;
+  if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
+  const head=P.kind==='meet'?'できた！ 答え '+fmt(ans())+'分後に出会う':'できた！ 答え '+fmt(ans())+'分後に追いつく';
+  const op=P.kind==='meet'?'('+P.a+'＋'+P.b+')':'('+P.a+'－'+P.b+')';
+  const ln=(P.pre?P.b+'×'+P.pre+'＝'+gap0()+'m ／ ':'')+gap0()+' ÷ '+op+' ＝ '+fmt(ans())+'分';
+  el.innerHTML='<b>'+head+'</b><span>'+ln+'</span>';el.classList.add('on');
+  $('nextq').hidden=idx>=PROBLEMS.length-1;
+}
+function update(){draw();updateCheck();}
+function setT(v){if(!picked)return;t=Math.max(0,Math.min(tmax(),Math.round(v)));update();}
+
+/* 時間のつまみをドラッグ */
+function localPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;}
+svg.addEventListener('pointerdown',e=>{
+  if(!picked)return;
+  const l=localPt(e);if(!l||l.y<280)return;   // 時間のつまみのあたりだけ
+  drag=true;svg.setPointerCapture(e.pointerId);setT((l.x-160)/(940-160)*tmax());e.preventDefault();
+});
+svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setT((l.x-160)/(940-160)*tmax());});
+const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
+svg.setAttribute('tabindex','0');
+svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+1);e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-1);e.preventDefault();}});
+
+function renderTabs(){
+  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
+}
+function load(i){
+  idx=i;P=PROBLEMS[i];t=0;picked=false;
+  $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+P.tag;
+  $('qText').textContent=P.text;
+  renderTabs();renderFirst();
+  $('check').classList.remove('on');$('nextq').hidden=true;
+  update();
+}
+$('reset').addEventListener('click',()=>load(idx));
+$('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)load(+b.dataset.i);});
+$('clearRec').addEventListener('click',()=>{if(!confirm('この部屋の記録（クリアした問題の✓）を消して、はじめからにします。\nよろしいですか？'))return;done={};try{localStorage.removeItem('tabibito-done');}catch(e){}load(0);});
+const hq=/^#q(\d+)$/.exec(location.hash);
+load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);
+})();
+</script></body></html>
