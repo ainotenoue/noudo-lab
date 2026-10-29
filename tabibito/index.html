@@ -24,6 +24,10 @@ button:active{transform:translateY(1px)}
 .first .q1{font-size:18px;font-weight:800}
 .first .opts{display:flex;gap:10px}
 .first .opts button{font-size:18px;padding:8px 18px;background:#fff;border-color:#e8c48a;color:#7a4f12}
+.first .opts .no{display:inline-block;margin-right:8px;font-size:20px;color:#c07a1c}
+.successMark{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);width:154px;height:154px;border:13px solid #e6a45c;border-radius:50%;color:#d68a37;font-size:100px;line-height:125px;text-align:center;background:#fffaf2e8;pointer-events:none;z-index:99;animation:successPop 1.15s ease-out forwards}
+@keyframes successPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}40%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+@media(prefers-reduced-motion:reduce){.successMark{animation:none;opacity:0}}
 .first .msg{font-size:15px;font-weight:700;color:#9a5a12}
 .first.ok{background:var(--green-s)}
 .first.ok .q1{color:#25642c}
@@ -167,6 +171,8 @@ function draw(){
 const fmt=n=>Number(n.toFixed(2)).toString();
 
 /* 初動: たす？ひく？ */
+/* 初動で正解したら、大きな○ */
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
 function renderFirst(){
   const A=P.a,B=P.b,el=$('first');
   el.classList.toggle('ok',picked);
@@ -176,7 +182,7 @@ function renderFirst(){
     $('msg').textContent='時間を進めて、あいだが0mになるところをさがそう';
   }else{
     $('q1').textContent='2人のあいだは、1分間に何mちぢまる？';
-    $('opts').innerHTML='<button data-op="add">'+A+'＋'+B+'＝'+(A+B)+'m</button><button data-op="sub">'+A+'－'+B+'＝'+(A-B)+'m</button>';
+    $('opts').innerHTML='<button data-op="add"><span class="no">①</span>'+A+'＋'+B+'＝'+(A+B)+'m</button><button data-op="sub"><span class="no">②</span>'+A+'－'+B+'＝'+(A-B)+'m</button>';
     $('msg').textContent='';
   }
   svg.classList.toggle('locked',!picked);
@@ -184,7 +190,7 @@ function renderFirst(){
 $('opts').addEventListener('click',e=>{
   const b=e.target.closest('button[data-op]');if(!b)return;
   const right=(b.dataset.op==='add')===(P.kind==='meet');
-  if(right){picked=true;renderFirst();update();}
+  if(right){picked=true;renderFirst();update();celebrate();}
   else{
     b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
     $('msg').textContent=P.kind==='meet'?'向かい合っているね。2人とも近づくよ':'同じ向きだね。兄が速い分だけ近づくよ';
