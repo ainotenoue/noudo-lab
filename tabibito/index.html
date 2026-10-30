@@ -93,7 +93,6 @@ const gap0=()=>P.pre?P.b*P.pre:P.d;                       // 兄が出発する�
 const rate=()=>P.kind==='meet'?P.a+P.b:P.a-P.b;          // 1分でちぢまる道のり
 const ans=()=>gap0()/rate();                              // 出会う（追いつく）までの分数
 const tmax=()=>Math.ceil(ans()*1.5);
-const gapAt=t=>Math.max(0,gap0()-rate()*t);
 const solved=()=>picked&&Math.abs(t-ans())<1e-9;
 
 const X0=80,X1=1020,RY=170;   // 道のはし・道の高さ
@@ -149,14 +148,14 @@ function draw(){
   // 追いかけ: 弟が先に出た分
   if(P.pre)h+=dim(X0,X(g0),RY+82,'先に '+P.b+'×'+P.pre+'＝'+g0+'m','#b5607a',16);
   // 2人のあいだ（いちばん大事な量）
-  const gp=gapAt(t),lo=Math.min(xa,xb),hi=Math.max(xa,xb);
-  if(gp>0)h+=dim(lo,hi,RY-112,'あいだ '+gp+'m','#9a5a12',22);
+  const gs=gap0()-rate()*t,met=Math.abs(gs)<1e-9,gp=Math.abs(gs),lo=Math.min(xa,xb),hi=Math.max(xa,xb);
+  if(!met)h+=dim(lo,hi,RY-112,'あいだ '+gp+'m','#9a5a12',22);
   else h+='<rect x="'+(xa-90)+'" y="'+(RY-148)+'" width="180" height="40" rx="20" fill="#90ee90"/>'+txt(xa,RY-127,P.kind==='meet'?'出会った！':'追いついた！',{fs:22,c:'#25642c'});
   // 人
   /* 2人が近いときは、名前を左右に分けて重ならないようにする */
   const near=Math.abs(xa-xb)<150;
-  h+=person(xb,RY-4,'#ffd1dc','#d9849b','弟',P.b,P.kind==='meet'?-1:1,near?'start':'middle',gp<=0);
-  h+=person(xa,RY-4,'#add8e6','#3d9cc2','兄',P.a,1,near?'end':'middle',gp<=0);
+  h+=person(xb,RY-4,'#ffd1dc','#d9849b','弟',P.b,P.kind==='meet'?-1:1,near?'start':'middle',met);
+  h+=person(xa,RY-4,'#add8e6','#3d9cc2','兄',P.a,1,near?'end':'middle',met);
   // はじめのあいだ（道の下）
   if(!P.pre)h+=dim(X(0),X(g0),RY+82,'はじめのあいだ '+g0+'m','#7b766d',16);
   // 時間のつまみ
@@ -174,6 +173,27 @@ const fmt=n=>Number(n.toFixed(2)).toString();
 
 /* 初動: たす？ひく？ */
 /* 初動で正解したら、大きな○ */
+/* ===== 効果音（Web Audio） ===== */
+let actx=null;
+function audio(){
+  try{if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC();}
+  if(actx.state==='suspended')actx.resume();return actx;}catch(e){return null;}
+}
+// tone(周波数Hz, 長さ秒, 波形, 音量, 開始の遅れ秒)
+function tone(f,d,type,vol,delay){
+  const c=audio();if(!c)return;
+  type=type||'sine';vol=vol==null?.035:vol;delay=delay||0;
+  const t0=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t0);
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.02);
+}
+// 初動の正解音（ピンポン）
+const firstSound=()=>{tone(590,.10);tone(790,.13,'sine',.035,.08);};
+// 出会った／追いついたときの音（ドミソド↑）
+const meetSound=()=>{tone(523,.12,'sine',.034);tone(659,.12,'sine',.034,.09);tone(784,.14,'sine',.034,.18);tone(1047,.32,'sine',.038,.27);tone(1568,.30,'triangle',.012,.27);};
+// iPad: 最初のタッチで音を使えるようにする
+document.addEventListener('touchstart',function un(){audio();document.removeEventListener('touchstart',un);},{passive:true});
 function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
 function renderFirst(){
   const A=P.a,B=P.b,el=$('first');
@@ -192,7 +212,7 @@ function renderFirst(){
 $('opts').addEventListener('click',e=>{
   const b=e.target.closest('button[data-op]');if(!b)return;
   const right=(b.dataset.op==='add')===(P.kind==='meet');
-  if(right){picked=true;renderFirst();update();celebrate();}
+  if(right){picked=true;renderFirst();update();celebrate();firstSound();}
   else{
     b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
     $('msg').textContent=P.kind==='meet'?'向かい合っているね。2人とも近づくよ':'同じ向きだね。兄が速い分だけ近づくよ';
@@ -207,7 +227,7 @@ function updateCheck(){
   const head=P.kind==='meet'?'できた！ 答え '+fmt(ans())+'分後に出会う':'できた！ 答え '+fmt(ans())+'分後に追いつく';
   const op=P.kind==='meet'?'('+P.a+'＋'+P.b+')':'('+P.a+'－'+P.b+')';
   const ln=(P.pre?P.b+'×'+P.pre+'＝'+gap0()+'m ／ ':'')+gap0()+' ÷ '+op+' ＝ '+fmt(ans())+'分';
-  el.innerHTML='<b>'+head+'</b><span>'+ln+'</span>';el.classList.add('on');
+  el.innerHTML='<b>'+head+'</b><span>'+ln+'</span>';el.classList.add('on');meetSound();
   $('nextq').hidden=idx>=PROBLEMS.length-1;
 }
 function update(){draw();updateCheck();}
