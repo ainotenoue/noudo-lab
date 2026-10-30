@@ -104,7 +104,7 @@ const read=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){
 const ROOMS={lab:{key:'lab-done',total:10,name:'食塩水の部屋',path:'./lab/',ring:'ringLab',col:'#5f9fb3'},
              balance:{key:'balance-done',total:10,name:'天秤図の部屋',path:'./balance/',ring:'ringBal',col:'#d9849b'},
              tsurukame:{key:'tsurukame-done',total:10,name:'つるかめ算の部屋',path:'./tsurukame/',ring:'ringTsuru',col:'#e8a24f'},
-             tabibito:{key:'tabibito-done',total:6,name:'旅人算の部屋',path:'./tabibito/',ring:'ringTabi',col:'#3f9b4a'}};
+             tabibito:{key:'tabibito-done',total:12,name:'旅人算の部屋',path:'./tabibito/',ring:'ringTabi',col:'#3f9b4a'}};
 function ring(id,n,total,col){
   const r=26,c=2*Math.PI*r,f=Math.min(1,n/total);
   $(id).innerHTML='<circle cx="32" cy="32" r="'+r+'" fill="none" stroke="#efebe3" stroke-width="7"/>'+

@@ -85,7 +85,8 @@ const $=id=>document.getElementById(id), svg=$('diagram');
    kind 'meet'  … 出会い（向かい合って進む）→ 1分で「速さの和」だけ ちぢまる
    kind 'chase' … 追いかけ（同じ向きに進む）→ 1分で「速さの差」だけ ちぢまる
    a … 兄（青）の速さ　b … 弟（ピンク）の速さ（分速m）
-   d … 兄が出発するときの2人のあいだ（m）　pre … 追いかけで、弟が先に出た分数（あれば） */
+   d … 兄が出発するときの2人のあいだ（m）　pre … 追いかけで、弟が先に出た分数（あれば）
+   type 'trip' … 折り返し（d＝片道）／ 'pond' … 池のまわり（d＝1周） */
 const PROBLEMS=[
   {kind:'meet',tag:'出会い算',a:90,b:60,d:1200,
    text:'兄と弟が1200mはなれた所から、向かい合って同時に出発しました。兄は分速90m、弟は分速60mです。2人は何分後に出会いますか？'},
@@ -98,15 +99,29 @@ const PROBLEMS=[
   {kind:'meet',tag:'出会い算',a:120,b:80,d:2000,
    text:'兄と弟が2kmはなれた所から、向かい合って同時に出発しました。兄は分速120m、弟は分速80mです。2人は何分後に出会いますか？'},
   {kind:'chase',tag:'追いかけ算｜あとから出発',a:100,b:60,pre:4,
-   text:'弟が家を出てから4分後に、兄が同じ道を追いかけました。弟は分速60m、兄は分速100mです。兄は家を出てから何分後に弟に追いつきますか？'}
+   text:'弟が家を出てから4分後に、兄が同じ道を追いかけました。弟は分速60m、兄は分速100mです。兄は家を出てから何分後に弟に追いつきますか？'},
+  /* 折り返し（往復）: 同じ所から出て、兄が先で折り返す → 2人で 道のり×2 進むと出会う */
+  {kind:'meet',type:'trip',tag:'出会い算｜折り返し',a:100,b:50,d:1200,from:'A',to:'B',
+   text:'AからBまで1200mの道があります。兄と弟が同時にAを出発してBへ向かい、兄はBに着くとすぐ折り返しました。兄は分速100m、弟は分速50mです。2人は出発してから何分後に出会いますか？'},
+  {kind:'meet',type:'trip',tag:'出会い算｜折り返し',a:90,b:60,d:1500,from:'家',to:'公園',
+   text:'家から公園まで1500mあります。兄と弟が同時に家を出て公園へ向かい、兄は公園に着くとすぐ折り返しました。兄は分速90m、弟は分速60mです。2人は出発してから何分後に出会いますか？'},
+  /* 池のまわり: 同じ場所から出発。はじめのあいだ＝1周 */
+  {kind:'meet',type:'pond',tag:'出会い算｜池のまわり',a:90,b:60,d:1200,
+   text:'1周1200mの池のまわりを、兄と弟が同じ場所から反対向きに同時に出発しました。兄は分速90m、弟は分速60mです。2人が初めて出会うのは何分後ですか？'},
+  {kind:'chase',type:'pond',tag:'追いかけ算｜池のまわり',a:80,b:50,d:600,
+   text:'1周600mの池のまわりを、兄と弟が同じ場所から同じ向きに同時に出発しました。兄は分速80m、弟は分速50mです。兄が弟に初めて追いつくのは何分後ですか？'},
+  {kind:'meet',type:'pond',tag:'出会い算｜池のまわり',a:100,b:80,d:1800,
+   text:'1周1800mの池のまわりを、兄と弟が同じ場所から反対向きに同時に出発しました。兄は分速100m、弟は分速80mです。2人が初めて出会うのは何分後ですか？'},
+  {kind:'chase',type:'pond',tag:'追いかけ算｜池のまわり',a:120,b:70,d:1500,
+   text:'1周1500mの池のまわりを、兄と弟が同じ場所から同じ向きに同時に出発しました。兄は分速120m、弟は分速70mです。兄が弟に初めて追いつくのは何分後ですか？'}
 ];
 let idx=0,P=PROBLEMS[0],t=0,picked=false,drag=false;
 let done={};try{done=JSON.parse(localStorage.getItem('tabibito-done')||'{}')||{};}catch(e){done={};}
 const saveDone=()=>{try{localStorage.setItem('tabibito-done',JSON.stringify(done));}catch(e){}};
-const gap0=()=>P.pre?P.b*P.pre:P.d;                       // 兄が出発するときのあいだ
+const gap0=()=>P.pre?P.b*P.pre:P.type==='trip'?P.d*2:P.d;                       // 兄が出発するときのあいだ
 const rate=()=>P.kind==='meet'?P.a+P.b:P.a-P.b;          // 1分でちぢまる道のり
 const ans=()=>gap0()/rate();                              // 出会う（追いつく）までの分数
-const tmax=()=>Math.ceil(ans()*1.5);
+const tmax=()=>{const m=Math.ceil(ans()*1.5);return P.type==='trip'?Math.min(m,Math.floor(P.d/P.b),Math.floor(2*P.d/P.a)):m;};
 const solved=()=>picked&&Math.abs(t-ans())<1e-9;
 
 const X0=80,X1=1020,RY=170;   // 道のはし・道の高さ
@@ -131,6 +146,12 @@ function person(x,y,col,dark,name,v,dir,la,met){
     txt(lx,met?-84:-76,name+' 分速'+v+'m',{a:la,fs:16,c:dark})+'</g>';
 }
 function draw(){
+  const T=tmax();
+  let h=P.type==='pond'?drawPond():P.type==='trip'?drawTrip():drawLine();
+  h+=drawSlider(T);
+  $('art').innerHTML=h;
+}
+function drawLine(){
   const g0=gap0(),r=rate(),T=tmax();
   // 道の長さ（m）: 出会い＝d、追いかけ＝あいだ＋弟が進む分
   const L=P.kind==='meet'?P.d:g0+P.b*T;
@@ -172,6 +193,87 @@ function draw(){
   h+=person(xa,RY-4,'#add8e6','#3d9cc2','兄',P.a,1,near?'end':'middle',met);
   // はじめのあいだ（道の下）
   if(!P.pre)h+=dim(X(0),X(g0),RY+82,'はじめのあいだ '+g0+'m','#7b766d',16);
+  return h;
+}
+const metPill=(x,y)=>'<rect x="'+(x-90)+'" y="'+(y-20)+'" width="180" height="40" rx="20" fill="#90ee90"/>'+txt(x,y+1,P.kind==='meet'?'出会った！':'追いついた！',{fs:22,c:'#25642c'});
+/* 折り返し: 兄はBで向きを変える */
+function drawTrip(){
+  const d=P.d,k=(X1-X0)/d,X=m=>X0+m*k,ok=solved();
+  const da=P.a*t,ma=da<=d?da:2*d-da,mb=P.b*t,xa=X(ma),xb=X(mb),turned=da>=d;
+  let h='<line x1="'+X0+'" y1="'+RY+'" x2="'+X1+'" y2="'+RY+'" stroke="'+(ok?'#3f9b4a':'#cfc8bb')+'" stroke-width="'+(ok?8:6)+'" stroke-linecap="round"/>';
+  h+='<line x1="'+X0+'" y1="'+(RY-14)+'" x2="'+X0+'" y2="'+(RY+14)+'" stroke="#9a9184" stroke-width="3"/><line x1="'+X1+'" y1="'+(RY-14)+'" x2="'+X1+'" y2="'+(RY+14)+'" stroke="#9a9184" stroke-width="3"/>';
+  h+=txt(X0-14,RY,P.from,{a:'end',fs:16,c:'#7b766d'})+txt(X1+14,RY,P.to,{a:'start',fs:16,c:'#7b766d'});
+  // 進んだ道のり: 兄は行き（上）と帰り（下）をつないだ帯
+  const y1=RY+24,y2=RY+40,y3=RY+58;
+  if(t>0){
+    let pa='M'+X0+' '+y1+' H'+X(Math.min(da,d));
+    if(turned)pa+=' A8 8 0 0 1 '+X1+' '+y2+' H'+xa;
+    h+='<path d="'+pa+'" fill="none" stroke="#add8e6" stroke-width="10" stroke-linecap="round" opacity=".9"/>';
+    h+='<line x1="'+X0+'" y1="'+y3+'" x2="'+xb+'" y2="'+y3+'" stroke="#ffd1dc" stroke-width="10" stroke-linecap="round" opacity=".9"/>';
+    for(let i=1;i<=Math.floor(t+1e-9);i++){
+      const m=P.a*i;h+='<circle cx="'+X(m<=d?m:2*d-m)+'" cy="'+(m<=d?y1:y2)+'" r="3" fill="#3d9cc2"/>';
+      h+='<circle cx="'+X(P.b*i)+'" cy="'+y3+'" r="3" fill="#e2708f"/>';
+    }
+  }
+  h+=dim(X0,X1,RY+92,'片道 '+d+'m','#7b766d',16);
+  // あいだ: 折り返す前は「Bまで行って戻る」道のり
+  const gs=gap0()-rate()*t,met=Math.abs(gs)<1e-9,gp=Math.abs(gs),C='#9a5a12';
+  if(met)h+=metPill(xa,RY-128);
+  else if(!turned){
+    const ya=RY-100,yb=RY-128;
+    h+='<path d="M'+xa+' '+ya+' H'+X1+' A14 14 0 0 0 '+X1+' '+yb+' H'+xb+'" fill="none" stroke="'+C+'" stroke-width="3"/>';
+    h+='<line x1="'+xa+'" y1="'+(ya-9)+'" x2="'+xa+'" y2="'+(ya+9)+'" stroke="'+C+'" stroke-width="3"/><line x1="'+xb+'" y1="'+(yb-9)+'" x2="'+xb+'" y2="'+(yb+9)+'" stroke="'+C+'" stroke-width="3"/>';
+    const s='あいだ '+gp+'m',w=tw(s,22)+16,cx=(xb+X1)/2;
+    h+='<rect x="'+(cx-w/2)+'" y="'+(yb-15)+'" width="'+w+'" height="30" rx="8" fill="#fff"/>'+txt(cx,yb+1,s,{fs:22,c:C});
+  }else h+=dim(Math.min(xa,xb),Math.max(xa,xb),RY-112,'あいだ '+gp+'m',C,22);
+  const near=Math.abs(xa-xb)<150,aRight=xa>=xb;
+  h+=person(xb,RY-4,'#ffd1dc','#d9849b','弟',P.b,1,near?(aRight?'end':'start'):'middle',met);
+  h+=person(xa,RY-4,'#add8e6','#3d9cc2','兄',P.a,turned?-1:1,near?(aRight?'start':'end'):'middle',met);
+  return h;
+}
+/* 池のまわり: スタートは上。兄は右回り、弟は反対向き（出会い）か同じ向き（追いかけ） */
+function drawPond(){
+  const C=P.d,CX=560,CY=150,R=95,ok=solved(),cw=P.kind==='chase';
+  const ang=m=>-Math.PI/2+m/C*2*Math.PI, pt=(m,r)=>[CX+r*Math.cos(ang(m)),CY+r*Math.sin(ang(m))];
+  const f=v=>v.toFixed(1);
+  // 弧: 道のり m0 から len だけ（dir=1 右回り）
+  const arc=(m0,len,r,dir,col,w,op)=>{
+    if(len<=0)return '';
+    if(len>=C-1e-9)return '<circle cx="'+CX+'" cy="'+CY+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+w+'"'+(op?' opacity="'+op+'"':'')+'/>';
+    const [x0,y0]=pt(m0,r),[x1,y1]=pt(m0+dir*len,r);
+    return '<path d="M'+f(x0)+' '+f(y0)+' A'+r+' '+r+' 0 '+(len>C/2?1:0)+' '+(dir>0?1:0)+' '+f(x1)+' '+f(y1)+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"'+(op?' opacity="'+op+'"':'')+'/>';
+  };
+  let h='<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="#eef7fa" stroke="'+(ok?'#3f9b4a':'#cfc8bb')+'" stroke-width="'+(ok?8:6)+'"/>';
+  h+='<line x1="'+CX+'" y1="'+(CY-R-12)+'" x2="'+CX+'" y2="'+(CY-R+12)+'" stroke="#9a9184" stroke-width="3"/>'+txt(CX-46,CY-R-24,'スタート',{a:'end',fs:15,c:'#7b766d'});
+  const da=P.a*t,db=P.b*t,bd=cw?1:-1;
+  // 進んだ道のり（外側の帯）。1周をこえた分は、うすい輪で
+  if(t>0){
+    h+=arc(0,da%C,R+16,1,'#add8e6',9,.9);if(da>=C)h+=arc(0,C,R+16,1,'#add8e6',9,.35);
+    h+=arc(0,db%C,R+29,bd,'#ffd1dc',9,.9);if(db>=C)h+=arc(0,C,R+29,bd,'#ffd1dc',9,.35);
+  }
+  // あいだ（内側・茶色）: 兄から右回りに、弟まで
+  const gs=gap0()-rate()*t,met=Math.abs(gs)<1e-9,g=gs>0?gs:((gs%C)+C)%C;
+  if(!met)h+=arc(da%C,g,R-15,1,'#9a5a12',5);
+  if(met)h+=metPill(CX,CY);
+  else{
+    h+=txt(CX,CY-10,'あいだ',{fs:17,c:'#9a5a12'})+txt(CX,CY+16,g+'m',{fs:26,c:'#9a5a12'});
+  }
+  // 2人（池の上の印）
+  const tok=(m,col,dark,ch)=>{const [x,y]=pt(m,R),r=met?21:16;
+    return '<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+r+'" fill="'+(met?ROSE:col)+'" stroke="'+(met?ROSE_D:dark)+'" stroke-width="3"/>'+txt(f(x),f(+y+1),ch,{fs:met?18:15,c:met?'#4a3a86':'#2f3437'});};
+  h+=met?tok(da,'','','2人'):tok(bd*db,'#ffd1dc','#d9849b','弟')+tok(da,'#add8e6','#3d9cc2','兄');
+  // 左: 2人の説明
+  const lg=(y,col,dark,ch,v,dir,dist)=>'<circle cx="110" cy="'+y+'" r="15" fill="'+col+'" stroke="'+dark+'" stroke-width="3"/>'+txt(110,y+1,ch,{fs:14})+
+    txt(136,y,ch+' 分速'+v+'m　'+dir,{a:'start',fs:17,c:dark})+txt(136,y+28,'進んだ道のり '+dist+'m',{a:'start',fs:15,c:'#7b766d',fw:700});
+  h+=lg(70,'#add8e6','#3d9cc2','兄',P.a,'右回り ↻',da);
+  h+=lg(150,'#ffd1dc','#d9849b','弟',P.b,cw?'右回り ↻':'左回り ↺',db);
+  // 右: 1周
+  h+=txt(800,90,'1周',{a:'start',fs:16,c:'#7b766d'})+txt(800,118,C+'m',{a:'start',fs:22,c:'#7b766d'});
+  h+=txt(800,170,'はじめのあいだ',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(800,196,'＝ 1周 '+C+'m',{a:'start',fs:17,c:'#7b766d'});
+  return h;
+}
+function drawSlider(T){
+  let h='';
   // 時間のつまみ
   const TX0=160,TX1=940,TY=345,tx=TX0+(TX1-TX0)*t/T;
   h+=txt(TX0-20,TY,'時間',{a:'end',fs:18,c:'#7b766d'});
@@ -181,7 +283,7 @@ function draw(){
   h+='<g class="thandle" id="th"><rect x="'+(tx-40)+'" y="'+(TY-30)+'" width="80" height="60" fill="transparent"/>'+
     '<circle cx="'+tx+'" cy="'+TY+'" r="18" fill="#fff" stroke="#3f9b4a" stroke-width="4"/>'+txt(tx,TY+1,'↔',{fs:18,c:'#3f9b4a'})+'</g>';
   h+='<rect x="'+(tx-48)+'" y="'+(TY-64)+'" width="96" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,fmt(t)+'分後',{fs:19,c:'#25642c'});
-  $('art').innerHTML=h;
+  return h;
 }
 const fmt=n=>Number(n.toFixed(2)).toString();
 
@@ -215,7 +317,7 @@ function renderFirst(){
   if(picked){
     $('q1').textContent='1分間に '+(P.kind==='meet'?A+'＋'+B:A+'－'+B)+'＝'+rate()+'m ちぢまる';
     $('opts').innerHTML='';
-    $('msg').textContent='時間を進めて、あいだが0mになるところをさがそう';
+    $('msg').textContent=P.type==='trip'?'折り返す分も入れて、あいだは '+P.d+'×2＝'+gap0()+'m':P.type==='pond'?'池では、はじめのあいだが 1周 '+P.d+'m':'時間を進めて、あいだが0mになるところをさがそう';
   }else{
     $('q1').textContent='2人のあいだは、1分間に何mちぢまる？';
     $('opts').innerHTML='<button data-op="add"><span class="no">①</span>'+A+'＋'+B+'＝'+(A+B)+'m</button><button data-op="sub"><span class="no">②</span>'+A+'－'+B+'＝'+(A-B)+'m</button>';
@@ -229,7 +331,7 @@ $('opts').addEventListener('click',e=>{
   if(right){picked=true;renderFirst();update();celebrate();firstSound();}
   else{
     b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
-    $('msg').textContent=P.kind==='meet'?'向かい合っているね。2人とも近づくよ':'同じ向きだね。兄が速い分だけ近づくよ';
+    $('msg').textContent=P.type==='trip'?'兄が折り返すと、向かい合うね。2人とも近づくよ':P.type==='pond'?(P.kind==='meet'?'反対向きに回るね。2人とも近づくよ':'同じ向きに回るね。兄が速い分だけ近づくよ'):P.kind==='meet'?'向かい合っているね。2人とも近づくよ':'同じ向きだね。兄が速い分だけ近づくよ';
   }
 });
 
@@ -240,7 +342,8 @@ function updateCheck(){
   if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
   const head=P.kind==='meet'?'できた！ 答え '+fmt(ans())+'分後に出会う':'できた！ 答え '+fmt(ans())+'分後に追いつく';
   const op=P.kind==='meet'?'('+P.a+'＋'+P.b+')':'('+P.a+'－'+P.b+')';
-  const ln=(P.pre?P.b+'×'+P.pre+'＝'+gap0()+'m ／ ':'')+gap0()+' ÷ '+op+' ＝ '+fmt(ans())+'分';
+  const g0s=P.type==='trip'?P.d+'×2':String(gap0());
+  const ln=(P.pre?P.b+'×'+P.pre+'＝'+gap0()+'m ／ ':'')+g0s+' ÷ '+op+' ＝ '+fmt(ans())+'分';
   el.innerHTML='<b>'+head+'</b><span>'+ln+'</span>';el.classList.add('on');meetSound();
   $('nextq').hidden=idx>=PROBLEMS.length-1;
 }
