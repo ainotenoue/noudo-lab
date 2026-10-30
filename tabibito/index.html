@@ -106,14 +106,16 @@ function dim(xa,xb,y,s,col,fs){
     '<line x1="'+xa+'" y1="'+(y-9)+'" x2="'+xa+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/><line x1="'+xb+'" y1="'+(y-9)+'" x2="'+xb+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/>'+
     '<rect x="'+((xa+xb)/2-w/2)+'" y="'+(y-15)+'" width="'+w+'" height="30" rx="8" fill="#fff"/>'+txt((xa+xb)/2,y+1,s,{fs,c:col});
 }
-/* 人: まるい頭と体。dir=1 右向き */
-function person(x,y,col,dark,name,v,dir,la){
+/* 人: まるい頭と体。dir=1 右向き。met=出会った瞬間（ブルーローズ・ひと回り大きく） */
+const ROSE='#c9b8ec',ROSE_D='#7b62c4';
+function person(x,y,col,dark,name,v,dir,la,met){
   la=la||'middle';const lx=la==='end'?-8:la==='start'?8:0;
-  return '<g transform="translate('+x+','+y+')">'+
-    '<circle cx="0" cy="-46" r="13" fill="#fff" stroke="'+dark+'" stroke-width="3"/>'+
-    '<rect x="-14" y="-31" width="28" height="30" rx="12" fill="'+col+'" stroke="'+dark+'" stroke-width="3"/>'+
-    '<path d="M'+(dir*18)+' -16 l'+(dir*12)+' 0 m'+(-dir*5)+' -5 l'+(dir*5)+' 5 l'+(-dir*5)+' 5" fill="none" stroke="'+dark+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+
-    txt(lx,-76,name+' 分速'+v+'m',{a:la,fs:16,c:dark})+'</g>';
+  const fc=met?ROSE:col,sc=met?ROSE_D:dark,k=met?1.22:1;
+  return '<g transform="translate('+x+','+y+')"><g transform="scale('+k+')">'+
+    '<circle cx="0" cy="-46" r="13" fill="'+(met?'#f6f1ff':'#fff')+'" stroke="'+sc+'" stroke-width="3"/>'+
+    '<rect x="-14" y="-31" width="28" height="30" rx="12" fill="'+fc+'" stroke="'+sc+'" stroke-width="3"/>'+
+    '<path d="M'+(dir*18)+' -16 l'+(dir*12)+' 0 m'+(-dir*5)+' -5 l'+(dir*5)+' 5 l'+(-dir*5)+' 5" fill="none" stroke="'+sc+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>'+
+    txt(lx,met?-84:-76,name+' 分速'+v+'m',{a:la,fs:16,c:dark})+'</g>';
 }
 function draw(){
   const g0=gap0(),r=rate(),T=tmax();
@@ -149,12 +151,12 @@ function draw(){
   // 2人のあいだ（いちばん大事な量）
   const gp=gapAt(t),lo=Math.min(xa,xb),hi=Math.max(xa,xb);
   if(gp>0)h+=dim(lo,hi,RY-112,'あいだ '+gp+'m','#9a5a12',22);
-  else h+='<rect x="'+(xa-90)+'" y="'+(RY-130)+'" width="180" height="40" rx="20" fill="#90ee90"/>'+txt(xa,RY-109,P.kind==='meet'?'出会った！':'追いついた！',{fs:22,c:'#25642c'});
+  else h+='<rect x="'+(xa-90)+'" y="'+(RY-148)+'" width="180" height="40" rx="20" fill="#90ee90"/>'+txt(xa,RY-127,P.kind==='meet'?'出会った！':'追いついた！',{fs:22,c:'#25642c'});
   // 人
   /* 2人が近いときは、名前を左右に分けて重ならないようにする */
   const near=Math.abs(xa-xb)<150;
-  h+=person(xb,RY-4,'#ffd1dc','#d9849b','弟',P.b,P.kind==='meet'?-1:1,near?'start':'middle');
-  h+=person(xa,RY-4,'#add8e6','#3d9cc2','兄',P.a,1,near?'end':'middle');
+  h+=person(xb,RY-4,'#ffd1dc','#d9849b','弟',P.b,P.kind==='meet'?-1:1,near?'start':'middle',gp<=0);
+  h+=person(xa,RY-4,'#add8e6','#3d9cc2','兄',P.a,1,near?'end':'middle',gp<=0);
   // はじめのあいだ（道の下）
   if(!P.pre)h+=dim(X(0),X(g0),RY+82,'はじめのあいだ '+g0+'m','#7b766d',16);
   // 時間のつまみ
