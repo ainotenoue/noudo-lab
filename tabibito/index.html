@@ -261,7 +261,7 @@ function drawPond(){
   // 2人（池の上の印）
   const tok=(m,col,dark,ch)=>{const [x,y]=pt(m,R),r=met?21:16;
     return '<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+r+'" fill="'+(met?ROSE:col)+'" stroke="'+(met?ROSE_D:dark)+'" stroke-width="3"/>'+txt(f(x),f(+y+1),ch,{fs:met?18:15,c:met?'#4a3a86':'#2f3437'});};
-  h+=met?tok(da,'','','2人'):tok(bd*db,'#ffd1dc','#d9849b','弟')+tok(da,'#add8e6','#3d9cc2','兄');
+  h+=met?tok(da,'','','2人'):t===0?tok(0,'#fff','#9a9184','2人'):tok(bd*db,'#ffd1dc','#d9849b','弟')+tok(da,'#add8e6','#3d9cc2','兄');
   // 左: 2人の説明
   const lg=(y,col,dark,ch,v,dir,dist)=>'<circle cx="110" cy="'+y+'" r="15" fill="'+col+'" stroke="'+dark+'" stroke-width="3"/>'+txt(110,y+1,ch,{fs:14})+
     txt(136,y,ch+' 分速'+v+'m　'+dir,{a:'start',fs:17,c:dark})+txt(136,y+28,'進んだ道のり '+dist+'m',{a:'start',fs:15,c:'#7b766d',fw:700});
