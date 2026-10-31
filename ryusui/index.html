@@ -96,15 +96,23 @@ const PROBLEMS=[
   {dir:'down',s:70,c:30,d:1500,text:'流れの速さが分速30mの川を、静水時の速さが分速70mの船が、A地点から1500m下流のB地点まで下ります。何分かかりますか？'},
   {dir:'up',s:70,c:30,d:1200,text:'流れの速さが分速30mの川を、静水時の速さが分速70mの船が、B地点から1200m上流のA地点まで上ります。何分かかりますか？'},
   {dir:'down',s:90,c:15,d:2100,text:'静水時の速さが分速90mの船で、流れの速さが分速15mの川を2100m下ります。何分かかりますか？'},
-  {dir:'up',s:90,c:15,d:1500,text:'静水時の速さが分速90mの船で、流れの速さが分速15mの川を1500m上ります。何分かかりますか？'}
+  {dir:'up',s:90,c:15,d:1500,text:'静水時の速さが分速90mの船で、流れの速さが分速15mの川を1500m上ります。何分かかりますか？'},
+  /* 逆算: 下りの速さ D と上りの速さ U から、静水時（ask:'s'）か流れ（ask:'c'）を求める
+     下り＋上り＝静水時×2　下り－上り＝流れ×2 */
+  {dir:'rev',ask:'c',D:100,U:60,text:'ある船の下りの速さは分速100m、上りの速さは分速60mです。川の流れの速さは分速何mですか？'},
+  {dir:'rev',ask:'s',D:100,U:60,text:'ある船の下りの速さは分速100m、上りの速さは分速60mです。この船の静水時の速さは分速何mですか？'},
+  {dir:'rev',ask:'s',D:120,U:80,d:2400,td:20,tu:30,text:'ある船が、2400mの川を下るのに20分、上るのに30分かかりました。この船の静水時の速さは分速何mですか？'},
+  {dir:'rev',ask:'c',D:150,U:100,d:1800,td:12,tu:18,text:'ある船が、1800mの川を下るのに12分、上るのに18分かかりました。川の流れの速さは分速何mですか？'}
 ];
 let idx=0,P=PROBLEMS[0],t=0,picked=false,drag=false;
 let done={};try{done=JSON.parse(localStorage.getItem('ryusui-done')||'{}')||{};}catch(e){done={};}
 const saveDone=()=>{try{localStorage.setItem('ryusui-done',JSON.stringify(done));}catch(e){}};
 const down=()=>P.dir==='down';
 const v=()=>down()?P.s+P.c:P.s-P.c;          // 船が1分で進む道のり
-const ans=()=>P.d/v();
-const tmax=()=>Math.ceil(ans()*1.5);
+const rev=()=>P.dir==='rev';
+const ans=()=>rev()?(P.ask==='s'?(P.D+P.U)/2:(P.D-P.U)/2):P.d/v();
+const tmax=()=>rev()?P.D:Math.ceil(ans()*1.5);
+const tstep=()=>rev()?5:1;
 const solved=()=>picked&&Math.abs(t-ans())<1e-9;
 const fmt=n=>Number(n.toFixed(2)).toString();
 
@@ -144,6 +152,7 @@ function drawRiver(){
   $('river').innerHTML=h;
 }
 function draw(){
+  if(rev()){$('art').innerHTML=drawRev()+drawSlider(tmax());return;}
   const T=tmax(),V=v(),L=V*T,k=(X1-X0)/L,ok=solved(),dn=down();
   // 地点: 下りは左から右へ、上りは右から左へ
   const sx=dn?X0:X1, gx=dn?X0+P.d*k:X1-P.d*k, bx=dn?X0+V*t*k:X1-V*t*k;
@@ -172,6 +181,34 @@ function draw(){
   h+=drawSlider(T);
   $('art').innerHTML=h;
 }
+/* 逆算: 線分図。つまみで求める速さを動かし、上りをぴったり合わせる */
+function drawRev(){
+  const D=P.D,U=P.U,k=600/D,bx=270,yd=80,yu=185,bh=34;
+  const sv=P.ask==='s'?t:D-t, cv=D-sv, up=sv-cv, ok=solved();
+  const bar=(x,y,w,fill,st,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-bh/2)+'" width="'+w+'" height="'+bh+'" rx="6" fill="'+fill+'" stroke="'+st+'" stroke-width="2.5"'+(dash?' stroke-dasharray="6 5"':'')+'/>'+(w>46&&lab?txt(x+w/2,y+1,lab,{fs:15,c:lc}):'');
+  let h='';
+  h+=txt(bx-18,yd-10,'下りの速さ',{a:'end',fs:15,c:'#7b766d'})+txt(bx-18,yd+14,'分速'+D+'m',{a:'end',fs:20,c:'#25642c'});
+  h+=txt(bx-18,yu-10,'上りの速さ',{a:'end',fs:15,c:'#7b766d'})+txt(bx-18,yu+14,'分速'+U+'m',{a:'end',fs:20,c:'#25642c'});
+  // 下り＝静水時＋流れ
+  h+=bar(bx,yd,sv*k,BOAT_S,BOAT,'静水時 '+sv,BOAT_D)+bar(bx+sv*k,yd,cv*k,'#d7eef6',WATER,'流れ '+cv,WATER);
+  // 上り＝静水時－流れ（流れの分は点線でぬける）
+  if(up>0)h+=bar(bx,yu,up*k,BOAT_S,BOAT,'静水時－流れ',BOAT_D);
+  if(up>0)h+=bar(bx+up*k,yu,cv*k,'#fff',WATER,'流れ',WATER,1);
+  else h+=txt(bx+8,yu,'流れが静水時より速いと、上れない',{a:'start',fs:15,c:'#9a9184'});
+  // 上りの速さ（めあて）
+  const ux=bx+U*k;
+  h+='<line x1="'+ux+'" y1="'+(yu-bh/2-14)+'" x2="'+ux+'" y2="'+(yu+bh/2+14)+'" stroke="#3f9b4a" stroke-width="4" stroke-dasharray="'+(ok?'0':'7 5')+'"/>';
+  h+=txt(ux,yu+bh/2+30,'上り '+U+'m',{fs:15,c:'#25642c'});
+  // ずれ（いちばん大事な量）
+  const gap=up-U;
+  if(ok){
+    const xa=bx+U*k,xb=bx+D*k,y=yu-bh/2-26;
+    h+='<line x1="'+xb+'" y1="'+(yd+bh/2)+'" x2="'+xb+'" y2="'+y+'" stroke="'+WATER+'" stroke-width="2" stroke-dasharray="3 4"/>';
+    h+=dim(xa,xb,y,'差 '+(D-U)+' ＝ 流れ×2',WATER,16);
+    h+='<rect x="'+(bx+D*k+30)+'" y="'+(yd-20)+'" width="170" height="40" rx="20" fill="#90ee90"/>'+txt(bx+D*k+115,yd+1,'ぴったり！',{fs:21,c:'#25642c'});
+  }else if(up>0)h+=dim(Math.min(bx+up*k,ux),Math.max(bx+up*k,ux),yu+bh/2+62,'ずれ '+Math.abs(gap)+'m','#9a5a12',20);
+  return h;
+}
 /* 船の力（静水時）と流れを、矢印でつなぐ */
 function drawCompose(){
   const S=P.s,C=P.c,k=Math.min(3,330/(S+C)),dn=down();
@@ -197,13 +234,13 @@ function drawSlider(T){
   let h='';
   // 時間のつまみ
   const TX0=160,TX1=940,TY=370,tx=TX0+(TX1-TX0)*t/T;
-  h+=txt(TX0-20,TY,'時間',{a:'end',fs:18,c:'#7b766d'});
+  h+=txt(TX0-20,TY,(rev()?(P.ask==='s'?'静水時':'流れ'):'時間'),{a:'end',fs:18,c:'#7b766d'});
   h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+TX1+'" y2="'+TY+'" stroke="#e2dccf" stroke-width="10" stroke-linecap="round"/>';
   h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+tx+'" y2="'+TY+'" stroke="#90ee90" stroke-width="10" stroke-linecap="round"/>';
-  for(let i=0;i<=T;i++){const x=TX0+(TX1-TX0)*i/T;h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
+  for(let i=0;i<=T;i+=tstep()){const x=TX0+(TX1-TX0)*i/T;h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
   h+='<g class="thandle" id="th"><rect x="'+(tx-40)+'" y="'+(TY-30)+'" width="80" height="60" fill="transparent"/>'+
     '<circle cx="'+tx+'" cy="'+TY+'" r="18" fill="#fff" stroke="#3f9b4a" stroke-width="4"/>'+txt(tx,TY+1,'↔',{fs:18,c:'#3f9b4a'})+'</g>';
-  h+='<rect x="'+(tx-48)+'" y="'+(TY-64)+'" width="96" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,fmt(t)+'分後',{fs:19,c:'#25642c'});
+  const lb=rev()?'分速'+t+'m':fmt(t)+'分後',lw=tw(lb,19)+28;h+='<rect x="'+(tx-lw/2)+'" y="'+(TY-64)+'" width="'+lw+'" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,lb,{fs:19,c:'#25642c'});
   return h;
 }
 
@@ -232,6 +269,19 @@ function celebrate(){const el=document.createElement('div');el.className='succes
 function renderFirst(){
   const S=P.s,C=P.c,el=$('first');
   el.classList.toggle('ok',picked);
+  if(rev()){
+    const pre=P.d?'下り '+P.d+'÷'+P.td+'＝'+P.D+'m、上り '+P.d+'÷'+P.tu+'＝'+P.U+'m。 ':'';
+    if(picked){
+      $('q1').textContent=P.ask==='s'?'下り＋上り '+P.D+'＋'+P.U+'＝'+(P.D+P.U)+'m は、静水時 2つ分':'下り－上り '+P.D+'－'+P.U+'＝'+(P.D-P.U)+'m は、流れ 2つ分';
+      $('opts').innerHTML='';
+      $('msg').textContent='つまみを動かして、上りをぴったり合わせよう';
+    }else{
+      $('q1').textContent=pre+'下りと上りを、どうする？';
+      $('opts').innerHTML='<button data-op="add"><span class="no">①</span>'+P.D+'＋'+P.U+'＝'+(P.D+P.U)+'m</button><button data-op="sub"><span class="no">②</span>'+P.D+'－'+P.U+'＝'+(P.D-P.U)+'m</button>';
+      $('msg').textContent='';
+    }
+    svg.classList.toggle('locked',!picked);return;
+  }
   if(picked){
     $('q1').textContent=(down()?'下りの速さ ':'上りの速さ ')+(down()?S+'＋'+C:S+'－'+C)+'＝'+v()+'m（1分間）';
     $('opts').innerHTML='';
@@ -245,11 +295,11 @@ function renderFirst(){
 }
 $('opts').addEventListener('click',e=>{
   const b=e.target.closest('button[data-op]');if(!b)return;
-  const right=(b.dataset.op==='add')===down();
+  const right=(b.dataset.op==='add')===(rev()?P.ask==='s':down());
   if(right){picked=true;renderFirst();update();celebrate();firstSound();}
   else{
     b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
-    $('msg').textContent=down()?'下りは、流れが船を押してくれるよ':'上りは、流れに押しもどされるよ';
+    $('msg').textContent=rev()?(P.ask==='s'?'足すと、流れが消えて 静水時が2つ分になるよ':'引くと、静水時が消えて 流れが2つ分残るよ'):down()?'下りは、流れが船を押してくれるよ':'上りは、流れに押しもどされるよ';
   }
 });
 function updateCheck(){
@@ -257,12 +307,17 @@ function updateCheck(){
   if(!solved()){el.classList.remove('on');el.innerHTML='';$('nextq').hidden=true;return;}
   if(el.classList.contains('on'))return;
   if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
+  if(rev()){
+    const nm=P.ask==='s'?'静水時の速さ':'流れの速さ',ex=P.ask==='s'?'('+P.D+'＋'+P.U+')÷2':'('+P.D+'－'+P.U+')÷2';
+    el.innerHTML='<b>できた！ 答え '+nm+' 分速'+ans()+'m</b><span>'+ex+' ＝ '+ans()+'m</span>';el.classList.add('on');meetSound();
+    $('nextq').hidden=idx>=PROBLEMS.length-1;return;
+  }
   const op=down()?'('+P.s+'＋'+P.c+')':'('+P.s+'－'+P.c+')';
   el.innerHTML='<b>できた！ 答え '+fmt(ans())+'分</b><span>'+P.d+' ÷ '+op+' ＝ '+fmt(ans())+'分</span>';el.classList.add('on');meetSound();
   $('nextq').hidden=idx>=PROBLEMS.length-1;
 }
 function update(){draw();updateCheck();}
-function setT(x){if(!picked)return;t=Math.max(0,Math.min(tmax(),Math.round(x)));update();}
+function setT(x){if(!picked)return;const st=tstep();t=Math.max(0,Math.min(tmax(),Math.round(x/st)*st));update();}
 /* 時間のつまみをドラッグ */
 function localPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;}
 svg.addEventListener('pointerdown',e=>{
@@ -273,15 +328,15 @@ svg.addEventListener('pointerdown',e=>{
 svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setT((l.x-160)/(940-160)*tmax());});
 const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
 svg.setAttribute('tabindex','0');
-svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+1);e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-1);e.preventDefault();}});
+svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+tstep());e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-tstep());e.preventDefault();}});
 function renderTabs(){
   $('tabs').innerHTML='<button class="introb" id="introOpen">はじめに</button>'+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
 }
 function load(i){
-  idx=i;P=PROBLEMS[i];t=0;picked=false;
-  $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+(down()?'下り':'上り');
+  idx=i;P=PROBLEMS[i];picked=false;t=rev()&&P.ask==='s'?P.D:0;  // 逆算は「流れ0」の状態から
+  $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+(rev()?(P.ask==='s'?'逆算｜静水時を求める':'逆算｜流れを求める'):down()?'下り':'上り');
   $('qText').textContent=P.text;
-  renderTabs();renderFirst();drawRiver();
+  renderTabs();renderFirst();if(rev())$('river').innerHTML='';else drawRiver();
   $('check').classList.remove('on');$('nextq').hidden=true;
   update();
 }
