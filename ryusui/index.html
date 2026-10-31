@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>流水算の部屋 v0.1｜miss maths</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>流水算の部屋｜miss maths</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -53,9 +53,22 @@ button:active{transform:translateY(1px)}
 .flow{animation:flow 1.4s linear infinite}
 @keyframes flow{to{stroke-dashoffset:-44}}
 @media(prefers-reduced-motion:reduce){.flow{animation:none}}
+/* はじめに（解説ページ） */
+.intro h2.ititle{margin:6px 0 0;font-size:clamp(19px,2.2vw,24px);font-weight:800;line-height:1.5}
+.introsvg{width:100%;height:auto;display:block;max-height:560px;font-family:inherit}
+.ifoot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.ifoot a{font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+#introGo{font-size:16px;padding:8px 22px;background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+.tabs button.introb{width:auto;padding:0 14px;margin-right:6px;background:#fff}
 @media(max-width:760px){main{padding:12px}.question{padding:16px}.panel{padding:10px}}
 @media(prefers-reduced-motion:reduce){.check.on,.first .shake{animation:none}}
 </style></head><body><main><h1 class="sr">流水算の部屋</h1>
+<div id="intro" class="intro" hidden>
+<div class="question"><small>流水算の部屋｜はじめに</small><h2 class="ititle">船の速さは「流れ」で変わる。下り？ 上り？</h2></div>
+<section class="panel"><svg class="introsvg" viewBox="0 0 1100 500" role="img" aria-label="流水算の見分け方：下りは静水時の速さに流れの速さを足す、上りは引く。下りと上りの速さから静水時と流れの速さを求める方法"><rect x="20" y="20" width="370" height="222" rx="22" fill="#fff1dc" stroke="#e8a24f" stroke-width="3"/><circle cx="58" cy="60" r="21" fill="#fff" stroke="#e8a24f" stroke-width="3"/><text x="58" y="61" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="800" fill="#9a5a12">①</text><text x="92" y="60" text-anchor="start" dominant-baseline="central" font-size="26" font-weight="800" fill="#9a5a12">下り＝足す</text><line x1="70" y1="116" x2="250.0" y2="116" stroke="#e8a24f" stroke-width="7" stroke-linecap="round"/><path d="M262.0 116 L245.2 105 L245.2 127 Z" fill="#e8a24f"/><text x="166.0" y="98" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="800" fill="#b8741f">静水時 80m</text><line x1="262.0" y1="116" x2="298.0" y2="116" stroke="#3d9cc2" stroke-width="7" stroke-linecap="round"/><path d="M310.0 116 L293.2 105 L293.2 127 Z" fill="#3d9cc2"/><text x="292.0" y="98" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#3d9cc2">流れ 20m</text><line x1="70" y1="156" x2="298.0" y2="156" stroke="#3f9b4a" stroke-width="7" stroke-linecap="round"/><path d="M310.0 156 L293.2 145 L293.2 167 Z" fill="#3f9b4a"/><text x="320.0" y="156" text-anchor="start" dominant-baseline="central" font-size="19" font-weight="800" fill="#25642c">100m</text><rect x="44" y="192" width="322" height="36" rx="18" fill="#fff"/><text x="205" y="210" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="#2f3437">下りの速さ ＝ 静水時 ＋ 流れ</text><rect x="20" y="258" width="370" height="222" rx="22" fill="#efe9fd" stroke="#9b84de" stroke-width="3"/><circle cx="58" cy="298" r="21" fill="#fff" stroke="#9b84de" stroke-width="3"/><text x="58" y="299" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="800" fill="#5b3fb8">②</text><text x="92" y="298" text-anchor="start" dominant-baseline="central" font-size="26" font-weight="800" fill="#5b3fb8">上り＝引く</text><line x1="330" y1="348" x2="150.0" y2="348" stroke="#e8a24f" stroke-width="7" stroke-linecap="round"/><path d="M138.0 348 L154.8 337 L154.8 359 Z" fill="#e8a24f"/><text x="234.0" y="330" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="800" fill="#b8741f">静水時 80m</text><line x1="138.0" y1="366" x2="174.0" y2="366" stroke="#3d9cc2" stroke-width="7" stroke-linecap="round"/><path d="M186.0 366 L169.2 355 L169.2 377 Z" fill="#3d9cc2"/><text x="194.0" y="366" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#3d9cc2">流れ 20m</text><line x1="330" y1="400" x2="198.0" y2="400" stroke="#3f9b4a" stroke-width="7" stroke-linecap="round"/><path d="M186.0 400 L202.8 389 L202.8 411 Z" fill="#3f9b4a"/><text x="176.0" y="400" text-anchor="end" dominant-baseline="central" font-size="19" font-weight="800" fill="#25642c">60m</text><rect x="44" y="430" width="322" height="36" rx="18" fill="#fff"/><text x="205" y="448" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="#2f3437">上りの速さ ＝ 静水時 － 流れ</text><rect x="420" y="20" width="660" height="222" rx="22" fill="#fff" stroke="#e2dccf" stroke-width="3"/><path d="M421.5 56 V40 a18.5 18.5 0 0 1 18.5 -18.5 H1060 a18.5 18.5 0 0 1 18.5 18.5 V56 Z" fill="#f3f0e8"/><text x="444" y="39" text-anchor="start" dominant-baseline="central" font-size="18" font-weight="800" fill="#5a554c">ことば</text><text x="450" y="89" text-anchor="start" dominant-baseline="central" font-size="19" font-weight="800" fill="#b8741f">静水時の速さ</text><text x="690" y="89" text-anchor="start" dominant-baseline="central" font-size="17" font-weight="700" fill="#2f3437">流れのない所での、船の速さ</text><line x1="440" y1="120" x2="1060" y2="120" stroke="#eee8dc" stroke-width="2"/><text x="450" y="151" text-anchor="start" dominant-baseline="central" font-size="19" font-weight="800" fill="#3d9cc2">流れの速さ</text><text x="690" y="151" text-anchor="start" dominant-baseline="central" font-size="17" font-weight="700" fill="#2f3437">川の水が、1分間に流れる道のり</text><line x1="440" y1="182" x2="1060" y2="182" stroke="#eee8dc" stroke-width="2"/><text x="450" y="213" text-anchor="start" dominant-baseline="central" font-size="19" font-weight="800" fill="#3f9b4a">下りの速さ・上りの速さ</text><text x="690" y="213" text-anchor="start" dominant-baseline="central" font-size="17" font-weight="700" fill="#2f3437">船が、本当に1分間に進む道のり</text><rect x="420" y="258" width="660" height="222" rx="22" fill="#fff" stroke="#e2dccf" stroke-width="3"/><path d="M421.5 294 V278 a18.5 18.5 0 0 1 18.5 -18.5 H1060 a18.5 18.5 0 0 1 18.5 18.5 V294 Z" fill="#f3f0e8"/><text x="444" y="277" text-anchor="start" dominant-baseline="central" font-size="18" font-weight="800" fill="#5a554c">逆に：下りと上りから求める</text><text x="524" y="318" text-anchor="end" dominant-baseline="central" font-size="16" font-weight="800" fill="#25642c">下り 100</text><rect x="540" y="305" width="208.0" height="26" rx="5" fill="#fff1dc" stroke="#e8a24f" stroke-width="2.5"/><text x="644.0" y="319" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="800" fill="#b8741f">静水時</text><rect x="748.0" y="305" width="52.0" height="26" rx="5" fill="#d7eef6" stroke="#3d9cc2" stroke-width="2.5"/><text x="774.0" y="319" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="800" fill="#3d9cc2">流れ</text><text x="524" y="362" text-anchor="end" dominant-baseline="central" font-size="16" font-weight="800" fill="#25642c">上り 60</text><rect x="540" y="349" width="156.0" height="26" rx="5" fill="#fff1dc" stroke="#e8a24f" stroke-width="2.5"/><text x="618.0" y="363" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="800" fill="#b8741f">静水時－流れ</text><rect x="696.0" y="349" width="52.0" height="26" rx="5" fill="#fff" stroke="#3d9cc2" stroke-width="2.5" stroke-dasharray="5 4"/><text x="722.0" y="363" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="800" fill="#3d9cc2">流れ</text><path d="M696.0 384 V392 H800.0 V296" fill="none" stroke="#3d9cc2" stroke-width="0"/><line x1="696.0" y1="386" x2="800.0" y2="386" stroke="#3d9cc2" stroke-width="3"/><line x1="696.0" y1="378" x2="696.0" y2="394" stroke="#3d9cc2" stroke-width="3"/><line x1="800.0" y1="378" x2="800.0" y2="394" stroke="#3d9cc2" stroke-width="3"/><text x="812.0" y="386" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#3d9cc2">差 40 ＝ 流れ×2</text><line x1="800.0" y1="331" x2="800.0" y2="378" stroke="#3d9cc2" stroke-width="2" stroke-dasharray="3 4"/><rect x="444" y="408" width="612" height="56" rx="16" fill="#f7f5ef"/><text x="595" y="436" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="#b8741f">静水時 ＝ (下り＋上り)÷2</text><text x="905" y="436" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="#3d9cc2">流れ ＝ (下り－上り)÷2</text></svg>
+<div class="ifoot"><a href="../">← 部屋への扉</a><button id="introGo">問題へ →</button></div></section>
+</div>
+<div id="roomMain">
 <div class="question"><div class="qtop"><small id="qTag"></small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
 <section class="panel">
   <div class="first" id="first">
@@ -67,6 +80,7 @@ button:active{transform:translateY(1px)}
   <div class="panel-foot"><a class="back" href="../">← 部屋への扉</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題 →</button><button id="reset">はじめに戻す</button></div></div>
 </section>
 <p class="rnote">記録はこのiPadのブラウザに保存されます。<button id="clearRec" class="clearrec">記録をリセット</button></p>
+</div>
 </main>
 <script>
 (()=>{
@@ -261,7 +275,7 @@ const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventLis
 svg.setAttribute('tabindex','0');
 svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+1);e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-1);e.preventDefault();}});
 function renderTabs(){
-  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
+  $('tabs').innerHTML='<button class="introb" id="introOpen">はじめに</button>'+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
 }
 function load(i){
   idx=i;P=PROBLEMS[i];t=0;picked=false;
@@ -275,7 +289,15 @@ $('reset').addEventListener('click',()=>load(idx));
 $('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)load(+b.dataset.i);});
 $('clearRec').addEventListener('click',()=>{if(!confirm('この部屋の記録（クリアした問題の✓）を消して、はじめからにします。\nよろしいですか？'))return;done={};try{localStorage.removeItem('ryusui-done');}catch(e){}load(0);});
-const hq=/^#q(\d+)$/.exec(location.hash);
-load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);
+/* はじめに: 初回だけ自動で出す。2回目からは「はじめに」ボタンで開く */
+const INTRO_KEY='mm-intro-ryusui';
+let started=false;
+function startRoom(){started=true;const hq=/^#q(\d+)$/.exec(location.hash);load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);}
+function showIntro(){$('intro').hidden=false;$('roomMain').hidden=true;window.scrollTo(0,0);}
+function hideIntro(){$('intro').hidden=true;$('roomMain').hidden=false;try{localStorage.setItem(INTRO_KEY,'1');}catch(e){}if(!started)startRoom();}
+$('introGo').addEventListener('click',hideIntro);
+$('tabs').addEventListener('click',e=>{if(e.target.closest('#introOpen'))showIntro();});
+let seen=false;try{seen=localStorage.getItem(INTRO_KEY)==='1';}catch(e){}
+if(seen||/^#q\d+$/.test(location.hash))startRoom();else showIntro();
 })();
 </script></body></html>

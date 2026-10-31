@@ -43,7 +43,7 @@ main{position:relative}
 .room .enter{font-size:13px;font-weight:800;color:var(--blue-d);white-space:nowrap}
 .r-lab .ic{background:#e9f5f9}
 .r-bal .ic{background:#fff0f4}
-.r-tsuru .ic{background:#fff1dc}.r-tabi .ic{background:#ebfbea}.r-average .ic{background:#e7f5e9}
+.r-tsuru .ic{background:#fff1dc}.r-tabi .ic{background:#ebfbea}.r-ryu .ic{background:#e9f5f9}.r-average .ic{background:#e7f5e9}
 /* 準備中の扉 */
 .soon{display:flex;align-items:center;gap:16px;border:2px dashed #d9d3c6;border-radius:24px;padding:20px 22px;color:#a39d91;background:rgba(255,255,255,.5)}
 .soon .ic{flex:none;width:64px;height:64px;border-radius:18px;background:#f0ede6;display:flex;align-items:center;justify-content:center;font-size:28px}
@@ -86,7 +86,7 @@ main{position:relative}
 
 <section class="floor">
   <div class="fhead"><span class="fno">FLOOR 03</span><h2 class="fname">速さ</h2></div>
-  <div class="rooms"><a class="room r-tabi" href="./tabibito/"><div class="ic" aria-hidden="true">🏃</div><div><div class="st">ROOM 05 · 旅人算</div><h3>旅人算の部屋</h3><p>足す？引く？ 最初の一手から始めよう。</p></div><div class="pg"><svg class="ring" id="ringTabi" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div></a></div>
+  <div class="rooms"><a class="room r-tabi" href="./tabibito/"><div class="ic" aria-hidden="true">🏃</div><div><div class="st">ROOM 05 · 旅人算</div><h3>旅人算の部屋</h3><p>足す？引く？ 最初の一手から始めよう。</p></div><div class="pg"><svg class="ring" id="ringTabi" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div></a><a class="room r-ryu" href="./ryusui/"><div class="ic" aria-hidden="true">🚤</div><div><div class="st">ROOM 06 · 流水算</div><h3>流水算の部屋</h3><p>下り？上り？ 流れの矢印で確かめよう。</p></div><div class="pg"><svg class="ring" id="ringRyu" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div></a></div>
 </section>
 
 <section class="floor">
@@ -104,7 +104,8 @@ const read=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){
 const ROOMS={lab:{key:'lab-done',total:10,name:'食塩水の部屋',path:'./lab/',ring:'ringLab',col:'#5f9fb3'},
              balance:{key:'balance-done',total:10,name:'天秤図の部屋',path:'./balance/',ring:'ringBal',col:'#d9849b'},
              tsurukame:{key:'tsurukame-done',total:10,name:'つるかめ算の部屋',path:'./tsurukame/',ring:'ringTsuru',col:'#e8a24f'},
-             tabibito:{key:'tabibito-done',total:12,name:'旅人算の部屋',path:'./tabibito/',ring:'ringTabi',col:'#3f9b4a'}};
+             tabibito:{key:'tabibito-done',total:12,name:'旅人算の部屋',path:'./tabibito/',ring:'ringTabi',col:'#3f9b4a'},
+             ryusui:{key:'ryusui-done',total:6,name:'流水算の部屋',path:'./ryusui/',ring:'ringRyu',col:'#3d9cc2'}};
 function ring(id,n,total,col){
   const r=26,c=2*Math.PI*r,f=Math.min(1,n/total);
   $(id).innerHTML='<circle cx="32" cy="32" r="'+r+'" fill="none" stroke="#efebe3" stroke-width="7"/>'+
