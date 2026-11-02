@@ -63,6 +63,7 @@ button:active{transform:translateY(1px)}
   <div class="panel-foot"><a class="back" href="../">← 部屋への扉</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題 →</button><button id="reset">はじめに戻す</button></div></div>
 </section>
 <p class="rnote">記録はこのiPadのブラウザに保存されます。<button id="clearRec" class="clearrec">記録をリセット</button></p>
+
 </main>
 <script>
 (()=>{
@@ -79,6 +80,7 @@ function dim(xa,xb,y,s,col,fs){
 const pill=(x,y,s,fs)=>{fs=fs||22;const w=tw(s,fs)+40;return '<rect x="'+(x-w/2)+'" y="'+(y-20)+'" width="'+w+'" height="40" rx="20" fill="#90ee90"/>'+txt(x,y+1,s,{fs,c:'#25642c'});};
 const ROSE='#c9b8ec',ROSE_D='#7b62c4';
 let idx=0,P=null,t=0,picked=false,drag=false;
+const INTRO=null;
 
 const KEY='tsuka-done';
 /* ===== 問題 =====
@@ -271,7 +273,7 @@ const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventLis
 svg.setAttribute('tabindex','0');
 svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+keyStep());e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-keyStep());e.preventDefault();}});
 function renderTabs(){
-  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
+  $('tabs').innerHTML=(INTRO?'<button class="introb" id="introOpen">はじめに</button>':'')+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
 }
 function load(i){
   idx=i;P=PROBLEMS[i];t=0;picked=false;
@@ -285,7 +287,17 @@ $('reset').addEventListener('click',()=>load(idx));
 $('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)load(+b.dataset.i);});
 $('clearRec').addEventListener('click',()=>{if(!confirm('この部屋の記録（クリアした問題の✓）を消して、はじめからにします。\nよろしいですか？'))return;done={};try{localStorage.removeItem(KEY);}catch(e){}load(0);});
-const hq=/^#q(\d+)$/.exec(location.hash);
-load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);
+function startRoom(){started=true;const hq=/^#q(\d+)$/.exec(location.hash);load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);}
+let started=false;
+if(!INTRO)startRoom();
+else{
+  /* はじめに: 初回だけ自動で出す。2回目からは「はじめに」ボタンで開く */
+  const showIntro=()=>{$('intro').hidden=false;$('roomMain').hidden=true;window.scrollTo(0,0);};
+  const hideIntro=()=>{$('intro').hidden=true;$('roomMain').hidden=false;try{localStorage.setItem(INTRO,'1');}catch(e){}if(!started)startRoom();};
+  $('introGo').addEventListener('click',hideIntro);
+  $('tabs').addEventListener('click',e=>{if(e.target.closest('#introOpen'))showIntro();});
+  let seen=false;try{seen=localStorage.getItem(INTRO)==='1';}catch(e){}
+  if(seen||/^#q\d+$/.test(location.hash))startRoom();else showIntro();
+}
 })();
 </script></body></html>

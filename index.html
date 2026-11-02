@@ -138,7 +138,7 @@ const ROOMS={lab:{key:'lab-done',total:10,name:'食塩水の部屋',path:'./lab/
              tabibito:{key:'tabibito-done',total:12,name:'旅人算の部屋',path:'./tabibito/',ring:'ringTabi',col:'#3f9b4a'},
              ryusui:{key:'ryusui-done',total:10,name:'流水算の部屋',path:'./ryusui/',ring:'ringRyu',col:'#3d9cc2'},
              tsuka:{key:'tsuka-done',total:6,name:'通過算の部屋',path:'./tsuka/',ring:'ringTsuka',col:'#d9849b'},
-             tokei:{key:'tokei-done',total:6,name:'時計算の部屋',path:'./tokei/',ring:'ringTokei',col:'#9b84de'}};
+             tokei:{key:'tokei-done',total:10,name:'時計算の部屋',path:'./tokei/',ring:'ringTokei',col:'#9b84de'}};
 function ring(id,n,total,col){
   const r=26,c=2*Math.PI*r,f=Math.min(1,n/total);
   $(id).innerHTML='<circle cx="32" cy="32" r="'+r+'" fill="none" stroke="#efebe3" stroke-width="7"/>'+
