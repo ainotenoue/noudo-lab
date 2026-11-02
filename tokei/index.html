@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>時計算の部屋｜miss maths</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f7f5ef;--ink:#2f3437;--ink2:#7b766d;--card:#fff;--edge:#ebe5da;--green-d:#3f9b4a;--green-s:#ebfbea}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Maru Gothic ProN','M PLUS Rounded 1c',-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:15px 28px 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.question{margin:0 0 10px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:20px 26px;line-height:1.7;font-size:clamp(17px,2vw,21px);font-weight:800}
+.question small{display:inline-block;font-size:13px;color:var(--green-d);background:var(--green-s);border-radius:999px;padding:2px 12px;font-weight:800}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;white-space:nowrap;border:2px solid #b9e6b9;border-radius:999px;padding:5px 14px;font-size:14px;background:var(--green-s);font-weight:800;color:#2f6f37;touch-action:manipulation}
+button:active{transform:translateY(1px)}
+.tabs button{width:38px;height:38px;padding:0;font-size:15px;background:#fff;border-color:var(--edge);color:var(--ink2)}
+.tabs button.done{background:#f3f0e8;color:#9a9488;border-color:#e2dccf}
+.tabs button.done::after{content:"✓";font-size:10px;vertical-align:super;margin-left:1px;color:var(--green-d)}
+.tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#9fd99f;color:#2f6f37}
+.panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:12px 22px 12px}
+/* 初動: まず「たす？ひく？」を決める */
+.first{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff7e9;border-radius:18px;padding:10px 16px}
+.first .q1{font-size:18px;font-weight:800}
+.first .opts{display:flex;gap:10px}
+.first .opts button{font-size:18px;padding:8px 18px;background:#fff;border-color:#e8c48a;color:#7a4f12}
+.first .opts .no{display:inline-block;margin-right:8px;font-size:20px;color:#c07a1c}
+.successMark{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);width:154px;height:154px;border:13px solid #e6a45c;border-radius:50%;color:#d68a37;font-size:100px;line-height:125px;text-align:center;background:#fffaf2e8;pointer-events:none;z-index:99;animation:successPop 1.15s ease-out forwards}
+@keyframes successPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}40%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+@media(prefers-reduced-motion:reduce){.successMark{animation:none;opacity:0}}
+.first .msg{font-size:15px;font-weight:700;color:#9a5a12}
+.first.ok{background:var(--green-s)}
+.first.ok .q1{color:#25642c}
+.first .shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.diagram{width:100%;height:auto;display:block;max-height:430px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
+.diagram:focus{outline:none}
+.locked .thandle{opacity:.35}
+.thandle{cursor:grab}
+.panel-foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;min-height:48px}
+.back{justify-self:start;font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+.check{visibility:hidden;background:var(--green-s);border-radius:16px;padding:8px 22px;text-align:center;color:#2f5f35;line-height:1.5}
+.check.on{visibility:visible;animation:pop .35s ease-out}
+.check b{display:block;font-size:22px;color:#25642c}
+.check span{display:block;font-size:18px;font-weight:700;margin-top:2px}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.fbtns{justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+#nextq{background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+#reset{background:#fff}
+.rnote{text-align:center;font-size:12px;color:var(--ink2);font-weight:700;margin:10px 0 0}
+.clearrec{margin-left:10px;background:none;border:0;padding:0;font-size:12px;color:var(--ink2);text-decoration:underline;font-weight:700}
+@media(max-width:760px){main{padding:12px}.question{padding:16px}.panel{padding:10px}}
+@media(prefers-reduced-motion:reduce){.check.on,.first .shake{animation:none}}
+</style></head><body><main><h1 class="sr">時計算の部屋</h1>
+<div class="question"><div class="qtop"><small id="qTag"></small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
+<section class="panel">
+  <div class="first" id="first">
+    <span class="q1" id="q1">長針は短針に、1分間に何度近づく？</span>
+    <span class="opts" id="opts"></span>
+    <span class="msg" id="msg"></span>
+  </div>
+  <svg class="diagram locked" id="diagram" viewBox="0 0 1100 400" role="img" aria-label="時計算の図。時間を進めると長針と短針が動きます"><g id="art"></g></svg>
+  <div class="panel-foot"><a class="back" href="../">← 部屋への扉</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題 →</button><button id="reset">はじめに戻す</button></div></div>
+</section>
+<p class="rnote">記録はこのiPadのブラウザに保存されます。<button id="clearRec" class="clearrec">記録をリセット</button></p>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id), svg=$('diagram');
+const txt=(x,y,s,o={})=>'<text x="'+x+'" y="'+y+'" text-anchor="'+(o.a||'middle')+'" dominant-baseline="central" font-size="'+(o.fs||20)+'" font-weight="'+(o.fw||800)+'" fill="'+(o.c||'#2f3437')+'">'+s+'</text>';
+const tw=(s,fs)=>{let w=0;for(const ch of String(s))w+=/[ -~]/.test(ch)?0.6:1;return w*fs;};
+function dim(xa,xb,y,s,col,fs){
+  fs=fs||20;const w=tw(s,fs)+16;
+  if(xb-xa<4)return '';
+  return '<line x1="'+xa+'" y1="'+y+'" x2="'+xb+'" y2="'+y+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<line x1="'+xa+'" y1="'+(y-9)+'" x2="'+xa+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/><line x1="'+xb+'" y1="'+(y-9)+'" x2="'+xb+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<rect x="'+((xa+xb)/2-w/2)+'" y="'+(y-15)+'" width="'+w+'" height="30" rx="8" fill="#fff"/>'+txt((xa+xb)/2,y+1,s,{fs,c:col});
+}
+const pill=(x,y,s,fs)=>{fs=fs||22;const w=tw(s,fs)+40;return '<rect x="'+(x-w/2)+'" y="'+(y-20)+'" width="'+w+'" height="40" rx="20" fill="#90ee90"/>'+txt(x,y+1,s,{fs,c:'#25642c'});};
+const ROSE='#c9b8ec',ROSE_D='#7b62c4';
+let idx=0,P=null,t=0,picked=false,drag=false;
+
+const KEY='tokei-done';
+/* ===== 問題 =====
+   長針は1分で6度、短針は0.5度。どちらも右回り → 長針は1分で 6－0.5＝5.5度 ずつ短針に近づく（追いかけ）
+   h … 何時ちょうどから　off … めあての位置（短針から何度のところに長針が来ればよいか）
+   g … はじめのあいだ（長針が追いつく角度）　gtx … 式での書き方
+   時間は「11分の1分」を1目もりとして数える（5.5度×1/11分＝0.5度） */
+const PROBLEMS=[
+  {h:3,off:0,g:90,gtx:'90',goal:'重なった！',tag:'重なる',text:'3時ちょうどから、長針と短針が初めて重なるのは何分後ですか？'},
+  {h:2,off:0,g:60,gtx:'60',goal:'重なった！',tag:'重なる',text:'2時ちょうどから、長針と短針が初めて重なるのは何分後ですか？'},
+  {h:4,off:0,g:120,gtx:'120',goal:'重なった！',tag:'重なる',text:'4時ちょうどから、長針と短針が初めて重なるのは何分後ですか？'},
+  {h:6,off:0,g:180,gtx:'180',goal:'重なった！',tag:'重なる',text:'6時ちょうどから、長針と短針が初めて重なるのは何分後ですか？'},
+  {h:3,off:180,g:270,gtx:'(90＋180)',goal:'一直線！',tag:'一直線',text:'3時ちょうどから、長針と短針が初めて一直線（反対向き）になるのは何分後ですか？'},
+  {h:9,off:-90,g:180,gtx:'(270－90)',goal:'直角！',tag:'直角',text:'9時ちょうどの長針と短針は直角です。このあと、次に直角になるのは何分後ですか？'}
+];
+const ans=()=>P.g*2;                                   // 11分の1分の目もりで
+const ansMin=()=>P.g/5.5;
+const tmax=()=>11*Math.min(Math.ceil(ansMin()*1.5),Math.ceil(ansMin())+15);
+const snap=v=>Math.round(v/11)*11, tickStep=()=>11, keyStep=()=>1;
+const fmtMin=n=>{const m=Math.floor(n/11),r=n%11;return r?m+'と'+r+'/11分':m+'分';};
+const tlabel=()=>fmtMin(t)+'後';
+const rightIsAdd=()=>false;
+const firstQ=()=>'長針は短針に、1分間に何度近づく？';
+const firstOpts=()=>['6＋0.5＝6.5度','6－0.5＝5.5度'];
+const pickedQ=()=>'1分間に 6－0.5＝5.5度 ちぢまる';
+const pickedMsg=()=>'あいだを0度に。こまかい調整は ◀ ▶（1/11分ずつ）';
+const wrongMsg=()=>'長針も短針も同じ右回り。長針が速い分だけ近づくよ';
+const checkHead=()=>'できた！ 答え '+fmtMin(ans())+'後';
+const checkLine=()=>P.gtx+' ÷ 5.5 ＝ '+fmtMin(ans());
+const f1=v=>Number(v.toFixed(1)).toString();
+const CX=300,CY=160,R=112;
+const pt=(deg,r)=>[CX+r*Math.sin(deg*Math.PI/180),CY-r*Math.cos(deg*Math.PI/180)];
+function arc(a0,len,r,col,w,op){
+  if(len<=0.01)return '';
+  if(len>=359.99)return '<circle cx="'+CX+'" cy="'+CY+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+w+'"'+(op?' opacity="'+op+'"':'')+'/>';
+  const [x0,y0]=pt(a0,r),[x1,y1]=pt(a0+len,r);
+  return '<path d="M'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 '+(len>180?1:0)+' 1 '+x1.toFixed(1)+' '+y1.toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"'+(op?' opacity="'+op+'"':'')+'/>';
+}
+function draw(){
+  const min=t/11, la=6*min, sa=30*P.h+0.5*min, rem=P.g-0.5*t, met=Math.abs(rem)<1e-9, ok=solved();
+  let h='';
+  // 文字盤
+  h+='<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="#fff" stroke="'+(ok?'#3f9b4a':'#cfc8bb')+'" stroke-width="'+(ok?8:6)+'"/>';
+  for(let i=0;i<60;i++){const big=i%5===0,[x0,y0]=pt(i*6,R-6),[x1,y1]=pt(i*6,R-(big?16:11));h+='<line x1="'+x0.toFixed(1)+'" y1="'+y0.toFixed(1)+'" x2="'+x1.toFixed(1)+'" y2="'+y1.toFixed(1)+'" stroke="#b9b2a5" stroke-width="'+(big?3:1.5)+'"/>';}
+  for(let i=1;i<=12;i++){const [x,y]=pt(i*30,R-30);h+=txt(x.toFixed(1),y.toFixed(1),i,{fs:15,c:'#9a9184'});}
+  // 進んだ角度（外側）
+  if(t>0){h+=arc(0,la%360,R+12,'#add8e6',8,.95);if(la>=360)h+=arc(0,360,R+12,'#add8e6',8,.35);h+=arc(30*P.h,0.5*min,R+24,'#ffd1dc',8);}
+  // めあての向き（点線）
+  const ga=sa+P.off,[gx,gy]=pt(ga,R-4);
+  if(P.off!==0)h+='<line x1="'+CX+'" y1="'+CY+'" x2="'+gx.toFixed(1)+'" y2="'+gy.toFixed(1)+'" stroke="#9a5a12" stroke-width="3" stroke-dasharray="6 5"/>';
+  // あいだ（長針から右回りに、めあてまで）
+  if(rem>0)h+=arc(la,rem,R-44,'#9a5a12',6);
+  // 針
+  const hand=(a,len,w,col)=>{const [x,y]=pt(a,len);return '<line x1="'+CX+'" y1="'+CY+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"/>';};
+  h+=hand(sa,R-58,met?12:10,met?ROSE_D:'#d9849b')+hand(la,R-20,met?7:6,met?ROSE_D:'#3d9cc2');
+  h+='<circle cx="'+CX+'" cy="'+CY+'" r="'+(met?8:6)+'" fill="'+(met?ROSE_D:'#2f3437')+'"/>';
+  // 右: 速さとあいだ
+  const RX=540;
+  h+='<line x1="'+RX+'" y1="62" x2="'+(RX+40)+'" y2="62" stroke="#3d9cc2" stroke-width="6" stroke-linecap="round"/>'+txt(RX+54,62,'長針　1分で 6度',{a:'start',fs:18,c:'#3d9cc2'});
+  h+='<line x1="'+RX+'" y1="100" x2="'+(RX+26)+'" y2="100" stroke="#d9849b" stroke-width="10" stroke-linecap="round"/>'+txt(RX+54,100,'短針　1分で 0.5度',{a:'start',fs:18,c:'#d9849b'});
+  h+=txt(RX,150,'はじめのあいだ',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(RX+130,150,P.gtx.replace(/[()]/g,'')+(P.gtx.includes('(')?'＝'+P.g:'')+'度',{a:'start',fs:17,c:'#7b766d'});
+  if(met)h+=pill(RX+120,215,P.goal,24);
+  else if(rem>0)h+=txt(RX,215,'あいだ',{a:'start',fs:18,c:'#9a5a12'})+txt(RX+70,215,f1(rem)+'度',{a:'start',fs:34,c:'#9a5a12'});
+  else h+=txt(RX,215,'通りすぎ '+f1(-rem)+'度',{a:'start',fs:20,c:'#7b766d'});
+  return h;
+}
+/* こまかい調整（1/11分ずつ） */
+const FB=[[985,'◀',-1],[1040,'▶',1]];
+function extraSlider(){
+  let h='';for(const [x,s] of FB)h+='<circle cx="'+x+'" cy="'+TY+'" r="21" fill="#fff" stroke="#3f9b4a" stroke-width="3"/>'+txt(x,TY+1,s,{fs:16,c:'#3f9b4a'});
+  return h+txt(1012,TY+36,'1/11分',{fs:13,c:'#7b766d',fw:700});
+}
+function hitExtra(l){for(const [x,,d] of FB)if(Math.hypot(l.x-x,l.y-TY)<26){setT(t+d);return true;}return false;}
+
+let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){done={};}
+const saveDone=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
+const solved=()=>picked&&Math.abs(t-ans())<1e-9;
+/* ===== 効果音（Web Audio） ===== */
+let actx=null;
+function audio(){
+  try{if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC();}
+  if(actx.state==='suspended')actx.resume();return actx;}catch(e){return null;}
+}
+// tone(周波数Hz, 長さ秒, 波形, 音量, 開始の遅れ秒)
+function tone(f,d,type,vol,delay){
+  const c=audio();if(!c)return;
+  type=type||'sine';vol=vol==null?.035:vol;delay=delay||0;
+  const t0=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t0);
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.02);
+}
+// 初動の正解音（ピンポン）
+const firstSound=()=>{tone(590,.10);tone(790,.13,'sine',.035,.08);};
+// 出会った／追いついたときの音（ドミソド↑）
+const meetSound=()=>{tone(523,.12,'sine',.034);tone(659,.12,'sine',.034,.09);tone(784,.14,'sine',.034,.18);tone(1047,.32,'sine',.038,.27);tone(1568,.30,'triangle',.012,.27);};
+// iPad: 最初のタッチで音を使えるようにする
+document.addEventListener('touchstart',function un(){audio();document.removeEventListener('touchstart',un);},{passive:true});
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+/* 時間のつまみ */
+const TX0=160,TX1=940,TY=345;
+function drawSlider(){
+  const T=tmax(),tx=TX0+(TX1-TX0)*t/T;let h='';
+  h+=txt(TX0-20,TY,'時間',{a:'end',fs:18,c:'#7b766d'});
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+TX1+'" y2="'+TY+'" stroke="#e2dccf" stroke-width="10" stroke-linecap="round"/>';
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+tx+'" y2="'+TY+'" stroke="#90ee90" stroke-width="10" stroke-linecap="round"/>';
+  const ts=tickStep();for(let i=0;i<=T+1e-9;i+=ts){const x=TX0+(TX1-TX0)*i/T;h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
+  h+='<g class="thandle"><circle cx="'+tx+'" cy="'+TY+'" r="18" fill="#fff" stroke="#3f9b4a" stroke-width="4"/>'+txt(tx,TY+1,'↔',{fs:18,c:'#3f9b4a'})+'</g>';
+  const lb=tlabel(),lw=tw(lb,19)+28;
+  h+='<rect x="'+(tx-lw/2)+'" y="'+(TY-64)+'" width="'+lw+'" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,lb,{fs:19,c:'#25642c'});
+  if(typeof extraSlider==='function')h+=extraSlider();
+  return h;
+}
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+function renderFirst(){
+  const el=$('first');el.classList.toggle('ok',picked);
+  if(picked){$('q1').textContent=pickedQ();$('opts').innerHTML='';$('msg').textContent=pickedMsg();}
+  else{$('q1').textContent=firstQ();const o=firstOpts();
+    $('opts').innerHTML='<button data-op="add"><span class="no">①</span>'+o[0]+'</button><button data-op="sub"><span class="no">②</span>'+o[1]+'</button>';$('msg').textContent='';}
+  svg.classList.toggle('locked',!picked);
+}
+$('opts').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-op]');if(!b)return;
+  if((b.dataset.op==='add')===rightIsAdd()){picked=true;renderFirst();update();celebrate();firstSound();}
+  else{b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');$('msg').textContent=wrongMsg();}
+});
+function updateCheck(){
+  const el=$('check');
+  if(!solved()){el.classList.remove('on');el.innerHTML='';$('nextq').hidden=true;return;}
+  if(el.classList.contains('on'))return;
+  if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
+  el.innerHTML='<b>'+checkHead()+'</b><span>'+checkLine()+'</span>';el.classList.add('on');meetSound();
+  $('nextq').hidden=idx>=PROBLEMS.length-1;
+}
+function update(){$('art').innerHTML=draw()+drawSlider();updateCheck();}
+function setT(v){if(!picked)return;t=Math.max(0,Math.min(tmax(),v));update();}
+function localPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;}
+svg.addEventListener('pointerdown',e=>{
+  if(!picked)return;
+  const l=localPt(e);if(!l)return;
+  if(typeof hitExtra==='function'&&hitExtra(l)){e.preventDefault();return;}
+  if(l.y<300)return;
+  drag=true;svg.setPointerCapture(e.pointerId);setT(snap((l.x-TX0)/(TX1-TX0)*tmax()));e.preventDefault();
+});
+svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setT(snap((l.x-TX0)/(TX1-TX0)*tmax()));});
+const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
+svg.setAttribute('tabindex','0');
+svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+keyStep());e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-keyStep());e.preventDefault();}});
+function renderTabs(){
+  $('tabs').innerHTML=PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
+}
+function load(i){
+  idx=i;P=PROBLEMS[i];t=0;picked=false;
+  $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+P.tag;
+  $('qText').textContent=P.text;
+  renderTabs();renderFirst();
+  $('check').classList.remove('on');$('nextq').hidden=true;
+  update();
+}
+$('reset').addEventListener('click',()=>load(idx));
+$('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)load(+b.dataset.i);});
+$('clearRec').addEventListener('click',()=>{if(!confirm('この部屋の記録（クリアした問題の✓）を消して、はじめからにします。\nよろしいですか？'))return;done={};try{localStorage.removeItem(KEY);}catch(e){}load(0);});
+const hq=/^#q(\d+)$/.exec(location.hash);
+load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);
+})();
+</script></body></html>
