@@ -121,7 +121,7 @@ const tmax=()=>P.b?660:11*Math.min(Math.ceil(ansMin()*1.5),Math.ceil(ansMin())+1
 const sAng=(h,m)=>30*h+0.5*m, lAng=m=>6*m;
 const angAt=(h,m)=>{let d=Math.abs(sAng(h,m)-lAng(m))%360;return d>180?360-d:d;};
 const snap=v=>Math.round(v/11)*11, tickStep=()=>P.b?55:11, keyStep=()=>P.b?11:1;
-const fmtMin=n=>{const m=Math.floor(n/11),r=n%11;return r?m+'と'+r+'/11分':m+'分';};
+const fmtMin=n=>{const m=Math.floor(n/11),r=n%11;return r?(m?m+'と':'')+r+'/11分':m+'分';};
 const tlabel=()=>fmtMin(t)+'後';
 const rightIsAdd=()=>!!P.b;
 const firstQ=()=>P.b?P.h+'時ちょうど、短針は12から何度？':'長針は短針に、1分間に何度近づく？';
@@ -131,7 +131,7 @@ const pickedMsg=()=>P.b?P.h+'時'+P.m+'分まで時間を進めて、角度を�
 const wrongMsg=()=>P.b?'数字と数字のあいだは30度。'+P.h+'時なら数字'+P.h+'つ分だよ':'長針も短針も同じ右回り。長針が速い分だけ近づくよ';
 const checkHead=()=>P.b?'できた！ 答え '+angAt(P.h,P.m)+'度':'できた！ 答え '+fmtMin(ans())+'後';
 const checkLine=()=>{
-  if(!P.b)return P.gtx+' ÷ 5.5 ＝ '+fmtMin(ans());
+  if(!P.b)return 'はじめのあいだ '+P.g+' ÷ 5.5 ＝ '+fmtMin(ans());
   const sa=sAng(P.h,P.m),la=lAng(P.m),d=Math.abs(sa-la);
   return (sa>=la?'短針 '+sa+' － 長針 '+la:'長針 '+la+' － 短針 '+sa)+' ＝ '+d+'度'+(d>180?' → 360－'+d+'＝'+(360-d)+'度':'');
 };
@@ -164,14 +164,13 @@ function draw(){
   const hand=(a,len,w,col)=>{const [x,y]=pt(a,len);return '<line x1="'+CX+'" y1="'+CY+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"/>';};
   h+=hand(sa,R-58,met?12:10,met?ROSE_D:HS)+hand(la,R-20,met?7:6,met?ROSE_D:HL);
   h+='<circle cx="'+CX+'" cy="'+CY+'" r="'+(met?8:6)+'" fill="'+(met?ROSE_D:'#2f3437')+'"/>';
-  // 右: 速さとあいだ
-  const RX=540;
-  h+='<line x1="'+RX+'" y1="62" x2="'+(RX+40)+'" y2="62" stroke="'+HL+'" stroke-width="6" stroke-linecap="round"/>'+txt(RX+54,62,'長針　1分で 6度',{a:'start',fs:18,c:'#3d9cc2'});
-  h+='<line x1="'+RX+'" y1="100" x2="'+(RX+26)+'" y2="100" stroke="'+HS+'" stroke-width="10" stroke-linecap="round"/>'+txt(RX+54,100,'短針　1分で 0.5度',{a:'start',fs:18,c:'#d9849b'});
-  h+=txt(RX,150,'はじめのあいだ',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(RX+130,150,P.gtx.replace(/[()]/g,'')+(P.gtx.includes('(')?'＝'+P.g:'')+'度',{a:'start',fs:17,c:'#7b766d'});
-  if(met)h+=pill(RX+120,215,P.goal,24);
-  else if(rem>0)h+=txt(RX,215,'あいだ',{a:'start',fs:18,c:'#9a5a12'})+txt(RX+70,215,f1(rem)+'度',{a:'start',fs:34,c:'#9a5a12'});
-  else h+=txt(RX,215,'通りすぎ '+f1(-rem)+'度',{a:'start',fs:20,c:'#7b766d'});
+  // 右: 計算の手順（数字の下に、その数字が何かを書く）
+  const RX=520,o=rem>0;
+  if(met)h+=pill(RX+420,28,P.goal,24);
+  h+=step(78,'はじめのあいだ','#7b766d',gapToks(),'',128);
+  h+=step(150,'1分で近づく','#3f9b4a',[['6','長針 1分で'],['－'],['0.5','短針 1分で'],['＝'],['5.5度']],'',128);
+  if(rem>=-1e-9)h+=step(222,'のこりのあいだ','#9a5a12',[[P.g,'はじめ'],['－'],['5.5','1分で'],['×'],[fmtMin(t).replace('分',''),'分'],['＝'],[f1(Math.max(0,rem))+'度']],'',128);
+  else h+=step(222,'のこりのあいだ','#7b766d',[['通りすぎ '+f1(-rem)+'度']],'',128);
   return h;
 }
 /* きほん: ○時△分の角度 */
@@ -186,16 +185,36 @@ function drawBasic(){
   for(let i=1;i<=12;i++){const [x,y]=pt(i*30,R-30);h+=txt(x.toFixed(1),y.toFixed(1),i,{fs:15,c:'#9a9184'});}
   const hand=(a,len,w,col)=>{const [x,y]=pt(a,len);return '<line x1="'+CX+'" y1="'+CY+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"/>';};
   h+=hand(sa,R-58,10,HS)+hand(la,R-20,6,HL)+'<circle cx="'+CX+'" cy="'+CY+'" r="6" fill="#2f3437"/>';
-  // 右: 12の位置から測った角度
-  const RX=540;
-  h+=txt(RX,40,'いま '+P.h+'時'+fmtMin(t),{a:'start',fs:17,c:'#7b766d'});
-  h+='<line x1="'+RX+'" y1="86" x2="'+(RX+26)+'" y2="86" stroke="'+HS+'" stroke-width="10" stroke-linecap="round"/>'+txt(RX+40,86,'短針　30×'+P.h+' ＋ 0.5×'+f1(min)+' ＝ '+f1(sa)+'度',{a:'start',fs:18,c:'#d9849b'});
-  h+='<line x1="'+RX+'" y1="126" x2="'+(RX+40)+'" y2="126" stroke="'+HL+'" stroke-width="6" stroke-linecap="round"/>'+txt(RX+54,126,'長針　6×'+f1(min)+' ＝ '+f1(la)+'度',{a:'start',fs:18,c:'#3d9cc2'});
-  h+=txt(RX,166,'（どちらも12の位置から右回りに）',{a:'start',fs:14,c:'#9a9184',fw:700});
-  if(at)h+=pill(RX+120,222,P.h+'時'+P.m+'分！',24);
-  const ax=RX+(at?250:0);
-  h+=txt(ax,222,'角度',{a:'start',fs:18,c:'#9a5a12'})+txt(ax+58,222,f1(ang)+'度',{a:'start',fs:34,c:'#9a5a12'});
+  // 右: 計算の手順（数字の下に、その数字が何かを書く）
+  const RX=520,mm=f1(min),big=Math.max(sa,la),sm=Math.min(sa,la),d=big-sm;
+  h+=txt(RX,28,'いま '+P.h+'時'+fmtMin(t),{a:'start',fs:18,c:'#7b766d'});
+  if(at)h+=pill(RX+300,28,P.h+'時'+P.m+'分！',24);
+  h+=step(78,'短針',HS,[['30','数字1つ分'],['×'],[P.h,P.h+'時'],['＋'],['0.5','1分で'],['×'],[mm,'分'],['＝'],[f1(sa)+'度']],'');
+  h+=step(150,'長針',HL,[['6','1分で'],['×'],[mm,'分'],['＝'],[f1(la)+'度']],'');
+  h+=d<=180?step(222,'角度','#9a5a12',[[f1(big),big===la?'長針':'短針'],['－'],[f1(sm),big===la?'短針':'長針'],['＝'],[f1(d)+'度']],'')
+            :step(222,'角度','#9a5a12',[['360','1周'],['－'],[f1(d),'長針と短針の差'],['＝'],[f1(360-d)+'度']],'');
   return h;
+}
+/* 計算の1行: 左に何の計算かの札、右に式。数字の下に小さく「その数字が何か」 */
+const OPS=['×','＋','－','＝','÷','→'];
+function step(y,tag,col,toks,note,bw){
+  bw=bw||62;
+  let h='<rect x="520" y="'+(y-16)+'" width="'+bw+'" height="32" rx="16" fill="'+col+'"/>'+txt(520+bw/2,y+1,tag,{fs:15,c:'#fff'});
+  let x=520+bw+16;
+  toks.forEach((tk,i)=>{
+    const s=String(tk[0]),last=i===toks.length-1,op=OPS.includes(s),fs=last?25:22,w=tw(s,fs),mid=x+w/2;
+    h+=txt(mid,y,s,{fs,c:op?'#9a9184':(last?col:'#2f3437')});
+    if(tk[1]){h+='<line x1="'+(mid-w/2)+'" y1="'+(y+15)+'" x2="'+(mid+w/2)+'" y2="'+(y+15)+'" stroke="#e2dccf" stroke-width="2"/>'+txt(mid,y+28,tk[1],{fs:12,c:'#9a9184',fw:700});}
+    x+=w+(op?8:10);
+  });
+  return h;
+}
+/* はじめのあいだの式 */
+function gapToks(){
+  const t=[['30','数字1つ分'],['×'],[P.h,P.h+'時']];
+  if(P.off===180)t.push(['＋'],['180','一直線']);
+  if(P.off===-90)t.push(['－'],['90','直角']);
+  t.push(['＝'],[P.g+'度']);return t;
 }
 /* こまかい調整（1/11分ずつ） */
 const FB=[[985,'◀',-1],[1040,'▶',1]];
