@@ -49,6 +49,16 @@ button:active{transform:translateY(1px)}
 #reset{background:#fff}
 .rnote{text-align:center;font-size:12px;color:var(--ink2);font-weight:700;margin:10px 0 0}
 .clearrec{margin-left:10px;background:none;border:0;padding:0;font-size:12px;color:var(--ink2);text-decoration:underline;font-weight:700}
+/* 式: 数字の下に、その数字が何かを小さく書く */
+.fxrow{display:inline-flex;align-items:center;gap:10px;vertical-align:middle}
+.fxtag{color:#fff;font-size:14px;font-weight:800;border-radius:999px;padding:4px 12px;white-space:nowrap}
+.fx{display:inline-flex;align-items:flex-start;gap:7px}
+.check .fx{display:flex;justify-content:center;margin-top:4px}
+.fx .tk{display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.fx .n{font-size:20px;font-weight:800;color:#2f3437;padding:0 2px;border-bottom:2px solid #e2dccf}
+.fx .c{font-size:11px;font-weight:700;color:#9a9184;margin-top:2px;white-space:nowrap}
+.fx .op{font-size:18px;font-weight:800;color:#9a9184;line-height:1.3}
+.fx .res .n{border-bottom-color:transparent;color:inherit;font-size:21px}
 @media(max-width:760px){main{padding:12px}.question{padding:16px}.panel{padding:10px}}
 @media(prefers-reduced-motion:reduce){.check.on,.first .shake{animation:none}}
 </style></head><body><main><h1 class="sr">通過算の部屋</h1>
@@ -79,6 +89,13 @@ function dim(xa,xb,y,s,col,fs){
 }
 const pill=(x,y,s,fs)=>{fs=fs||22;const w=tw(s,fs)+40;return '<rect x="'+(x-w/2)+'" y="'+(y-20)+'" width="'+w+'" height="40" rx="20" fill="#90ee90"/>'+txt(x,y+1,s,{fs,c:'#25642c'});};
 const ROSE='#c9b8ec',ROSE_D='#7b62c4';
+
+/* 式を、数字と「その数字が何か」の組でならべる */
+const FXOPS=['×','＋','－','＝','÷'];
+const fx=(toks,col)=>'<div class="fx">'+toks.map((t,i)=>{const s=String(t[0]);if(FXOPS.includes(s))return '<div class="op">'+s+'</div>';
+  const last=i===toks.length-1;return '<div class="tk'+(last?' res':'')+'"'+(last?' style="color:'+(col||'#25642c')+'"':'')+'><div class="n">'+s+'</div><div class="c">'+(t[1]||'&nbsp;')+'</div></div>';}).join('')+'</div>';
+const fxRow=(tag,col,toks)=>'<span class="fxrow"><span class="fxtag" style="background:'+col+'">'+tag+'</span>'+fx(toks,col)+'</span>';
+
 let idx=0,P=null,t=0,picked=false,drag=false;
 const INTRO=null;
 
@@ -106,13 +123,15 @@ const tlabel=()=>t+'秒後';
 const rightIsAdd=()=>P.kind==='bridge'||P.kind==='pass';
 const firstQ=()=>two()?'のこりは、1秒間に何mちぢまる？':'先頭が進む道のりは？';
 const firstOpts=()=>two()?[P.va+'＋'+P.vb+'＝'+(P.va+P.vb)+'m',P.va+'－'+P.vb+'＝'+(P.va-P.vb)+'m']:[P.B+'＋'+P.L+'＝'+(P.B+P.L)+'m',P.B+'－'+P.L+'＝'+(P.B-P.L)+'m'];
-const pickedQ=()=>two()?'1秒間に '+(P.kind==='pass'?P.va+'＋'+P.vb:P.va+'－'+P.vb)+'＝'+rate()+'m ちぢまる':'先頭が進む道のり '+(P.kind==='bridge'?P.B+'＋'+P.L:P.B+'－'+P.L)+'＝'+dist()+'m';
+const pickedQ=()=>two()?fxRow('1秒で近づく','#3f9b4a',[[P.va,'A（m）'],[P.kind==='pass'?'＋':'－'],[P.vb,'B（m）'],['＝'],[rate()+'m']])
+  :fxRow('先頭が進む道のり','#3f9b4a',[[P.B,(P.kind==='bridge'?'鉄橋':'トンネル')+'（m）'],[P.kind==='bridge'?'＋':'－'],[P.L,'列車（m）'],['＝'],[dist()+'m']]);
 const pickedMsg=()=>two()?'道のりは2本の長さの和 '+P.LA+'＋'+P.LB+'＝'+dist()+'m':'時間を進めて、のこりが0mになるところをさがそう';
 const wrongMsg=()=>({bridge:'わたり終わるのは、最後尾が鉄橋を出たとき。先頭は列車の長さ分、先まで進むよ',
   tunnel:'かくれているのは、最後尾が入ってから先頭が出るまで。列車の長さ分、短くなるよ',
   pass:'向かい合って走るね。2本とも近づくよ',over:'同じ向きに走るね。速い分だけ近づくよ'})[P.kind];
 const checkHead=()=>'できた！ 答え '+ans()+'秒';
-const checkLine=()=>two()?'('+P.LA+'＋'+P.LB+') ÷ ('+P.va+(P.kind==='pass'?'＋':'－')+P.vb+') ＝ '+ans()+'秒':'('+P.B+(P.kind==='bridge'?'＋':'－')+P.L+') ÷ '+P.v+' ＝ '+ans()+'秒';
+const checkLine=()=>two()?fx([[dist(),'2本の長さ（m）'],['÷'],[rate(),'1秒で近づく（m）'],['＝'],[ans()+'秒']])
+  :fx([[dist(),'先頭が進む道のり（m）'],['÷'],[P.v,'秒速（m）'],['＝'],[ans()+'秒']]);
 
 const X0=80,X1=1020;
 const CA=['#add8e6','#3d9cc2'],CB=['#ffd1dc','#d9849b'];
@@ -240,7 +259,7 @@ function drawSlider(){
 function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
 function renderFirst(){
   const el=$('first');el.classList.toggle('ok',picked);
-  if(picked){$('q1').textContent=pickedQ();$('opts').innerHTML='';$('msg').textContent=pickedMsg();}
+  if(picked){$('q1').innerHTML=pickedQ();$('opts').innerHTML='';$('msg').textContent=pickedMsg();}
   else{$('q1').textContent=firstQ();const o=firstOpts();
     $('opts').innerHTML='<button data-op="add"><span class="no">①</span>'+o[0]+'</button><button data-op="sub"><span class="no">②</span>'+o[1]+'</button>';$('msg').textContent='';}
   svg.classList.toggle('locked',!picked);
@@ -255,7 +274,7 @@ function updateCheck(){
   if(!solved()){el.classList.remove('on');el.innerHTML='';$('nextq').hidden=true;return;}
   if(el.classList.contains('on'))return;
   if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
-  el.innerHTML='<b>'+checkHead()+'</b><span>'+checkLine()+'</span>';el.classList.add('on');meetSound();
+  const cl=checkLine();el.innerHTML='<b>'+checkHead()+'</b>'+(cl.charAt(0)==='<'?cl:'<span>'+cl+'</span>');el.classList.add('on');meetSound();
   $('nextq').hidden=idx>=PROBLEMS.length-1;
 }
 function update(){$('art').innerHTML=draw()+drawSlider();updateCheck();}

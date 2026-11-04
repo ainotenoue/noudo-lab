@@ -49,6 +49,16 @@ button:active{transform:translateY(1px)}
 #reset{background:#fff}
 .rnote{text-align:center;font-size:12px;color:var(--ink2);font-weight:700;margin:10px 0 0}
 .clearrec{margin-left:10px;background:none;border:0;padding:0;font-size:12px;color:var(--ink2);text-decoration:underline;font-weight:700}
+/* 式: 数字の下に、その数字が何かを小さく書く */
+.fxrow{display:inline-flex;align-items:center;gap:10px;vertical-align:middle}
+.fxtag{color:#fff;font-size:14px;font-weight:800;border-radius:999px;padding:4px 12px;white-space:nowrap}
+.fx{display:inline-flex;align-items:flex-start;gap:7px}
+.check .fx{display:flex;justify-content:center;margin-top:4px}
+.fx .tk{display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.fx .n{font-size:20px;font-weight:800;color:#2f3437;padding:0 2px;border-bottom:2px solid #e2dccf}
+.fx .c{font-size:11px;font-weight:700;color:#9a9184;margin-top:2px;white-space:nowrap}
+.fx .op{font-size:18px;font-weight:800;color:#9a9184;line-height:1.3}
+.fx .res .n{border-bottom-color:transparent;color:inherit;font-size:21px}
 /* 川の流れ（白い線が下流へ動く） */
 .flow{animation:flow 1.4s linear infinite}
 @keyframes flow{to{stroke-dashoffset:-44}}
@@ -134,6 +144,13 @@ function arrow(x1,x2,y,col,w,lab,lc){
   if(lab)h+=txt((x1+x2)/2,y-w/2-13,lab,{fs:15,c:lc||col});
   return h;
 }
+
+/* 式を、数字と「その数字が何か」の組でならべる */
+const FXOPS=['×','＋','－','＝','÷'];
+const fx=(toks,col)=>'<div class="fx">'+toks.map((t,i)=>{const s=String(t[0]);if(FXOPS.includes(s))return '<div class="op">'+s+'</div>';
+  const last=i===toks.length-1;return '<div class="tk'+(last?' res':'')+'"'+(last?' style="color:'+(col||'#25642c')+'"':'')+'><div class="n">'+s+'</div><div class="c">'+(t[1]||'&nbsp;')+'</div></div>';}).join('')+'</div>';
+const fxRow=(tag,col,toks)=>'<span class="fxrow"><span class="fxtag" style="background:'+col+'">'+tag+'</span>'+fx(toks,col)+'</span>';
+
 const BOAT='#e8a24f',BOAT_D='#b8741f',BOAT_S='#fff1dc',WATER='#3d9cc2';
 /* 船: dir=1 右向き */
 function boat(x,y,dir,big){
@@ -272,7 +289,8 @@ function renderFirst(){
   if(rev()){
     const pre=P.d?'下り '+P.d+'÷'+P.td+'＝'+P.D+'m、上り '+P.d+'÷'+P.tu+'＝'+P.U+'m。 ':'';
     if(picked){
-      $('q1').textContent=P.ask==='s'?'下り＋上り '+P.D+'＋'+P.U+'＝'+(P.D+P.U)+'m は、静水時 2つ分':'下り－上り '+P.D+'－'+P.U+'＝'+(P.D-P.U)+'m は、流れ 2つ分';
+      $('q1').innerHTML=P.ask==='s'?fxRow('静水時 2つ分','#3f9b4a',[[P.D,'下り（m）'],['＋'],[P.U,'上り（m）'],['＝'],[(P.D+P.U)+'m']])
+                                   :fxRow('流れ 2つ分','#3f9b4a',[[P.D,'下り（m）'],['－'],[P.U,'上り（m）'],['＝'],[(P.D-P.U)+'m']]);
       $('opts').innerHTML='';
       $('msg').textContent='つまみを動かして、上りをぴったり合わせよう';
     }else{
@@ -283,7 +301,7 @@ function renderFirst(){
     svg.classList.toggle('locked',!picked);return;
   }
   if(picked){
-    $('q1').textContent=(down()?'下りの速さ ':'上りの速さ ')+(down()?S+'＋'+C:S+'－'+C)+'＝'+v()+'m（1分間）';
+    $('q1').innerHTML=fxRow(down()?'下りの速さ':'上りの速さ','#3f9b4a',[[S,'静水時（m）'],[down()?'＋':'－'],[C,'流れ（m）'],['＝'],[v()+'m']]);
     $('opts').innerHTML='';
     $('msg').textContent='時間を進めて、のこりが0mになるところをさがそう';
   }else{
@@ -309,11 +327,11 @@ function updateCheck(){
   if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
   if(rev()){
     const nm=P.ask==='s'?'静水時の速さ':'流れの速さ',ex=P.ask==='s'?'('+P.D+'＋'+P.U+')÷2':'('+P.D+'－'+P.U+')÷2';
-    el.innerHTML='<b>できた！ 答え '+nm+' 分速'+ans()+'m</b><span>'+ex+' ＝ '+ans()+'m</span>';el.classList.add('on');meetSound();
+    el.innerHTML='<b>できた！ 答え '+nm+' 分速'+ans()+'m</b>'+(P.ask==='s'?fx([[P.D+P.U,'下り＋上り（m）'],['÷'],['2','静水時 2つ分'],['＝'],[ans()+'m']]):fx([[P.D-P.U,'下り－上り（m）'],['÷'],['2','流れ 2つ分'],['＝'],[ans()+'m']]));el.classList.add('on');meetSound();
     $('nextq').hidden=idx>=PROBLEMS.length-1;return;
   }
   const op=down()?'('+P.s+'＋'+P.c+')':'('+P.s+'－'+P.c+')';
-  el.innerHTML='<b>できた！ 答え '+fmt(ans())+'分</b><span>'+P.d+' ÷ '+op+' ＝ '+fmt(ans())+'分</span>';el.classList.add('on');meetSound();
+  el.innerHTML='<b>できた！ 答え '+fmt(ans())+'分</b>'+fx([[P.d,'道のり（m）'],['÷'],[v(),(down()?'下り':'上り')+'の速さ（m）'],['＝'],[fmt(ans())+'分']]);el.classList.add('on');meetSound();
   $('nextq').hidden=idx>=PROBLEMS.length-1;
 }
 function update(){draw();updateCheck();}
