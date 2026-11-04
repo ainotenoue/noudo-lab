@@ -1,36 +1,369 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>平均算の部屋｜miss maths</title><style>
-*{box-sizing:border-box}body{margin:0;background:#f7f5ef;color:#303538;font-family:"Hiragino Maru Gothic ProN",-apple-system,sans-serif;font-weight:700}main{max-width:1120px;margin:auto;padding:18px 24px}section{background:white;border:2px solid #eae5da;border-radius:25px;padding:20px;margin-bottom:13px}.top,.nav,.tools{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.tag{background:#eaf4ef;color:#3b8062;padding:9px 15px;border-radius:25px;font-size:14px}.stage{display:flex;gap:8px;flex-wrap:wrap}button,a.btn{font:inherit;color:#514c45;background:white;border:2px solid #e2ddd1;border-radius:30px;padding:10px 15px;cursor:pointer;text-decoration:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button.active,.primary{background:#dff1e7!important;border-color:#89c4a1!important}button:disabled{opacity:.3}h1{font-size:24px;margin:15px 0 4px}.sub{font-size:14px;color:#777168;margin:6px 0 12px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:16px}.play{background:#f5faf5;border:3px solid #d9e9dc;border-radius:20px;padding:12px;min-height:340px}.play svg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}.play{position:relative}.dragging{cursor:grabbing}.dragHint{fill:#e7f4e9;stroke:#5eaf80;stroke-width:3;stroke-dasharray:7 5}.candy{cursor:grab;filter:drop-shadow(0 2px 2px #7775)}.candyHit{cursor:grab;touch-action:none}.grabbed{fill:#e6f8e9;stroke:#48a46c;stroke-width:3}.grabLabel{fill:#347e52;font-weight:800}.candy:active{cursor:grabbing}.side{background:#fff7e9;border-radius:20px;padding:18px;text-align:center}.big{font-size:42px;margin:8px 0}.status{min-height:40px}.tools{justify-content:center;margin:10px 0}.formula{background:#f4effa;border-radius:14px;padding:13px 16px;margin-top:12px;line-height:1.7}.hidden{display:none}.bottom{margin-top:14px}.successMark{position:fixed;top:43%;left:50%;transform:translate(-50%,-50%);border:13px solid #e5a45d;border-radius:50%;background:#fffaf3ee;color:#d28c3c;font-size:100px;width:160px;height:160px;line-height:130px;text-align:center;pointer-events:none;z-index:5;animation:pop 1.1s forwards}@keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}80%{opacity:1}100%{opacity:0}}@media(max-width:720px){main{padding:10px}.layout{grid-template-columns:1fr}.play{min-height:0}.side{padding:12px}.big{font-size:32px}section{padding:12px}}</style></head><body><main>
-<section><div class="top"><span class="tag">平均算の部屋｜試作 v0.4</span><div class="stage"><button id="stageA" class="active">STAGE A｜分けてそろえる</button><button id="stageB">STAGE B｜図で考える</button></div></div><h1 id="title"></h1><p class="sub" id="desc"></p></section>
-<section><div class="layout"><div class="play"><svg id="visual" viewBox="0 0 740 390" role="img"></svg></div><div class="side"><div>みんなの合計</div><div class="big" id="total"></div><div>平均（1人分）</div><div class="big" id="average"></div><div class="status" id="status"></div><div class="tools"><button id="undo">↶ ひとつ戻す</button><button id="reset">最初から</button></div><p class="sub" id="guide"></p></div></div><div id="formula" class="formula hidden"></div><div class="nav bottom"><a class="btn" href="../">← ひろばへ</a><a class="btn primary" href="./problems.html">標準問題5問へ →</a><button id="next" class="primary hidden">次の問題 →</button></div></section></main>
-<script>(()=>{'use strict';
-const P=[[3,9,6,2],[4,8,6,10],[2,6,10,14],[5,7,9,11]],$=id=>document.getElementById(id),colors=['#add8e6','#ffd1dc','#a6d69a','#f4d49b'];
-let stage='A',index=0,values=[],history=[],wasCorrect=false,selected=null,drag=null;
-function avg(){return values.reduce((a,b)=>a+b,0)/values.length}
-function solved(){return values.every(x=>x===avg())}
-function pop(){const d=document.createElement('div');d.className='successMark';d.textContent='○';document.body.appendChild(d);d.addEventListener('animationend',()=>d.remove())}
-function reset(){values=[...P[index]];history=[];wasCorrect=false;selected=null;drag=null;render()}
-function move(from,to){if(from===to||to<0||values[from]<=0)return;history.push([...values]);values[from]--;values[to]++;render()}
-function col(i){const n=values.length,spacing=660/n,w=Math.min(120,spacing-20);return {x:45+i*spacing+spacing/2-w/2,w,center:45+i*spacing+spacing/2}}
-function point(e){const svg=$('visual'),p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const matrix=svg.getScreenCTM();return matrix?p.matrixTransform(matrix.inverse()):{x:-999,y:-999}}
-function targetAt(p){for(let i=0;i<values.length;i++){const c=col(i);if(p.x>=c.x-14&&p.x<=c.x+c.w+14&&p.y>=24&&p.y<=386)return i}return -1}
-function svg(){const baseline=310,scale=15,mean=avg(),active=drag?drag.to:-1;let s='<line x1="35" y1="'+(baseline-mean*scale)+'" x2="715" y2="'+(baseline-mean*scale)+'" stroke="#c38d51" stroke-width="3" stroke-dasharray="9 7"/><text x="705" y="'+(baseline-mean*scale-10)+'" text-anchor="end" font-size="18" fill="#ad793d">平均 '+mean+'</text>';
-values.forEach((v,i)=>{const c=col(i),x=c.x,w=c.w,y=baseline-v*scale;
-if(active===i&&drag.from!==i)s+='<rect class="dragHint" x="'+(x-9)+'" y="20" width="'+(w+18)+'" height="365" rx="15"/>';
-s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(v*scale)+'" rx="5" fill="'+colors[i]+'" stroke="#fff" stroke-width="2"/>';
-if(stage==='A'){for(let j=0;j<v;j++){const cx=c.center+(j%2===0?-16:16),cy=baseline-16-Math.floor(j/2)*26;s+='<circle class="candy" cx="'+cx+'" cy="'+cy+'" r="12" fill="#fff" stroke="'+colors[i]+'" stroke-width="4"/><circle class="candyHit" data-from="'+i+'" cx="'+cx+'" cy="'+cy+'" r="17" fill="transparent"/>'}}
-s+='<text x="'+c.center+'" y="'+(y-13)+'" text-anchor="middle" font-size="23" fill="#303538">'+v+'こ</text><text x="'+c.center+'" y="347" text-anchor="middle" font-size="20" fill="#525454">'+['あお','もも','みどり','きいろ'][i]+'</text>';
-if(stage==='B'&&v>0){const ty=y-15;s+='<rect x="'+(x+5)+'" y="'+ty+'" width="'+(w-10)+'" height="24" rx="9" fill="#fff" stroke="#5fa883" stroke-width="3" style="filter:drop-shadow(0 2px 2px #7774)"/><path d="M '+(c.center-11)+' '+(ty+12)+' h22 m-17 -5 l-5 5 5 5 m12 -10 l5 5 -5 5" fill="none" stroke="#4d9870" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><rect class="candyHit" data-from="'+i+'" x="'+(x-8)+'" y="'+(ty-12)+'" width="'+(w+16)+'" height="49" rx="12" fill="transparent"/>'}
-else s+='<rect x="'+(x-8)+'" y="324" width="'+(w+16)+'" height="61" rx="10" fill="transparent"/>';
-});
-s+='<line x1="35" y1="'+baseline+'" x2="715" y2="'+baseline+'" stroke="#aaa" stroke-width="2"/>';
-if(drag&&stage==='B'){s+='<rect x="'+(drag.x-35)+'" y="'+(drag.y-18)+'" width="70" height="36" rx="10" fill="'+colors[drag.from]+'" stroke="#fff" stroke-width="4" style="filter:drop-shadow(0 4px 5px #7778)" pointer-events="none"/><text class="grabLabel" x="'+drag.x+'" y="'+(drag.y-29)+'" font-size="19" text-anchor="middle" pointer-events="none">つかんだ！</text>'}else if(drag){s+='<circle cx="'+drag.x+'" cy="'+drag.y+'" r="28" fill="#dff5e6" stroke="#50ae77" stroke-width="4" opacity=".85" pointer-events="none"/><circle cx="'+drag.x+'" cy="'+drag.y+'" r="19" fill="'+colors[drag.from]+'" stroke="#fff" stroke-width="4" style="filter:drop-shadow(0 4px 5px #7778);pointer-events:none"/><circle cx="'+(drag.x-5)+'" cy="'+(drag.y-5)+'" r="6" fill="#fff" opacity=".85" pointer-events="none"/><text class="grabLabel" x="'+drag.x+'" y="'+(drag.y-38)+'" font-size="19" text-anchor="middle" pointer-events="none">つかんだ！</text>'}
-return s}
-function render(){const sum=values.reduce((a,b)=>a+b,0),mean=avg(),ok=solved();$('stageA').classList.toggle('active',stage==='A');$('stageB').classList.toggle('active',stage==='B');$('title').textContent=stage==='A'?'キャンディーを分けて、同じ数にしよう':'棒グラフの高さを、平均にそろえよう';$('desc').textContent=stage==='A'?'キャンディーをつまんで、別の子へポイッ！':'棒の上の白い取っ手をつまんで、別の棒へポイッ！';$('total').textContent=sum+'こ';$('average').textContent=mean+'こ';$('visual').innerHTML=svg();$('status').textContent=ok?'正解！ 全員 '+mean+'こ':drag?'つかんだ！ 別の子へポイッ！':stage==='A'?'白い丸をつまんでね':'棒の上の白い取っ手をつまんでね';$('guide').textContent=stage==='A'?'白い丸に指を置くと大きくなるよ。別の子へ運ぼう！':'白い取っ手をドラッグすると、1段分の面積が移動するよ。';$('formula').classList.toggle('hidden',!ok);$('formula').textContent='考え方：合計 '+sum+'こ ÷ '+values.length+'人 = 平均 '+mean+'こ。全体の数は変わらず、出っ張りと不足がつり合うよ。';$('next').classList.toggle('hidden',!ok||index===P.length-1);$('undo').disabled=history.length===0;if(ok&&!wasCorrect)pop();wasCorrect=ok}
-const visual=$('visual');
-visual.addEventListener('pointerdown',e=>{if(drag)return;const el=e.target.closest('[data-from]');if(!el)return;const from=Number(el.dataset.from),p=point(e);if(values[from]<=0)return;drag={id:e.pointerId,from,to:-1,x:p.x,y:p.y};visual.setPointerCapture(e.pointerId);e.preventDefault();render()});
-visual.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const p=point(e);drag.x=p.x;drag.y=p.y;const t=targetAt(p);drag.to=t===drag.from?-1:t;render();e.preventDefault()});
-function finish(e,cancel){if(!drag||drag.id!==e.pointerId)return;const d=drag,p=point(e),to=cancel?-1:targetAt(p);drag=null;if(visual.hasPointerCapture(e.pointerId))visual.releasePointerCapture(e.pointerId);if(to!==-1&&to!==d.from)move(d.from,to);else render();e.preventDefault()}
-visual.addEventListener('pointerup',e=>finish(e,false));visual.addEventListener('pointercancel',e=>finish(e,true));visual.addEventListener('lostpointercapture',()=>{if(drag){drag=null;render()}});
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>平均算の部屋｜miss maths</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f7f5ef;--ink:#2f3437;--ink2:#7b766d;--card:#fff;--edge:#ebe5da;--green-d:#3f9b4a;--green-s:#ebfbea}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Maru Gothic ProN','M PLUS Rounded 1c',-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:15px 28px 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.question{margin:0 0 10px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:20px 26px;line-height:1.7;font-size:clamp(17px,2vw,21px);font-weight:800}
+.question small{display:inline-block;font-size:13px;color:var(--green-d);background:var(--green-s);border-radius:999px;padding:2px 12px;font-weight:800}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;white-space:nowrap;border:2px solid #b9e6b9;border-radius:999px;padding:5px 14px;font-size:14px;background:var(--green-s);font-weight:800;color:#2f6f37;touch-action:manipulation}
+button:active{transform:translateY(1px)}
+.tabs button{width:38px;height:38px;padding:0;font-size:15px;background:#fff;border-color:var(--edge);color:var(--ink2)}
+.tabs button.done{background:#f3f0e8;color:#9a9488;border-color:#e2dccf}
+.tabs button.done::after{content:"✓";font-size:10px;vertical-align:super;margin-left:1px;color:var(--green-d)}
+.tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#9fd99f;color:#2f6f37}
+.panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:12px 22px 12px}
+/* 初動: まず「たす？ひく？」を決める */
+.first{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff7e9;border-radius:18px;padding:10px 16px}
+.first .q1{font-size:18px;font-weight:800}
+.first .opts{display:flex;gap:10px}
+.first .opts button{font-size:18px;padding:8px 18px;background:#fff;border-color:#e8c48a;color:#7a4f12}
+.first .opts .no{display:inline-block;margin-right:8px;font-size:20px;color:#c07a1c}
+.successMark{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);width:154px;height:154px;border:13px solid #e6a45c;border-radius:50%;color:#d68a37;font-size:100px;line-height:125px;text-align:center;background:#fffaf2e8;pointer-events:none;z-index:99;animation:successPop 1.15s ease-out forwards}
+@keyframes successPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}40%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+@media(prefers-reduced-motion:reduce){.successMark{animation:none;opacity:0}}
+.first .msg{font-size:15px;font-weight:700;color:#9a5a12}
+.first.ok{background:var(--green-s)}
+.first.ok .q1{color:#25642c}
+.first .shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.diagram{width:100%;height:auto;display:block;max-height:430px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
+.diagram:focus{outline:none}
+.locked .thandle{opacity:.35}
+.thandle{cursor:grab}
+.panel-foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;min-height:48px}
+.back{justify-self:start;font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+.check{visibility:hidden;background:var(--green-s);border-radius:16px;padding:8px 22px;text-align:center;color:#2f5f35;line-height:1.5}
+.check.on{visibility:visible;animation:pop .35s ease-out}
+.check b{display:block;font-size:22px;color:#25642c}
+.check span{display:block;font-size:18px;font-weight:700;margin-top:2px}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.fbtns{justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+#nextq{background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+#reset{background:#fff}
+.rnote{text-align:center;font-size:12px;color:var(--ink2);font-weight:700;margin:10px 0 0}
+.clearrec{margin-left:10px;background:none;border:0;padding:0;font-size:12px;color:var(--ink2);text-decoration:underline;font-weight:700}
+/* 式: 数字の下に、その数字が何かを小さく書く */
+.fxrow{display:inline-flex;align-items:center;gap:10px;vertical-align:middle}
+.fxtag{color:#fff;font-size:14px;font-weight:800;border-radius:999px;padding:4px 12px;white-space:nowrap}
+.fx{display:inline-flex;align-items:flex-start;gap:7px}
+.check .fx{display:flex;justify-content:center;margin-top:4px}
+.fxpair{display:flex;justify-content:center;align-items:flex-start;gap:10px;margin-top:4px}.fxpair .fx{margin-top:0}
+.fx .tk{display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.fx .n{font-size:20px;font-weight:800;color:#2f3437;padding:0 2px;border-bottom:2px solid #e2dccf}
+.fx .c{font-size:11px;font-weight:700;color:#9a9184;margin-top:2px;white-space:nowrap}
+.fx .op{font-size:18px;font-weight:800;color:#9a9184;line-height:1.3}
+.fx .res .n{border-bottom-color:transparent;color:inherit;font-size:21px}
+.tabs a.taiken{display:inline-flex;align-items:center;height:38px;padding:0 14px;margin-right:6px;border:2px solid #e8c48a;border-radius:999px;background:#fff7e9;color:#9a5a12;font-size:14px;font-weight:800;text-decoration:none}
+/* はじめに（解説ページ） */
+.intro h2.ititle{margin:6px 0 0;font-size:clamp(19px,2.2vw,24px);font-weight:800;line-height:1.5}
+.introsvg{width:100%;height:auto;display:block;max-height:560px;font-family:inherit}
+.ifoot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.ifoot a{font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+#introGo{font-size:16px;padding:8px 22px;background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+.tabs button.introb{width:auto;padding:0 14px;margin-right:6px;background:#fff}
+@media(max-width:760px){main{padding:12px}.question{padding:16px}.panel{padding:10px}}
+@media(prefers-reduced-motion:reduce){.check.on,.first .shake{animation:none}}
+</style></head><body><main><h1 class="sr">平均算の部屋</h1>
+<div id="intro" class="intro" hidden>
+<div class="question"><small>平均算の部屋｜はじめに</small><h2 class="ititle">平均は「ならした高さ」。ならしても合計は変わらない</h2></div>
+<section class="panel"><svg class="introsvg" viewBox="0 0 1100 500" role="img" aria-label="ならすと、でっぱりとへこみは同じ。平均×人数＝合計"><rect x="20" y="20" width="510" height="460" rx="24" fill="#f7fbf8" stroke="#9fcfae" stroke-width="3"/><text x="48" y="56" text-anchor="start" dominant-baseline="central" font-size="28" font-weight="800" fill="#2f6f37">ならす</text><rect x="70" y="288" width="80" height="72" rx="6" fill="#add8e6" stroke="#3d9cc2" stroke-width="2"/><rect x="70" y="240" width="80" height="48" fill="#fff" stroke="#3d9cc2" stroke-width="2" stroke-dasharray="5 4"/><text x="110.0" y="224" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#2f3437">3</text><rect x="180" y="144" width="80" height="216" rx="6" fill="#add8e6" stroke="#3d9cc2" stroke-width="2"/><rect x="180" y="144" width="80" height="96" rx="5" fill="#f7b6c6"/><text x="220.0" y="128" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#2f3437">9</text><rect x="290" y="216" width="80" height="144" rx="6" fill="#add8e6" stroke="#3d9cc2" stroke-width="2"/><rect x="290" y="216" width="80" height="24" rx="5" fill="#f7b6c6"/><text x="330.0" y="200" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#2f3437">6</text><rect x="400" y="312" width="80" height="48" rx="6" fill="#add8e6" stroke="#3d9cc2" stroke-width="2"/><rect x="400" y="240" width="80" height="72" fill="#fff" stroke="#3d9cc2" stroke-width="2" stroke-dasharray="5 4"/><text x="440.0" y="224" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#2f3437">2</text><line x1="56" y1="240" x2="508" y2="240" stroke="#9a5a12" stroke-width="3" stroke-dasharray="9 6"/><text x="508" y="226" text-anchor="end" dominant-baseline="central" font-size="16" font-weight="800" fill="#9a5a12">平均 5</text><line x1="56" y1="360" x2="508" y2="360" stroke="#b9b2a5" stroke-width="2"/><rect x="64" y="388" width="20" height="20" rx="4" fill="#f7b6c6"/><text x="94" y="398" text-anchor="start" dominant-baseline="central" font-size="20" font-weight="800" fill="#b5607a">でっぱり 4＋1＝5</text><rect x="64" y="428" width="20" height="20" rx="2" fill="#fff" stroke="#3d9cc2" stroke-width="2" stroke-dasharray="4 3"/><text x="94" y="438" text-anchor="start" dominant-baseline="central" font-size="20" font-weight="800" fill="#24617a">へこみ 2＋3＝5</text><text x="470" y="418" text-anchor="end" dominant-baseline="central" font-size="26" font-weight="800" fill="#2f6f37">同じ！</text><rect x="570" y="20" width="510" height="460" rx="24" fill="#fffaf0" stroke="#e8c48a" stroke-width="3"/><text x="598" y="56" text-anchor="start" dominant-baseline="central" font-size="28" font-weight="800" fill="#9a5a12">平均 × 人数 ＝ 合計</text><rect x="650" y="240" width="90" height="120" fill="#ffe2b8" stroke="#e8a24f" stroke-width="2"/><rect x="740" y="240" width="90" height="120" fill="#ffe2b8" stroke="#e8a24f" stroke-width="2"/><rect x="830" y="240" width="90" height="120" fill="#ffe2b8" stroke="#e8a24f" stroke-width="2"/><rect x="920" y="240" width="90" height="120" fill="#ffe2b8" stroke="#e8a24f" stroke-width="2"/><line x1="636" y1="360" x2="1024" y2="360" stroke="#b9b2a5" stroke-width="2"/><text x="830" y="300.0" text-anchor="middle" dominant-baseline="central" font-size="30" font-weight="800" fill="#9a5a12">合計 20</text><line x1="628" y1="240" x2="628" y2="360" stroke="#7b766d" stroke-width="3"/><text x="616" y="300.0" text-anchor="end" dominant-baseline="central" font-size="18" font-weight="800" fill="#7b766d">平均 5</text><line x1="650" y1="384" x2="1010" y2="384" stroke="#7b766d" stroke-width="3"/><text x="830" y="406" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#7b766d">4人</text><text x="825" y="438" text-anchor="middle" dominant-baseline="central" font-size="30" font-weight="800" fill="#9a5a12">5 × 4 ＝ 20</text></svg>
+<div class="ifoot"><a href="../">← 部屋への扉</a><button id="introGo">問題へ →</button></div></section>
+</div>
+<div id="roomMain">
+<div class="question"><div class="qtop"><small id="qTag"></small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
+<section class="panel">
+  <div class="first" id="first">
+    <span class="q1" id="q1">5人の合計は？</span>
+    <span class="opts" id="opts"></span>
+    <span class="msg" id="msg"></span>
+  </div>
+  <svg class="diagram locked" id="diagram" viewBox="0 0 1100 400" role="img" aria-label="平均算の図。つまみを動かすと棒の高さや線が動きます"><g id="art"></g></svg>
+  <div class="panel-foot"><a class="back" href="../">← 部屋への扉</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題 →</button><button id="reset">はじめに戻す</button></div></div>
+</section>
+<p class="rnote">記録はこのiPadのブラウザに保存されます。<button id="clearRec" class="clearrec">記録をリセット</button></p>
+</div>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id), svg=$('diagram');
+const txt=(x,y,s,o={})=>'<text x="'+x+'" y="'+y+'" text-anchor="'+(o.a||'middle')+'" dominant-baseline="central" font-size="'+(o.fs||20)+'" font-weight="'+(o.fw||800)+'" fill="'+(o.c||'#2f3437')+'">'+s+'</text>';
+const tw=(s,fs)=>{let w=0;for(const ch of String(s))w+=/[ -~]/.test(ch)?0.6:1;return w*fs;};
+function dim(xa,xb,y,s,col,fs){
+  fs=fs||20;const w=tw(s,fs)+16;
+  if(xb-xa<4)return '';
+  return '<line x1="'+xa+'" y1="'+y+'" x2="'+xb+'" y2="'+y+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<line x1="'+xa+'" y1="'+(y-9)+'" x2="'+xa+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/><line x1="'+xb+'" y1="'+(y-9)+'" x2="'+xb+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<rect x="'+((xa+xb)/2-w/2)+'" y="'+(y-15)+'" width="'+w+'" height="30" rx="8" fill="#fff"/>'+txt((xa+xb)/2,y+1,s,{fs,c:col});
+}
+const pill=(x,y,s,fs)=>{fs=fs||22;const w=tw(s,fs)+40;return '<rect x="'+(x-w/2)+'" y="'+(y-20)+'" width="'+w+'" height="40" rx="20" fill="#90ee90"/>'+txt(x,y+1,s,{fs,c:'#25642c'});};
+const ROSE='#c9b8ec',ROSE_D='#7b62c4';
 
-$('stageA').onclick=()=>{stage='A';reset()};$('stageB').onclick=()=>{stage='B';reset()};$('undo').onclick=()=>{if(history.length)values=history.pop();selected=null;drag=null;render()};$('reset').onclick=reset;$('next').onclick=()=>{index++;reset()};reset();
-})();</script></body></html>
+/* 式を、数字と「その数字が何か」の組でならべる */
+const FXOPS=['×','＋','－','＝','÷','：','＜','＞','→'];
+const fx=(toks,col)=>'<div class="fx">'+toks.map((t,i)=>{const s=String(t[0]);if(FXOPS.includes(s))return '<div class="op">'+s+'</div>';
+  const last=i===toks.length-1;return '<div class="tk'+(last?' res':'')+'"'+(last?' style="color:'+(col||'#25642c')+'"':'')+'><div class="n">'+s+'</div><div class="c">'+(t[1]||'&nbsp;')+'</div></div>';}).join('')+'</div>';
+const fxRow=(tag,col,toks)=>'<span class="fxrow"><span class="fxtag" style="background:'+col+'">'+tag+'</span>'+fx(toks,col)+'</span>';
+
+let idx=0,P=null,t=0,picked=false,drag=false;
+const INTRO='mm-intro-average',PRETABS='<a class="introb taiken" href="./taiken.html">キャンディーで体験</a>';
+
+const KEY='average-done';
+/* ===== 問題 =====
+   total … 平均から合計（人数分ずつ足していく）
+   mean  … 合計から平均（平均の高さを動かして、人数分の合計を合わせる）
+   one   … わからない1人の点数（その人の点数を動かして、めあての平均にそろえる）
+   g2    … 2組の平均（全体の平均の線を動かして、へこみとでっぱりの面積をそろえる）
+   ratio … 人数の比（A組の人数を動かして、へこみとでっぱりの面積をそろえる。天秤と同じ逆の比） */
+const PROBLEMS=[
+  {kind:'total',tag:'きほん｜合計を求める',A:76,n:5,text:'5人の算数のテストの平均点は76点でした。5人の合計点は何点ですか？'},
+  {kind:'mean',tag:'きほん｜平均を求める',S:320,n:4,text:'4人のテストの合計点は320点でした。4人の平均点は何点ですか？'},
+  {kind:'one',tag:'1人の点数',A:78,n:5,known:[72,85,76,81],names:['1人目','2人目','3人目','4人目','5人目'],
+   now:[['314','4人の合計']],first:['78×5＝390点','78×4＝312点'],fq:'まず、5人の合計は？',
+   text:'5人のテストの平均点は78点でした。4人の点数は72点、85点、76点、81点です。残りの1人は何点ですか？'},
+  {kind:'one',tag:'加わった人',A:74,n:5,known:[70,70,70,70],names:['','4人（平均70）','','','加わった人'],
+   now:[['70','平均'],['×'],['4','人']],first:['74×5＝370点','74×4＝296点'],fq:'5人になったときの合計は？',
+   text:'4人のテストの平均点は70点でした。新たに1人加わると、5人の平均点は74点になりました。加わった人は何点ですか？'},
+  {kind:'one',tag:'あと何点？',A:80,n:4,known:[76,76,76],names:['','3回（平均76）','','4回目'],
+   now:[['76','平均'],['×'],['3','回']],first:['80×4＝320点','80×3＝240点'],fq:'4回の合計は？',
+   text:'3回のテストの平均点は76点でした。4回目のテストで何点をとれば、4回の平均点が80点になりますか？'},
+  {kind:'g2',tag:'2組の平均',a:70,na:12,b:80,nb:8,text:'A組12人の平均点は70点、B組8人の平均点は80点でした。20人全員の平均点は何点ですか？'},
+  {kind:'ratio',tag:'人数の比',a:70,b:85,m:76,nb:2,text:'A組の平均点は70点、B組の平均点は85点で、2組合わせた平均点は76点でした。A組とB組の人数の比を、もっとも簡単な整数の比で答えなさい。'}
+];
+const ksum=()=>P.known.reduce((x,y)=>x+y,0);
+const g2m=()=>(P.a*P.na+P.b*P.nb)/(P.na+P.nb);
+const ans=()=>({total:P.n,mean:P.S/P.n,one:P.A*P.n-(P.kind==='one'?ksum():0),g2:g2m(),ratio:P.nb*(P.b-P.m)/(P.m-P.a)})[P.kind];
+const tmin=()=>({g2:P.a,ratio:1,mean:40,one:40})[P.kind]||0;
+const tmax=()=>({total:P.n,g2:P.b,ratio:8})[P.kind]||100;
+const t0=()=>({mean:50,one:50})[P.kind]??tmin();
+const snap=v=>Math.round(v), tickStep=()=>(P.kind==='mean'||P.kind==='one')?5:1, keyStep=()=>1;
+const sliderName=()=>({total:'人数',mean:'平均',one:P.names?P.names[P.n-1]:'',g2:'全体の平均',ratio:'A組の人数'})[P.kind];
+const tlabel=()=>({total:t+'人分',mean:t+'点',one:t+'点',g2:t+'点',ratio:t+'人'})[P.kind];
+const rightIsAdd=()=>P.kind!=='g2';
+const firstQ=()=>({total:'5人の合計は？',mean:'4人の平均は？',g2:'20人の平均は？',ratio:'1人あたり、全体の平均76点とのちがいは？'})[P.kind]||P.fq;
+const firstOpts=()=>({total:['76×5＝380点','76＋5＝81点'],mean:['320÷4＝80点','320－4＝316点'],
+  g2:['(70＋80)÷2＝75点','(70×12＋80×8)÷20＝74点'],ratio:['A組 6点・B組 9点','A組 70点・B組 85点']})[P.kind]||P.first;
+const G='#3f9b4a';
+const pickedQ=()=>({total:fxRow('合計','#3f9b4a',[['76','平均（点）'],['×'],['5','人'],['＝'],['380点']]),
+  mean:fxRow('平均','#3f9b4a',[['320','合計（点）'],['÷'],['4','人'],['＝'],['80点']]),
+  g2:fxRow('20人の合計','#3f9b4a',[['70','A組の平均'],['×'],['12','人'],['＋'],['80','B組の平均'],['×'],['8','人'],['＝'],['1480点']]),
+  ratio:fxRow('1人あたり','#3f9b4a',[['76','全体'],['－'],['70','A組'],['＝'],['6点'],['／'],['85','B組'],['－'],['76','全体'],['＝'],['9点']])})[P.kind]
+  ||fxRow('めあての合計','#3f9b4a',[[P.A,'平均（点）'],['×'],[P.n,P.kind==='one'&&P.names[0]==='1人目'||P.names[1].includes('人')?'人':'回'],['＝'],[P.A*P.n+'点']]);
+const pickedMsg=()=>({total:'1人分ずつ足して、合計を見よう',mean:'平均の高さを動かして、合計320点に合わせよう',
+  g2:'線を動かして、へこみとでっぱりをそろえよう',ratio:'B組を2人として、A組の人数を動かそう'})[P.kind]||'点数を動かして、平均をぴったり'+P.A+'点に';
+const wrongMsg=()=>({total:'平均×人数＝合計。76点が5人分だよ',mean:'合計を人数で分けると、1人分になるよ',
+  g2:'人数がちがうので、そのまま平均できないよ。人数の多いA組のほうに引っぱられる',ratio:'全体の平均76点から、それぞれ何点はなれているかを見よう'})[P.kind]||'平均×人数＝合計。人数をよく見よう';
+const checkHead=()=>'できた！ 答え '+({total:P.A*P.n+'点',mean:ans()+'点',one:ans()+'点',g2:ans()+'点',ratio:'3：2'})[P.kind];
+const checkLine=()=>({total:fx([['76','平均（点）'],['×'],['5','人'],['＝'],['380点']]),
+  mean:fx([['320','合計（点）'],['÷'],['4','人'],['＝'],['80点']]),
+  g2:fx([['1480','20人の合計（点）'],['÷'],['20','人'],['＝'],['74点']]),
+  ratio:fx([['9','B組 1人のでっぱり'],['：'],['6','A組 1人のへこみ'],['＝'],['3：2','A組：B組']])})[P.kind]
+  ||fx([[P.A*P.n,'めあての合計'],['－'],[ksum(),'わかっている分の合計'],['＝'],[ans()+'点']]);
+
+/* ===== 図 ===== */
+const BX0=60,BX1=610,BASE=240,K=3.2,F=40;      // 棒グラフは40点から上を大きく見せる（1点＝3.2）
+const Y=v=>BASE-(v-F)*K;
+const CB=['#add8e6','#3d9cc2'],CO=['#ffe2b8','#e8a24f'],UP='#f7b6c6',DN='#3d9cc2';
+const OPS=['×','＋','－','＝','÷','：','＜','＞','／'];
+/* 右の計算の1行（時計算と同じ書き方：数字の下に、その数字が何か） */
+function step(y,tag,col,toks,bw){
+  bw=bw||96;const X=650;
+  let h='<rect x="'+X+'" y="'+(y-16)+'" width="'+bw+'" height="32" rx="16" fill="'+col+'"/>'+txt(X+bw/2,y+1,tag,{fs:14,c:'#fff'});
+  let x=X+bw+12;
+  toks.forEach((tk,i)=>{
+    const s=String(tk[0]),last=i===toks.length-1,op=OPS.includes(s),fs=last?23:21,w=tw(s,fs),slot=Math.max(w,tk[1]?tw(tk[1],12):0),mid=x+slot/2;
+    h+=txt(mid,y,s,{fs,c:op?'#9a9184':(last?col:'#2f3437')});
+    if(tk[1])h+='<line x1="'+(mid-w/2)+'" y1="'+(y+15)+'" x2="'+(mid+w/2)+'" y2="'+(y+15)+'" stroke="#e2dccf" stroke-width="2"/>'+txt(mid,y+28,tk[1],{fs:12,c:'#9a9184',fw:700});
+    x+=slot+(op?7:9);
+  });
+  return h;
+}
+function bar(x,w,v,c,dash){
+  let h='<rect x="'+x+'" y="'+Y(v)+'" width="'+w+'" height="'+((v-F)*K)+'" rx="5" fill="'+(dash?'#fff':c[0])+'" stroke="'+c[1]+'" stroke-width="2"'+(dash?' stroke-dasharray="6 5"':'')+'/>';
+  // 下の方を省略している印（≈）
+  let z='M'+(x-3)+' '+(BASE-14);for(let i=0,xx=x-3;xx<x+w+3;i++,xx+=10)z+=' L'+Math.min(xx+5,x+w+3)+' '+(BASE-(i%2?14:20));
+  return h+'<path d="'+z+'" fill="none" stroke="#fff" stroke-width="5"/>';
+}
+function hline(v,col,lab,dash,left){return '<line x1="'+(BX0-14)+'" y1="'+Y(v)+'" x2="'+(BX1+10)+'" y2="'+Y(v)+'" stroke="'+col+'" stroke-width="3"'+(dash?' stroke-dasharray="9 6"':'')+'/>'+(lab?txt(left?BX0-10:BX1+8,Y(v)-13,lab,{a:left?'start':'end',fs:15,c:col}):'');}
+/* 線より上（でっぱり）と下（へこみ）を塗る */
+function shade(x,w,v,m){
+  if(v>m)return '<rect x="'+x+'" y="'+Y(v)+'" width="'+w+'" height="'+((v-m)*K)+'" rx="4" fill="'+UP+'" opacity=".85"/>';
+  if(v<m)return '<rect x="'+x+'" y="'+Y(m)+'" width="'+w+'" height="'+((m-v)*K)+'" fill="#e9f5f9" stroke="'+DN+'" stroke-width="2" stroke-dasharray="5 4"/>';
+  return '';
+}
+function draw(){
+  let h='<line x1="'+(BX0-14)+'" y1="'+BASE+'" x2="'+(BX1+10)+'" y2="'+BASE+'" stroke="#b9b2a5" stroke-width="2"/>';
+  const ok=solved();
+  if(P.kind==='total'){
+    const n=P.n,w=80,gap=(BX1-BX0-n*w)/(n-1);
+    for(let i=0;i<n;i++){const x=BX0+i*(w+gap);h+=bar(x,w,P.A,CB,i>=t)+txt(x+w/2,Y(P.A)-14,i<t?P.A:'',{fs:19})+txt(x+w/2,BASE+20,(i+1)+'人目',{fs:15,c:'#7b766d'});}
+    h+=hline(P.A,'#9a5a12','平均 '+P.A+'点',true);
+    if(ok)h+=pill(860,40,'5人分の合計！');
+    h+=step(110,'合計','#9a5a12',[['76','平均（点）'],['×'],[t,'人'],['＝'],[76*t+'点']]);
+    return h;
+  }
+  if(P.kind==='mean'){
+    const n=P.n,w=90,gap=(BX1-BX0-n*w)/(n-1);
+    for(let i=0;i<n;i++){const x=BX0+i*(w+gap);h+=bar(x,w,t,CB)+txt(x+w/2,Y(t)-14,t,{fs:19})+txt(x+w/2,BASE+20,(i+1)+'人目',{fs:15,c:'#7b766d'});}
+    const cur=t*n,d=P.S-cur;
+    if(ok)h+=pill(860,40,'ぴったり！');
+    h+=step(80,'4人分','#3d9cc2',[[t,'平均（点）'],['×'],['4','人'],['＝'],[cur+'点']]);
+    h+=step(152,'合計','#7b766d',[[P.S,'4人の合計（点）']]);
+    h+=step(224,'ずれ','#9a5a12',[[P.S,'合計'],['－'],[cur,'4人分'],['＝'],[d+'点']]);
+    return h;
+  }
+  if(P.kind==='one'){
+    const n=P.n,w=78,gap=(BX1-BX0-n*w)/(n-1),vals=P.known.concat([t]),sum=ksum()+t,live=sum/n;
+    vals.forEach((v,i)=>{const x=BX0+i*(w+gap),u=i===n-1;h+=bar(x,w,v,u?CO:CB)+shade(x,w,v,P.A)+txt(x+w/2,Y(v)-14,v,{fs:19,c:u?'#9a5a12':'#2f3437'});
+      if(P.names[i])h+=txt(x+w/2,BASE+20,P.names[i],{fs:15,c:'#7b766d'});});
+    h+=hline(P.A,G,'',true)+hline(live,'#9a5a12','',false);
+    // 線の名前は、上にまとめて
+    h+='<line x1="'+BX0+'" y1="20" x2="'+(BX0+34)+'" y2="20" stroke="'+G+'" stroke-width="3" stroke-dasharray="9 6"/>'+txt(BX0+42,20,'めあての平均 '+P.A+'点',{a:'start',fs:15,c:G});
+    h+='<line x1="'+(BX0+260)+'" y1="20" x2="'+(BX0+294)+'" y2="20" stroke="#9a5a12" stroke-width="3"/>'+txt(BX0+302,20,'いまの平均 '+(Math.round(live*10)/10)+'点',{a:'start',fs:15,c:'#9a5a12'});
+    const goal=P.A*n,d=goal-sum;
+    if(ok)h+=pill(860,40,'平均'+P.A+'点！');
+    h+=step(80,'めあての合計',G,[[P.A,'平均（点）'],['×'],[n,P.names[0]==='1人目'||P.names[1].includes('人')?'人':'回'],['＝'],[goal+'点']],124);
+    h+=step(152,'いまの合計','#e8a24f',P.now.concat([['＋'],[t,P.names[n-1]==='5人目'?'？の点':P.names[n-1]],['＝'],[sum+'点']]),124);
+    h+=step(224,'ずれ','#9a5a12',[[goal,'めあて'],['－'],[sum,'いま'],['＝'],[d+'点']],124);
+    return h;
+  }
+  if(P.kind==='g2'){
+    const u=(BX1-BX0)/(P.na+P.nb),wa=u*P.na,wb=u*P.nb,xa=BX0,xb=BX0+wa;
+    h+=bar(xa,wa,P.a,CB)+bar(xb,wb,P.b,['#ffd1dc','#d9849b']);
+    const dn=(t-P.a)*P.na,up=(P.b-t)*P.nb;
+    h+=shade(xa,wa,P.a,t)+shade(xb,wb,P.b,t);
+    h+=txt(xa+wa/2,Y(P.a)+24,'A組 平均'+P.a+'点',{fs:16,c:'#24617a'})+txt(xb+wb/2,Y(P.b)-14,'B組 平均'+P.b+'点',{fs:16,c:'#8a3d55'});
+    h+=txt(xa+wa/2,BASE+20,P.na+'人',{fs:16,c:'#7b766d'})+txt(xb+wb/2,BASE+20,P.nb+'人',{fs:16,c:'#7b766d'});
+    h+=hline(t,'#9a5a12','全体の平均 '+t+'点',false,true);
+    if(ok)h+=pill(860,40,'つり合った！');
+    h+=step(80,'へこみ',DN,[[t-P.a,'1人分'],['×'],[P.na,'A組（人）'],['＝'],[dn]]);
+    h+=step(152,'でっぱり','#d9849b',[[P.b-t,'1人分'],['×'],[P.nb,'B組（人）'],['＝'],[up]]);
+    h+=step(224,'くらべる','#9a5a12',[[dn,'へこみ'],[dn===up?'＝':dn<up?'＜':'＞'],[up,'でっぱり']]);
+    return h;
+  }
+  // ratio: B組は2人、A組の人数を動かす
+  const u=52,wa=u*t,wb=u*P.nb,xa=BX0,xb=BX0+wa,m=P.m;
+  h+=bar(xa,wa,P.a,CB)+bar(xb,wb,P.b,['#ffd1dc','#d9849b'])+shade(xa,wa,P.a,m)+shade(xb,wb,P.b,m);
+  for(let i=1;i<t;i++)h+='<line x1="'+(xa+i*u)+'" y1="'+Y(P.a)+'" x2="'+(xa+i*u)+'" y2="'+BASE+'" stroke="#fff" stroke-width="2"/>';
+  h+='<line x1="'+(xb+u)+'" y1="'+Y(P.b)+'" x2="'+(xb+u)+'" y2="'+BASE+'" stroke="#fff" stroke-width="2"/>';
+  h+=txt(xa+wa/2,Y(P.a)+24,'A組 '+P.a+'点',{fs:15,c:'#24617a'})+txt(xb+wb/2,Y(P.b)-14,'B組 '+P.b+'点',{fs:15,c:'#8a3d55'});
+  h+=txt(xa+wa/2,BASE+20,'A組 '+t+'人',{fs:16,c:'#7b766d'})+txt(xb+wb/2,BASE+20,'B組 '+P.nb+'人',{fs:16,c:'#7b766d'});
+  h+=hline(m,'#9a5a12','全体の平均 '+m+'点',false,true);
+  const dn=(m-P.a)*t,up=(P.b-m)*P.nb;
+  if(ok)h+=pill(860,40,'つり合った！');
+  h+=step(80,'へこみ',DN,[[m-P.a,'1人分'],['×'],[t,'A組（人）'],['＝'],[dn]]);
+  h+=step(152,'でっぱり','#d9849b',[[P.b-m,'1人分'],['×'],[P.nb,'B組（人）'],['＝'],[up]]);
+  h+=step(224,'くらべる','#9a5a12',[[dn,'へこみ'],[dn===up?'＝':dn<up?'＜':'＞'],[up,'でっぱり']]);
+  return h;
+}
+
+let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){done={};}
+const saveDone=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
+const solved=()=>picked&&Math.abs(t-ans())<1e-9;
+/* ===== 効果音（Web Audio） ===== */
+let actx=null;
+function audio(){
+  try{if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC();}
+  if(actx.state==='suspended')actx.resume();return actx;}catch(e){return null;}
+}
+// tone(周波数Hz, 長さ秒, 波形, 音量, 開始の遅れ秒)
+function tone(f,d,type,vol,delay){
+  const c=audio();if(!c)return;
+  type=type||'sine';vol=vol==null?.035:vol;delay=delay||0;
+  const t0=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t0);
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.02);
+}
+// 初動の正解音（ピンポン）
+const firstSound=()=>{tone(590,.10);tone(790,.13,'sine',.035,.08);};
+// 出会った／追いついたときの音（ドミソド↑）
+const meetSound=()=>{tone(523,.12,'sine',.034);tone(659,.12,'sine',.034,.09);tone(784,.14,'sine',.034,.18);tone(1047,.32,'sine',.038,.27);tone(1568,.30,'triangle',.012,.27);};
+// iPad: 最初のタッチで音を使えるようにする
+document.addEventListener('touchstart',function un(){audio();document.removeEventListener('touchstart',un);},{passive:true});
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+/* 時間のつまみ（tmin があれば、その値から） */
+const TX0=160,TX1=940,TY=345;
+const tlo=()=>typeof tmin==='function'?tmin():0;
+function drawSlider(){
+  const T=tmax(),L0=tlo(),tx=TX0+(TX1-TX0)*(t-L0)/(T-L0);let h='';
+  h+=txt(TX0-20,TY,typeof sliderName==='function'?sliderName():'時間',{a:'end',fs:18,c:'#7b766d'});
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+TX1+'" y2="'+TY+'" stroke="#e2dccf" stroke-width="10" stroke-linecap="round"/>';
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+tx+'" y2="'+TY+'" stroke="#90ee90" stroke-width="10" stroke-linecap="round"/>';
+  const ts=tickStep();for(let i=L0;i<=T+1e-9;i+=ts){const x=TX0+(TX1-TX0)*(i-L0)/(T-L0);h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
+  h+='<g class="thandle"><circle cx="'+tx+'" cy="'+TY+'" r="18" fill="#fff" stroke="#3f9b4a" stroke-width="4"/>'+txt(tx,TY+1,'↔',{fs:18,c:'#3f9b4a'})+'</g>';
+  const lb=tlabel(),lw=tw(lb,19)+28;
+  h+='<rect x="'+(tx-lw/2)+'" y="'+(TY-64)+'" width="'+lw+'" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,lb,{fs:19,c:'#25642c'});
+  if(typeof extraSlider==='function')h+=extraSlider();
+  return h;
+}
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+function renderFirst(){
+  const el=$('first');el.classList.toggle('ok',picked);
+  if(picked){$('q1').innerHTML=pickedQ();$('opts').innerHTML='';$('msg').textContent=pickedMsg();}
+  else{$('q1').textContent=firstQ();const o=firstOpts();
+    $('opts').innerHTML='<button data-op="add"><span class="no">①</span>'+o[0]+'</button><button data-op="sub"><span class="no">②</span>'+o[1]+'</button>';$('msg').textContent='';}
+  svg.classList.toggle('locked',!picked);
+}
+$('opts').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-op]');if(!b)return;
+  if((b.dataset.op==='add')===rightIsAdd()){picked=true;renderFirst();update();celebrate();firstSound();}
+  else{b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');$('msg').textContent=wrongMsg();}
+});
+function updateCheck(){
+  const el=$('check');
+  if(!solved()){el.classList.remove('on');el.innerHTML='';$('nextq').hidden=true;return;}
+  if(el.classList.contains('on'))return;
+  if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
+  const cl=checkLine();el.innerHTML='<b>'+checkHead()+'</b>'+(cl.charAt(0)==='<'?cl:'<span>'+cl+'</span>');el.classList.add('on');meetSound();
+  $('nextq').hidden=idx>=PROBLEMS.length-1;
+}
+function update(){$('art').innerHTML=draw()+drawSlider();updateCheck();}
+function setT(v){if(!picked)return;t=Math.max(tlo(),Math.min(tmax(),v));update();}
+function localPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;}
+svg.addEventListener('pointerdown',e=>{
+  if(!picked)return;
+  const l=localPt(e);if(!l)return;
+  if(typeof hitExtra==='function'&&hitExtra(l)){e.preventDefault();return;}
+  if(l.y<300)return;
+  drag=true;svg.setPointerCapture(e.pointerId);setT(snap(tlo()+(l.x-TX0)/(TX1-TX0)*(tmax()-tlo())));e.preventDefault();
+});
+svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setT(snap(tlo()+(l.x-TX0)/(TX1-TX0)*(tmax()-tlo())));});
+const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
+svg.setAttribute('tabindex','0');
+svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+keyStep());e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-keyStep());e.preventDefault();}});
+function renderTabs(){
+  $('tabs').innerHTML=(INTRO?'<button class="introb" id="introOpen">はじめに</button>':'')+PRETABS+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
+}
+function load(i){
+  idx=i;P=PROBLEMS[i];picked=false;t=typeof t0==='function'?t0():tlo();
+  $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+P.tag;
+  $('qText').textContent=P.text;
+  renderTabs();renderFirst();
+  $('check').classList.remove('on');$('nextq').hidden=true;
+  update();
+}
+$('reset').addEventListener('click',()=>load(idx));
+$('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)load(+b.dataset.i);});
+$('clearRec').addEventListener('click',()=>{if(!confirm('この部屋の記録（クリアした問題の✓）を消して、はじめからにします。\nよろしいですか？'))return;done={};try{localStorage.removeItem(KEY);}catch(e){}load(0);});
+function startRoom(){started=true;const hq=/^#q(\d+)$/.exec(location.hash);load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);}
+let started=false;
+if(!INTRO)startRoom();
+else{
+  /* はじめに: 初回だけ自動で出す。2回目からは「はじめに」ボタンで開く */
+  const showIntro=()=>{$('intro').hidden=false;$('roomMain').hidden=true;window.scrollTo(0,0);};
+  const hideIntro=()=>{$('intro').hidden=true;$('roomMain').hidden=false;try{localStorage.setItem(INTRO,'1');}catch(e){}if(!started)startRoom();};
+  $('introGo').addEventListener('click',hideIntro);
+  $('tabs').addEventListener('click',e=>{if(e.target.closest('#introOpen'))showIntro();});
+  let seen=false;try{seen=localStorage.getItem(INTRO)==='1';}catch(e){}
+  if(seen||/^#q\d+$/.test(location.hash))startRoom();else showIntro();
+}
+})();
+</script></body></html>

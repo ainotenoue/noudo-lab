@@ -54,6 +54,7 @@ button:active{transform:translateY(1px)}
 .fxtag{color:#fff;font-size:14px;font-weight:800;border-radius:999px;padding:4px 12px;white-space:nowrap}
 .fx{display:inline-flex;align-items:flex-start;gap:7px}
 .check .fx{display:flex;justify-content:center;margin-top:4px}
+.fxpair{display:flex;justify-content:center;align-items:flex-start;gap:10px;margin-top:4px}.fxpair .fx{margin-top:0}
 .fx .tk{display:flex;flex-direction:column;align-items:center;line-height:1.15}
 .fx .n{font-size:20px;font-weight:800;color:#2f3437;padding:0 2px;border-bottom:2px solid #e2dccf}
 .fx .c{font-size:11px;font-weight:700;color:#9a9184;margin-top:2px;white-space:nowrap}
@@ -104,13 +105,13 @@ const pill=(x,y,s,fs)=>{fs=fs||22;const w=tw(s,fs)+40;return '<rect x="'+(x-w/2)
 const ROSE='#c9b8ec',ROSE_D='#7b62c4';
 
 /* 式を、数字と「その数字が何か」の組でならべる */
-const FXOPS=['×','＋','－','＝','÷'];
+const FXOPS=['×','＋','－','＝','÷','：','＜','＞','→'];
 const fx=(toks,col)=>'<div class="fx">'+toks.map((t,i)=>{const s=String(t[0]);if(FXOPS.includes(s))return '<div class="op">'+s+'</div>';
   const last=i===toks.length-1;return '<div class="tk'+(last?' res':'')+'"'+(last?' style="color:'+(col||'#25642c')+'"':'')+'><div class="n">'+s+'</div><div class="c">'+(t[1]||'&nbsp;')+'</div></div>';}).join('')+'</div>';
 const fxRow=(tag,col,toks)=>'<span class="fxrow"><span class="fxtag" style="background:'+col+'">'+tag+'</span>'+fx(toks,col)+'</span>';
 
 let idx=0,P=null,t=0,picked=false,drag=false;
-const INTRO='mm-intro-tokei';
+const INTRO='mm-intro-tokei',PRETABS='';
 
 const KEY='tokei-done';
 /* ===== 問題 =====
@@ -267,14 +268,15 @@ const meetSound=()=>{tone(523,.12,'sine',.034);tone(659,.12,'sine',.034,.09);ton
 // iPad: 最初のタッチで音を使えるようにする
 document.addEventListener('touchstart',function un(){audio();document.removeEventListener('touchstart',un);},{passive:true});
 function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
-/* 時間のつまみ */
+/* 時間のつまみ（tmin があれば、その値から） */
 const TX0=160,TX1=940,TY=345;
+const tlo=()=>typeof tmin==='function'?tmin():0;
 function drawSlider(){
-  const T=tmax(),tx=TX0+(TX1-TX0)*t/T;let h='';
-  h+=txt(TX0-20,TY,'時間',{a:'end',fs:18,c:'#7b766d'});
+  const T=tmax(),L0=tlo(),tx=TX0+(TX1-TX0)*(t-L0)/(T-L0);let h='';
+  h+=txt(TX0-20,TY,typeof sliderName==='function'?sliderName():'時間',{a:'end',fs:18,c:'#7b766d'});
   h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+TX1+'" y2="'+TY+'" stroke="#e2dccf" stroke-width="10" stroke-linecap="round"/>';
   h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+tx+'" y2="'+TY+'" stroke="#90ee90" stroke-width="10" stroke-linecap="round"/>';
-  const ts=tickStep();for(let i=0;i<=T+1e-9;i+=ts){const x=TX0+(TX1-TX0)*i/T;h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
+  const ts=tickStep();for(let i=L0;i<=T+1e-9;i+=ts){const x=TX0+(TX1-TX0)*(i-L0)/(T-L0);h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
   h+='<g class="thandle"><circle cx="'+tx+'" cy="'+TY+'" r="18" fill="#fff" stroke="#3f9b4a" stroke-width="4"/>'+txt(tx,TY+1,'↔',{fs:18,c:'#3f9b4a'})+'</g>';
   const lb=tlabel(),lw=tw(lb,19)+28;
   h+='<rect x="'+(tx-lw/2)+'" y="'+(TY-64)+'" width="'+lw+'" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,lb,{fs:19,c:'#25642c'});
@@ -303,24 +305,24 @@ function updateCheck(){
   $('nextq').hidden=idx>=PROBLEMS.length-1;
 }
 function update(){$('art').innerHTML=draw()+drawSlider();updateCheck();}
-function setT(v){if(!picked)return;t=Math.max(0,Math.min(tmax(),v));update();}
+function setT(v){if(!picked)return;t=Math.max(tlo(),Math.min(tmax(),v));update();}
 function localPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;}
 svg.addEventListener('pointerdown',e=>{
   if(!picked)return;
   const l=localPt(e);if(!l)return;
   if(typeof hitExtra==='function'&&hitExtra(l)){e.preventDefault();return;}
   if(l.y<300)return;
-  drag=true;svg.setPointerCapture(e.pointerId);setT(snap((l.x-TX0)/(TX1-TX0)*tmax()));e.preventDefault();
+  drag=true;svg.setPointerCapture(e.pointerId);setT(snap(tlo()+(l.x-TX0)/(TX1-TX0)*(tmax()-tlo())));e.preventDefault();
 });
-svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setT(snap((l.x-TX0)/(TX1-TX0)*tmax()));});
+svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setT(snap(tlo()+(l.x-TX0)/(TX1-TX0)*(tmax()-tlo())));});
 const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
 svg.setAttribute('tabindex','0');
 svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+keyStep());e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-keyStep());e.preventDefault();}});
 function renderTabs(){
-  $('tabs').innerHTML=(INTRO?'<button class="introb" id="introOpen">はじめに</button>':'')+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
+  $('tabs').innerHTML=(INTRO?'<button class="introb" id="introOpen">はじめに</button>':'')+PRETABS+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
 }
 function load(i){
-  idx=i;P=PROBLEMS[i];t=0;picked=false;
+  idx=i;P=PROBLEMS[i];picked=false;t=typeof t0==='function'?t0():tlo();
   $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+P.tag;
   $('qText').textContent=P.text;
   renderTabs();renderFirst();

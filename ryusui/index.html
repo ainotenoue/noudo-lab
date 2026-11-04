@@ -54,6 +54,7 @@ button:active{transform:translateY(1px)}
 .fxtag{color:#fff;font-size:14px;font-weight:800;border-radius:999px;padding:4px 12px;white-space:nowrap}
 .fx{display:inline-flex;align-items:flex-start;gap:7px}
 .check .fx{display:flex;justify-content:center;margin-top:4px}
+.fxpair{display:flex;justify-content:center;align-items:flex-start;gap:10px;margin-top:4px}.fxpair .fx{margin-top:0}
 .fx .tk{display:flex;flex-direction:column;align-items:center;line-height:1.15}
 .fx .n{font-size:20px;font-weight:800;color:#2f3437;padding:0 2px;border-bottom:2px solid #e2dccf}
 .fx .c{font-size:11px;font-weight:700;color:#9a9184;margin-top:2px;white-space:nowrap}
@@ -146,7 +147,7 @@ function arrow(x1,x2,y,col,w,lab,lc){
 }
 
 /* 式を、数字と「その数字が何か」の組でならべる */
-const FXOPS=['×','＋','－','＝','÷'];
+const FXOPS=['×','＋','－','＝','÷','：','＜','＞','→'];
 const fx=(toks,col)=>'<div class="fx">'+toks.map((t,i)=>{const s=String(t[0]);if(FXOPS.includes(s))return '<div class="op">'+s+'</div>';
   const last=i===toks.length-1;return '<div class="tk'+(last?' res':'')+'"'+(last?' style="color:'+(col||'#25642c')+'"':'')+'><div class="n">'+s+'</div><div class="c">'+(t[1]||'&nbsp;')+'</div></div>';}).join('')+'</div>';
 const fxRow=(tag,col,toks)=>'<span class="fxrow"><span class="fxtag" style="background:'+col+'">'+tag+'</span>'+fx(toks,col)+'</span>';
