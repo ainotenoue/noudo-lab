@@ -43,7 +43,7 @@ main{position:relative}
 .room .enter{font-size:13px;font-weight:800;color:var(--blue-d);white-space:nowrap}
 .r-lab .ic{background:#e9f5f9}
 .r-bal .ic{background:#fff0f4}
-.r-tsuru .ic{background:#fff1dc}.r-tabi .ic{background:#ebfbea}.r-ryu .ic{background:#e9f5f9}.r-tsuka .ic{background:#fff0f4}.r-tokei .ic{background:#efe9fd}.r-average .ic{background:#e7f5e9}
+.r-tsuru .ic{background:#fff1dc}.r-tabi .ic{background:#ebfbea}.r-ryu .ic{background:#e9f5f9}.r-tsuka .ic{background:#fff0f4}.r-tokei .ic{background:#efe9fd}.r-wasa .ic{background:#fff1dc}.r-average .ic{background:#e7f5e9}
 /* 準備中の扉 */
 .soon{display:flex;align-items:center;gap:16px;border:2px dashed #d9d3c6;border-radius:24px;padding:20px 22px;color:#a39d91;background:rgba(255,255,255,.5)}
 .soon .ic{flex:none;width:64px;height:64px;border-radius:18px;background:#f0ede6;display:flex;align-items:center;justify-content:center;font-size:28px}
@@ -83,7 +83,7 @@ main{position:relative}
     </a>
     <a class="room r-average" href="./average/">
       <div class="ic" aria-hidden="true">🍬</div>
-      <div><div class="st">ROOM 04 · 平均算</div><h3>平均算の部屋</h3><p>ならしても合計は同じ。でっぱりとへこみに注目。</p></div>
+      <div><div class="st">ROOM 04 · 平均算</div><h3>平均算の部屋</h3><p>でっぱりとへこみをそろえよう。</p></div>
       <div class="pg"><svg class="ring" id="ringAvg" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
     </a>
   </div>
@@ -117,7 +117,14 @@ main{position:relative}
 
 <section class="floor">
   <div class="fhead"><span class="fno">FLOOR 03</span><h2 class="fname">そろえる・くらべる</h2></div>
-  <div class="soon"><div class="ic">🔒</div><div><b>準備中</b><small>和差算・分配算・年齢算・倍数算の部屋を準備しています</small></div></div>
+  <div class="rooms">
+    <a class="room r-wasa" href="./wasa/">
+      <div class="ic" aria-hidden="true">📏</div>
+      <div><div class="st">ROOM 09 · 和差算</div><h3>和差算の部屋</h3><p>差をのぞくか、たすか。そろえよう。</p></div>
+      <div class="pg"><svg class="ring" id="ringWasa" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+    <div class="soon"><div class="ic">🔒</div><div><b>準備中</b><small>分配算・年齢算・倍数算</small></div></div>
+  </div>
 </section>
 
 <section class="floor">
@@ -139,6 +146,7 @@ const ROOMS={lab:{key:'lab-done',total:10,name:'食塩水の部屋',path:'./lab/
              tabibito:{key:'tabibito-done',total:12,name:'旅人算の部屋',path:'./tabibito/',ring:'ringTabi',col:'#3f9b4a'},
              ryusui:{key:'ryusui-done',total:10,name:'流水算の部屋',path:'./ryusui/',ring:'ringRyu',col:'#3d9cc2'},
              tsuka:{key:'tsuka-done',total:6,name:'通過算の部屋',path:'./tsuka/',ring:'ringTsuka',col:'#d9849b'},
+             wasa:{key:'wasa-done',total:6,name:'和差算の部屋',path:'./wasa/',ring:'ringWasa',col:'#e8a24f'},
              tokei:{key:'tokei-done',total:10,name:'時計算の部屋',path:'./tokei/',ring:'ringTokei',col:'#9b84de'}};
 function ring(id,n,total,col){
   const r=26,c=2*Math.PI*r,f=Math.min(1,n/total);
