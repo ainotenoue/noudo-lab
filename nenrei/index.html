@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>年齢算の部屋｜miss maths</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f7f5ef;--ink:#2f3437;--ink2:#7b766d;--card:#fff;--edge:#ebe5da;--green-d:#3f9b4a;--green-s:#ebfbea}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Maru Gothic ProN','M PLUS Rounded 1c',-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:15px 28px 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.question{margin:0 0 10px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:20px 26px;line-height:1.7;font-size:clamp(17px,2vw,21px);font-weight:800}
+.question small{display:inline-block;font-size:13px;color:var(--green-d);background:var(--green-s);border-radius:999px;padding:2px 12px;font-weight:800}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;white-space:nowrap;border:2px solid #b9e6b9;border-radius:999px;padding:5px 14px;font-size:14px;background:var(--green-s);font-weight:800;color:#2f6f37;touch-action:manipulation}
+button:active{transform:translateY(1px)}
+.tabs button{width:38px;height:38px;padding:0;font-size:15px;background:#fff;border-color:var(--edge);color:var(--ink2)}
+.tabs button.done{background:#f3f0e8;color:#9a9488;border-color:#e2dccf}
+.tabs button.done::after{content:"✓";font-size:10px;vertical-align:super;margin-left:1px;color:var(--green-d)}
+.tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#9fd99f;color:#2f6f37}
+.panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:12px 22px 12px}
+/* 初動: まず「たす？ひく？」を決める */
+.first{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff7e9;border-radius:18px;padding:10px 16px}
+.first .q1{font-size:18px;font-weight:800}
+.first .opts{display:flex;gap:10px}
+.first .opts button{font-size:18px;padding:8px 18px;background:#fff;border-color:#e8c48a;color:#7a4f12}
+.first .opts .no{display:inline-block;margin-right:8px;font-size:20px;color:#c07a1c}
+.successMark{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);width:154px;height:154px;border:13px solid #e6a45c;border-radius:50%;color:#d68a37;font-size:100px;line-height:125px;text-align:center;background:#fffaf2e8;pointer-events:none;z-index:99;animation:successPop 1.15s ease-out forwards}
+@keyframes successPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}40%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+@media(prefers-reduced-motion:reduce){.successMark{animation:none;opacity:0}}
+.first .msg{font-size:15px;font-weight:700;color:#9a5a12}
+.first.ok{background:var(--green-s)}
+.first.ok .q1{color:#25642c}
+.first .shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.diagram{width:100%;height:auto;display:block;max-height:430px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
+.diagram:focus{outline:none}
+.locked .thandle{opacity:.35}
+.thandle{cursor:grab}
+.panel-foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;min-height:48px}
+.back{justify-self:start;font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+.check{visibility:hidden;background:var(--green-s);border-radius:16px;padding:8px 22px;text-align:center;color:#2f5f35;line-height:1.5}
+.check.on{visibility:visible;animation:pop .35s ease-out}
+.check b{display:block;font-size:22px;color:#25642c}
+.check span{display:block;font-size:18px;font-weight:700;margin-top:2px}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.fbtns{justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+#nextq{background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+#reset{background:#fff}
+.rnote{text-align:center;font-size:12px;color:var(--ink2);font-weight:700;margin:10px 0 0}
+.clearrec{margin-left:10px;background:none;border:0;padding:0;font-size:12px;color:var(--ink2);text-decoration:underline;font-weight:700}
+/* 式: 数字の下に、その数字が何かを小さく書く */
+.fxrow{display:inline-flex;align-items:center;gap:10px;vertical-align:middle}
+.fxtag{color:#fff;font-size:14px;font-weight:800;border-radius:999px;padding:4px 12px;white-space:nowrap}
+.fx{display:inline-flex;align-items:flex-start;gap:7px}
+.check .fx{display:flex;justify-content:center;margin-top:4px}
+.fxpair{display:flex;justify-content:center;align-items:flex-start;gap:10px;margin-top:4px}.fxpair .fx{margin-top:0}
+.fx .tk{display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.fx .n{font-size:20px;font-weight:800;color:#2f3437;padding:0 2px;border-bottom:2px solid #e2dccf}
+.fx .c{font-size:11px;font-weight:700;color:#9a9184;margin-top:2px;white-space:nowrap}
+.fx .op{font-size:18px;font-weight:800;color:#9a9184;line-height:1.3}
+.fx .res .n{border-bottom-color:transparent;color:inherit;font-size:21px}
+/* はじめに（解説ページ） */
+.intro h2.ititle{margin:6px 0 0;font-size:clamp(19px,2.2vw,24px);font-weight:800;line-height:1.5}
+.introsvg{width:100%;height:auto;display:block;max-height:560px;font-family:inherit}
+.ifoot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.ifoot a{font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+#introGo{font-size:16px;padding:8px 22px;background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+.tabs button.introb{width:auto;padding:0 14px;margin-right:6px;background:#fff}
+@media(max-width:760px){main{padding:12px}.question{padding:16px}.panel{padding:10px}}
+@media(prefers-reduced-motion:reduce){.check.on,.first .shake{animation:none}}
+</style></head><body><main><h1 class="sr">年齢算の部屋</h1>
+<div id="intro" class="intro" hidden>
+<div class="question"><small>年齢算の部屋｜はじめに</small><h2 class="ititle">年齢の差は、何年たっても変わらない</h2></div>
+<section class="panel"><svg class="introsvg" viewBox="0 0 1100 500" role="img" aria-label="年齢算：何年たっても年齢の差は変わらない。父が子の3倍のとき、差は子の2つ分"><rect x="20" y="20" width="1060" height="460" rx="24" fill="#fffaf0" stroke="#e8c48a" stroke-width="3"/><text x="550" y="64" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="#9a5a12">何年たっても、2人の年齢の「差」は変わらない</text><text x="120" y="140" text-anchor="start" dominant-baseline="central" font-size="18" font-weight="800" fill="#7b766d">いま</text><text x="186" y="122" text-anchor="end" dominant-baseline="central" font-size="14" font-weight="800" fill="#3d9cc2">父</text><rect x="200" y="105" width="70" height="34" rx="6" fill="#add8e6" stroke="#3d9cc2" stroke-width="2.5"/><rect x="270" y="105" width="210" height="34" rx="6" fill="#fff1dc" stroke="#e8a24f" stroke-width="2.5"/><text x="375.0" y="123" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="800" fill="#9a5a12">差 30</text><text x="488" y="122" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#3d9cc2">40</text><text x="186" y="158" text-anchor="end" dominant-baseline="central" font-size="14" font-weight="800" fill="#d9849b">子</text><rect x="200" y="141" width="70" height="34" rx="6" fill="#ffd1dc" stroke="#d9849b" stroke-width="2.5"/><text x="278" y="158" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#d9849b">10</text><text x="120" y="230" text-anchor="start" dominant-baseline="central" font-size="18" font-weight="800" fill="#7b766d">5年後</text><text x="186" y="212" text-anchor="end" dominant-baseline="central" font-size="14" font-weight="800" fill="#3d9cc2">父</text><rect x="200" y="195" width="105" height="34" rx="6" fill="#add8e6" stroke="#3d9cc2" stroke-width="2.5"/><rect x="305" y="195" width="210" height="34" rx="6" fill="#fff1dc" stroke="#e8a24f" stroke-width="2.5"/><text x="410.0" y="213" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="800" fill="#9a5a12">差 30</text><text x="523" y="212" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#3d9cc2">45</text><text x="186" y="248" text-anchor="end" dominant-baseline="central" font-size="14" font-weight="800" fill="#d9849b">子</text><rect x="200" y="231" width="105" height="34" rx="6" fill="#ffd1dc" stroke="#d9849b" stroke-width="2.5"/><text x="313" y="248" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#d9849b">15</text><text x="120" y="320" text-anchor="start" dominant-baseline="central" font-size="18" font-weight="800" fill="#7b766d">20年後</text><text x="186" y="302" text-anchor="end" dominant-baseline="central" font-size="14" font-weight="800" fill="#3d9cc2">父</text><rect x="200" y="285" width="210" height="34" rx="6" fill="#add8e6" stroke="#3d9cc2" stroke-width="2.5"/><rect x="410" y="285" width="210" height="34" rx="6" fill="#fff1dc" stroke="#e8a24f" stroke-width="2.5"/><text x="515.0" y="303" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="800" fill="#9a5a12">差 30</text><text x="628" y="302" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#3d9cc2">60</text><text x="186" y="338" text-anchor="end" dominant-baseline="central" font-size="14" font-weight="800" fill="#d9849b">子</text><rect x="200" y="321" width="210" height="34" rx="6" fill="#ffd1dc" stroke="#d9849b" stroke-width="2.5"/><text x="418" y="338" text-anchor="start" dominant-baseline="central" font-size="15" font-weight="800" fill="#d9849b">30</text><rect x="700" y="120" width="350" height="220" rx="18" fill="#fff" stroke="#ebe5da" stroke-width="2"/><text x="875" y="160" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="#2f3437">5年後：父45 ＝ 子15 の 3倍</text><text x="875" y="210" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="#7b766d">父＝子の3つ分 なら</text><text x="875" y="250" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="800" fill="#9a5a12">差 30 ＝ 子の 2つ分</text><text x="875" y="300" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="800" fill="#2f3437">子 ＝ 30 ÷ 2 ＝ 15歳</text><text x="550" y="420" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#7b766d">和は、1年に「人数分」ずつふえる（2人なら2歳）</text></svg>
+<div class="ifoot"><a href="../">← 部屋への扉</a><button id="introGo">問題へ →</button></div></section>
+</div>
+<div id="roomMain">
+<div class="question"><div class="qtop"><small id="qTag"></small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
+<section class="panel">
+  <div class="first" id="first">
+    <span class="q1" id="q1">年齢の差は、何つ分？</span>
+    <span class="opts" id="opts"></span>
+    <span class="msg" id="msg"></span>
+  </div>
+  <svg class="diagram locked" id="diagram" viewBox="0 0 1100 400" role="img" aria-label="年齢算の線分図。つまみで年を動かすと、2人の年齢が変わります"><g id="art"></g></svg>
+  <div class="panel-foot"><a class="back" href="../">← 部屋への扉</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題 →</button><button id="reset">はじめに戻す</button></div></div>
+</section>
+<p class="rnote">記録はこのiPadのブラウザに保存されます。<button id="clearRec" class="clearrec">記録をリセット</button></p>
+</div>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id), svg=$('diagram');
+const txt=(x,y,s,o={})=>'<text x="'+x+'" y="'+y+'" text-anchor="'+(o.a||'middle')+'" dominant-baseline="central" font-size="'+(o.fs||20)+'" font-weight="'+(o.fw||800)+'" fill="'+(o.c||'#2f3437')+'">'+s+'</text>';
+const tw=(s,fs)=>{let w=0;for(const ch of String(s))w+=/[ -~]/.test(ch)?0.6:1;return w*fs;};
+function dim(xa,xb,y,s,col,fs){
+  fs=fs||20;const w=tw(s,fs)+16;
+  if(xb-xa<4)return '';
+  return '<line x1="'+xa+'" y1="'+y+'" x2="'+xb+'" y2="'+y+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<line x1="'+xa+'" y1="'+(y-9)+'" x2="'+xa+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/><line x1="'+xb+'" y1="'+(y-9)+'" x2="'+xb+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<rect x="'+((xa+xb)/2-w/2)+'" y="'+(y-15)+'" width="'+w+'" height="30" rx="8" fill="#fff"/>'+txt((xa+xb)/2,y+1,s,{fs,c:col});
+}
+const pill=(x,y,s,fs)=>{fs=fs||22;const w=tw(s,fs)+40;return '<rect x="'+(x-w/2)+'" y="'+(y-20)+'" width="'+w+'" height="40" rx="20" fill="#90ee90"/>'+txt(x,y+1,s,{fs,c:'#25642c'});};
+const ROSE='#c9b8ec',ROSE_D='#7b62c4';
+
+/* 式を、数字と「その数字が何か」の組でならべる */
+const FXOPS=['×','＋','－','＝','÷','：','＜','＞','→'];
+const fx=(toks,col)=>'<div class="fx">'+toks.map((t,i)=>{const s=String(t[0]);if(FXOPS.includes(s))return '<div class="op">'+s+'</div>';
+  const last=i===toks.length-1;return '<div class="tk'+(last?' res':'')+'"'+(last?' style="color:'+(col||'#25642c')+'"':'')+'><div class="n">'+s+'</div><div class="c">'+(t[1]||'&nbsp;')+'</div></div>';}).join('')+'</div>';
+const fxRow=(tag,col,toks)=>'<span class="fxrow"><span class="fxtag" style="background:'+col+'">'+tag+'</span>'+fx(toks,col)+'</span>';
+
+let idx=0,P=null,t=0,picked=false,drag=false;
+const INTRO='mm-intro-nenrei',PRETABS='';
+
+const KEY='nenrei-done';
+/* ===== 問題 =====
+   times … 父（F歳）が子（C歳）の m倍になるのは何年後／前？ 年齢の差 D は何年たっても同じ。
+           父＝子の m つ分 のとき、差 D ＝ 子の (m－1) つ分 → そのときの子 ＝ D÷(m－1)
+   sum   … 2人の年齢の和が S になるのは？ 1年で和は 1＋1＝2歳ふえる
+   catch … 父の年齢と、子2人の年齢の和が等しくなるのは？ 1年で差は 2－1＝1歳ちぢまる */
+const PROBLEMS=[
+  {kind:'times',tag:'○倍になる',na:'父',nb:'子',F:40,C:10,m:3,text:'いま、父は40歳、子は10歳です。父の年齢が子の年齢の3倍になるのは何年後ですか？'},
+  {kind:'times',tag:'○倍になる',na:'母',nb:'子',F:36,C:8,m:3,text:'いま、母は36歳、子は8歳です。母の年齢が子の年齢の3倍になるのは何年後ですか？'},
+  {kind:'times',tag:'○倍だった',na:'父',nb:'子',F:45,C:15,m:4,text:'いま、父は45歳、子は15歳です。父の年齢が子の年齢の4倍だったのは何年前ですか？'},
+  {kind:'times',tag:'○倍になる',na:'母',nb:'子',F:42,C:12,m:2,text:'いま、母は42歳、子は12歳です。母の年齢が子の年齢の2倍になるのは何年後ですか？'},
+  {kind:'sum',tag:'和がふえる',na:'父',nb:'子',F:38,C:8,S:60,text:'いま、父は38歳、子は8歳です。2人の年齢の和が60歳になるのは何年後ですか？'},
+  {kind:'catch',tag:'和に追いつく',na:'父',nb:'子2人',F:35,C1:7,C2:4,text:'いま、父は35歳、兄は7歳、弟は4歳です。父の年齢と、兄と弟の年齢の和が等しくなるのは何年後ですか？'}
+];
+const D=()=>P.F-P.C;
+const ct=()=>D()/(P.m-1);                         // そのときの子
+const K=()=>P.C1+P.C2;
+const ans=()=>({times:ct()-P.C,sum:(P.S-P.F-P.C)/2,catch:P.F-K()})[P.kind];
+const tmin=()=>P.kind==='times'&&ans()<0?-(P.C-1):0;
+const tmax=()=>P.kind==='times'&&ans()<0?0:Math.ceil(ans()*1.5)+2;
+const snap=v=>Math.round(v), tickStep=()=>1, keyStep=()=>1;
+const sliderName=()=>'年';
+const yl=x=>x>=0?x+'年後':(-x)+'年前';
+const tlabel=()=>t===0?'いま':yl(t);
+const rightIsAdd=()=>P.kind==='sum';
+const firstQ=()=>({times:P.na+'＝'+P.nb+'の'+P.m+'倍のとき、年齢の差は'+P.nb+'の何つ分？',sum:'1年で、2人の年齢の和は何歳ふえる？',catch:'1年で、父と子2人の和の差は何歳ちぢまる？'})[P.kind];
+const firstOpts=()=>({times:[P.m+'＋1＝'+(P.m+1)+'つ分',P.m+'－1＝'+(P.m-1)+'つ分'],sum:['1＋1＝2歳','1－1＝0歳'],catch:['2＋1＝3歳','2－1＝1歳']})[P.kind];
+const pickedQ=()=>({times:fxRow('そのときの'+P.nb,'#3f9b4a',[[D(),'差（歳）'],['÷'],[P.m-1,P.nb+'の'+(P.m-1)+'つ分'],['＝'],[ct()+'歳']]),
+  sum:fxRow('ふやす和','#3f9b4a',[[P.S,'めあての和'],['－'],[P.F+P.C,'いまの和'],['＝'],[(P.S-P.F-P.C)+'歳']]),
+  catch:fxRow('いまの差','#3f9b4a',[[P.F,'父'],['－'],[K(),'子2人の和'],['＝'],[(P.F-K())+'歳']])})[P.kind];
+const pickedMsg=()=>({times:P.nb+'が'+ct()+'歳になるのは？ つまみで年を動かそう',sum:'1年で2歳ずつふえる。つまみで年を動かそう',catch:'1年で1歳ずつちぢまる。つまみで年を動かそう'})[P.kind];
+const wrongMsg=()=>({times:P.na+'は'+P.nb+'の'+P.m+'つ分。差は '+P.m+'つ分－1つ分 だよ',sum:'2人とも、1年に1歳ずつ年をとるよ',catch:'子2人の和は1年に2歳、父は1歳ふえる。その差だけちぢまるよ'})[P.kind];
+const checkHead=()=>'できた！ 答え '+yl(ans());
+const checkLine=()=>{
+  if(P.kind==='sum')return fx([[P.S-P.F-P.C,'ふやす和'],['÷'],['2','1年でふえる'],['＝'],[yl(ans())]]);
+  if(P.kind==='catch')return fx([[P.F-K(),'いまの差'],['÷'],['1','1年でちぢまる'],['＝'],[yl(ans())]]);
+  const a=ans();
+  return '<div class="fxpair">'+fx([[D(),'差（歳）'],['÷'],[P.m-1,P.nb+'の'+(P.m-1)+'つ分'],['＝'],[ct()+'歳']])+'<div class="op">→</div>'+
+    (a>=0?fx([[ct(),'そのときの'+P.nb],['－'],[P.C,'いまの'+P.nb],['＝'],[yl(a)]]):fx([[P.C,'いまの'+P.nb],['－'],[ct(),'そのときの'+P.nb],['＝'],[yl(a)]]))+'</div>';
+};
+
+/* 右の計算の1行（数字の下に、その数字が何か） */
+const SOPS=['×','＋','－','＝','÷','：'];
+function step(y,tag,col,toks,bw){
+  bw=bw||118;const X=650;
+  let h='<rect x="'+X+'" y="'+(y-16)+'" width="'+bw+'" height="32" rx="16" fill="'+col+'"/>'+txt(X+bw/2,y+1,tag,{fs:14,c:'#fff'});
+  let x=X+bw+12;
+  toks.forEach((tk,i)=>{
+    const s=String(tk[0]),last=i===toks.length-1,op=SOPS.includes(s),fs=last?23:21,w=tw(s,fs),slot=Math.max(w,tk[1]?tw(tk[1],12):0),mid=x+slot/2;
+    h+=txt(mid,y,s,{fs,c:op?'#9a9184':(last?col:'#2f3437')});
+    if(tk[1])h+='<line x1="'+(mid-w/2)+'" y1="'+(y+15)+'" x2="'+(mid+w/2)+'" y2="'+(y+15)+'" stroke="#e2dccf" stroke-width="2"/>'+txt(mid,y+28,tk[1],{fs:12,c:'#9a9184',fw:700});
+    x+=slot+(op?7:9);
+  });
+  return h;
+}
+const BH=32;
+const CB=['#add8e6','#3d9cc2'],CP=['#ffd1dc','#d9849b'],CO=['#fff1dc','#e8a24f'],CG=['#dff3df','#5cbf5c'];
+const seg=(x,w,y,c,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-BH/2)+'" width="'+w+'" height="'+BH+'" rx="6" fill="'+(dash?'#fff':c[0])+'" stroke="'+c[1]+'" stroke-width="2.5"'+(dash?' stroke-dasharray="6 5"':'')+'/>'+(lab!==''&&lab!=null&&w>tw(String(lab),15)+8?txt(x+w/2,y+1,lab,{fs:15,c:lc||c[1]}):'');
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;};
+
+const X0=120,XW=490,Y1=100,Y2=176,Y3=244;
+function draw(){
+  const ok=solved(),x=t;let h='';
+  h+=txt(X0-80,36,tlabel()==='いま'?'いま':tlabel()+'の年齢',{a:'start',fs:17,c:'#7b766d'});
+  if(P.kind==='times'){
+    const f=P.F+x,c=P.C+x,mx=P.F+Math.max(tmax(),0),k=XW/mx;
+    h+=txt(X0-14,Y1,P.na,{a:'end',fs:16,c:CB[1]})+txt(X0-14,Y2,P.nb,{a:'end',fs:16,c:CP[1]});
+    h+=seg(X0,(f-D())*k,Y1,CB,'')+seg(X0+(f-D())*k,D()*k,Y1,CO,'差 '+D(),'#9a5a12');
+    h+=txt(X0+f*k+10,Y1,f+'歳',{a:'start',fs:18,c:CB[1]});
+    h+=seg(X0,c*k,Y2,CP,'')+txt(X0+c*k+10,Y2,c+'歳',{a:'start',fs:18,c:CP[1]});
+    // 子の長さで、父の線を区切ってみる（m倍ならぴったり）
+    for(let i=1;i<=P.m;i++){const xx=X0+c*i*k;if(xx>X0+XW+20)break;
+      h+='<line x1="'+xx+'" y1="'+(Y1-BH/2-8)+'" x2="'+xx+'" y2="'+(Y2+BH/2)+'" stroke="#9a9184" stroke-width="2" stroke-dasharray="3 5"/>'+txt(xx,Y1-BH/2-18,P.nb+'×'+i,{fs:12,c:'#9a9184',fw:700});}
+    if(ok)h+=pill(880,40,P.m+'倍！');
+    const r=Math.round(f/c*100)/100;
+    h+=step(92,'差は同じ','#e8a24f',[[f,P.na],['－'],[c,P.nb],['＝'],[D()+'歳']]);
+    h+=step(164,P.nb+'の年齢','#d9849b',[[P.C,'いま'],[x>=0?'＋':'－'],[Math.abs(x),'年'],['＝'],[c+'歳']]);
+    h+=step(236,'何倍？','#9a5a12',[[f,P.na],['÷'],[c,P.nb],['＝'],[r+'倍']]);
+    return h;
+  }
+  if(P.kind==='sum'){
+    const f=P.F+x,c=P.C+x,s=f+c,k=XW/Math.max(P.S,P.F+P.C+2*tmax());
+    h+=txt(X0-14,Y1,P.na,{a:'end',fs:16,c:CB[1]})+seg(X0,f*k,Y1,CB,f+'歳','#24617a');
+    h+=txt(X0-14,Y2,P.nb,{a:'end',fs:16,c:CP[1]})+seg(X0,c*k,Y2,CP,c+'歳','#8a3d55');
+    h+=txt(X0-14,Y3,'和',{a:'end',fs:16,c:'#9a5a12'})+seg(X0,f*k,Y3,CB,'')+seg(X0+f*k,c*k,Y3,CP,'')+txt(X0+Math.max(s,P.S)*k+12,Y3,s+'歳',{a:'start',fs:18,c:'#9a5a12'});
+    const gx=X0+P.S*k;h+='<line x1="'+gx+'" y1="'+(Y3-BH/2-10)+'" x2="'+gx+'" y2="'+(Y3+BH/2+8)+'" stroke="#3f9b4a" stroke-width="3" stroke-dasharray="6 5"/>'+txt(gx,Y3-BH/2-20,'めあて '+P.S+'歳',{fs:13,c:'#3f9b4a'});
+    if(ok)h+=pill(880,40,'和が'+P.S+'歳！');
+    h+=step(92,'和','#9a5a12',[[f,P.na],['＋'],[c,P.nb],['＝'],[s+'歳']]);
+    h+=step(164,'ふえた和','#e8a24f',[['2','1年で'],['×'],[x,'年'],['＝'],[2*x+'歳']]);
+    h+=step(236,'ずれ','#9a5a12',[[P.S,'めあて'],['－'],[s,'いま'],['＝'],[(P.S-s)+'歳']]);
+    return h;
+  }
+  // catch
+  const f=P.F+x,a=P.C1+x,b=P.C2+x,k=XW/(P.F+tmax()+4);
+  h+=txt(X0-14,Y1,P.na,{a:'end',fs:16,c:CB[1]})+seg(X0,f*k,Y1,CB,f+'歳','#24617a');
+  h+=txt(X0-14,Y2,'兄＋弟',{a:'end',fs:16,c:CP[1]})+seg(X0,a*k,Y2,CP,a,'#8a3d55')+seg(X0+a*k,b*k,Y2,CO,b,'#9a5a12');
+  const gap=f-(a+b);
+  h+='<line x1="'+(X0+f*k)+'" y1="'+(Y1-BH/2-6)+'" x2="'+(X0+f*k)+'" y2="'+(Y2+BH/2+6)+'" stroke="#9a9184" stroke-width="2" stroke-dasharray="3 5"/>';
+  if(ok)h+=pill(880,40,'等しくなった！');
+  h+=step(92,P.na,'#3d9cc2',[[P.F,'いま'],['＋'],[x,'年'],['＝'],[f+'歳']]);
+  h+=step(164,'兄＋弟','#d9849b',[[K(),'いまの和'],['＋'],['2','1年で'],['×'],[x,'年'],['＝'],[(a+b)+'歳']]);
+  h+=step(236,'差','#9a5a12',[[f,P.na],['－'],[a+b,'兄＋弟'],['＝'],[gap+'歳']]);
+  return h;
+}
+
+let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){done={};}
+const saveDone=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
+const solved=()=>picked&&Math.abs(t-ans())<1e-9;
+/* ===== 効果音（Web Audio） ===== */
+let actx=null;
+function audio(){
+  try{if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC();}
+  if(actx.state==='suspended')actx.resume();return actx;}catch(e){return null;}
+}
+// tone(周波数Hz, 長さ秒, 波形, 音量, 開始の遅れ秒)
+function tone(f,d,type,vol,delay){
+  const c=audio();if(!c)return;
+  type=type||'sine';vol=vol==null?.035:vol;delay=delay||0;
+  const t0=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t0);
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.02);
+}
+// 初動の正解音（ピンポン）
+const firstSound=()=>{tone(590,.10);tone(790,.13,'sine',.035,.08);};
+// 出会った／追いついたときの音（ドミソド↑）
+const meetSound=()=>{tone(523,.12,'sine',.034);tone(659,.12,'sine',.034,.09);tone(784,.14,'sine',.034,.18);tone(1047,.32,'sine',.038,.27);tone(1568,.30,'triangle',.012,.27);};
+// iPad: 最初のタッチで音を使えるようにする
+document.addEventListener('touchstart',function un(){audio();document.removeEventListener('touchstart',un);},{passive:true});
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+/* 時間のつまみ（tmin があれば、その値から） */
+const TX0=160,TX1=940,TY=345;
+const tlo=()=>typeof tmin==='function'?tmin():0;
+function drawSlider(){
+  const T=tmax(),L0=tlo(),tx=TX0+(TX1-TX0)*(t-L0)/(T-L0);let h='';
+  h+=txt(TX0-20,TY,typeof sliderName==='function'?sliderName():'時間',{a:'end',fs:18,c:'#7b766d'});
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+TX1+'" y2="'+TY+'" stroke="#e2dccf" stroke-width="10" stroke-linecap="round"/>';
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+tx+'" y2="'+TY+'" stroke="#90ee90" stroke-width="10" stroke-linecap="round"/>';
+  const ts=tickStep();for(let i=L0;i<=T+1e-9;i+=ts){const x=TX0+(TX1-TX0)*(i-L0)/(T-L0);h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
+  h+='<g class="thandle"><circle cx="'+tx+'" cy="'+TY+'" r="18" fill="#fff" stroke="#3f9b4a" stroke-width="4"/>'+txt(tx,TY+1,'↔',{fs:18,c:'#3f9b4a'})+'</g>';
+  const lb=tlabel(),lw=tw(lb,19)+28;
+  h+='<rect x="'+(tx-lw/2)+'" y="'+(TY-64)+'" width="'+lw+'" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,lb,{fs:19,c:'#25642c'});
+  if(typeof extraSlider==='function')h+=extraSlider();
+  return h;
+}
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+function renderFirst(){
+  const el=$('first');el.classList.toggle('ok',picked);
+  if(picked){$('q1').innerHTML=pickedQ();$('opts').innerHTML='';$('msg').textContent=pickedMsg();}
+  else{$('q1').textContent=firstQ();const o=firstOpts();
+    $('opts').innerHTML='<button data-op="add"><span class="no">①</span>'+o[0]+'</button><button data-op="sub"><span class="no">②</span>'+o[1]+'</button>';$('msg').textContent='';}
+  svg.classList.toggle('locked',!picked);
+}
+$('opts').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-op]');if(!b)return;
+  if((b.dataset.op==='add')===rightIsAdd()){picked=true;renderFirst();update();celebrate();firstSound();}
+  else{b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');$('msg').textContent=wrongMsg();}
+});
+function updateCheck(){
+  const el=$('check');
+  if(!solved()){el.classList.remove('on');el.innerHTML='';$('nextq').hidden=true;return;}
+  if(el.classList.contains('on'))return;
+  if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
+  const cl=checkLine();el.innerHTML='<b>'+checkHead()+'</b>'+(cl.charAt(0)==='<'?cl:'<span>'+cl+'</span>');el.classList.add('on');meetSound();
+  $('nextq').hidden=idx>=PROBLEMS.length-1;
+}
+function update(){$('art').innerHTML=draw()+drawSlider();updateCheck();}
+function setT(v){if(!picked)return;t=Math.max(tlo(),Math.min(tmax(),v));update();}
+function localPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;}
+svg.addEventListener('pointerdown',e=>{
+  if(!picked)return;
+  const l=localPt(e);if(!l)return;
+  if(typeof hitExtra==='function'&&hitExtra(l)){e.preventDefault();return;}
+  if(l.y<300)return;
+  drag=true;svg.setPointerCapture(e.pointerId);setT(snap(tlo()+(l.x-TX0)/(TX1-TX0)*(tmax()-tlo())));e.preventDefault();
+});
+svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setT(snap(tlo()+(l.x-TX0)/(TX1-TX0)*(tmax()-tlo())));});
+const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
+svg.setAttribute('tabindex','0');
+svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+keyStep());e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-keyStep());e.preventDefault();}});
+function renderTabs(){
+  $('tabs').innerHTML=(INTRO?'<button class="introb" id="introOpen">はじめに</button>':'')+PRETABS+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
+}
+function load(i){
+  idx=i;P=PROBLEMS[i];picked=false;t=typeof t0==='function'?t0():tlo();
+  $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+P.tag;
+  $('qText').textContent=P.text;
+  renderTabs();renderFirst();
+  $('check').classList.remove('on');$('nextq').hidden=true;
+  update();
+}
+$('reset').addEventListener('click',()=>load(idx));
+$('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)load(+b.dataset.i);});
+$('clearRec').addEventListener('click',()=>{if(!confirm('この部屋の記録（クリアした問題の✓）を消して、はじめからにします。\nよろしいですか？'))return;done={};try{localStorage.removeItem(KEY);}catch(e){}load(0);});
+function startRoom(){started=true;const hq=/^#q(\d+)$/.exec(location.hash);load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);}
+let started=false;
+if(!INTRO)startRoom();
+else{
+  /* はじめに: 初回だけ自動で出す。2回目からは「はじめに」ボタンで開く */
+  const showIntro=()=>{$('intro').hidden=false;$('roomMain').hidden=true;window.scrollTo(0,0);};
+  const hideIntro=()=>{$('intro').hidden=true;$('roomMain').hidden=false;try{localStorage.setItem(INTRO,'1');}catch(e){}if(!started)startRoom();};
+  $('introGo').addEventListener('click',hideIntro);
+  $('tabs').addEventListener('click',e=>{if(e.target.closest('#introOpen'))showIntro();});
+  let seen=false;try{seen=localStorage.getItem(INTRO)==='1';}catch(e){}
+  if(seen||/^#q\d+$/.test(location.hash))startRoom();else showIntro();
+}
+})();
+</script></body></html>
