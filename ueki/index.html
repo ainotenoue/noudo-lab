@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>植木算の部屋｜miss maths</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#f7f5ef;--ink:#2f3437;--ink2:#7b766d;--card:#fff;--edge:#ebe5da;--green-d:#3f9b4a;--green-s:#ebfbea}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Hiragino Maru Gothic ProN','M PLUS Rounded 1c',-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:15px 28px 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.question{margin:0 0 10px;background:var(--card);border:2px solid var(--edge);border-radius:22px;padding:20px 26px;line-height:1.7;font-size:clamp(17px,2vw,21px);font-weight:800}
+.question small{display:inline-block;font-size:13px;color:var(--green-d);background:var(--green-s);border-radius:999px;padding:2px 12px;font-weight:800}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;white-space:nowrap;border:2px solid #b9e6b9;border-radius:999px;padding:5px 14px;font-size:14px;background:var(--green-s);font-weight:800;color:#2f6f37;touch-action:manipulation}
+button:active{transform:translateY(1px)}
+.tabs button{width:38px;height:38px;padding:0;font-size:15px;background:#fff;border-color:var(--edge);color:var(--ink2)}
+.tabs button.done{background:#f3f0e8;color:#9a9488;border-color:#e2dccf}
+.tabs button.done::after{content:"✓";font-size:10px;vertical-align:super;margin-left:1px;color:var(--green-d)}
+.tabs button[aria-pressed="true"]{background:var(--green-s);border-color:#9fd99f;color:#2f6f37}
+.panel{background:var(--card);border:2px solid var(--edge);border-radius:26px;padding:12px 22px 12px}
+/* 初動: まず「たす？ひく？」を決める */
+.first{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff7e9;border-radius:18px;padding:10px 16px}
+.first .q1{font-size:18px;font-weight:800}
+.first .opts{display:flex;gap:10px}
+.first .opts button{font-size:18px;padding:8px 18px;background:#fff;border-color:#e8c48a;color:#7a4f12}
+.first .opts .no{display:inline-block;margin-right:8px;font-size:20px;color:#c07a1c}
+.successMark{position:fixed;top:42%;left:50%;transform:translate(-50%,-50%);width:154px;height:154px;border:13px solid #e6a45c;border-radius:50%;color:#d68a37;font-size:100px;line-height:125px;text-align:center;background:#fffaf2e8;pointer-events:none;z-index:99;animation:successPop 1.15s ease-out forwards}
+@keyframes successPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}40%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.05)}}
+@media(prefers-reduced-motion:reduce){.successMark{animation:none;opacity:0}}
+.first .msg{font-size:15px;font-weight:700;color:#9a5a12}
+.first.ok{background:var(--green-s)}
+.first.ok .q1{color:#25642c}
+.first .shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.diagram{width:100%;height:auto;display:block;max-height:430px;touch-action:none;user-select:none;-webkit-user-select:none;font-family:inherit}
+.diagram:focus{outline:none}
+.locked .thandle{opacity:.35}
+.thandle{cursor:grab}
+.panel-foot{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;min-height:48px}
+.back{justify-self:start;font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+.check{visibility:hidden;background:var(--green-s);border-radius:16px;padding:8px 22px;text-align:center;color:#2f5f35;line-height:1.5}
+.check.on{visibility:visible;animation:pop .35s ease-out}
+.check b{display:block;font-size:22px;color:#25642c}
+.check span{display:block;font-size:18px;font-weight:700;margin-top:2px}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.fbtns{justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+#nextq{background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+#reset{background:#fff}
+.rnote{text-align:center;font-size:12px;color:var(--ink2);font-weight:700;margin:10px 0 0}
+.clearrec{margin-left:10px;background:none;border:0;padding:0;font-size:12px;color:var(--ink2);text-decoration:underline;font-weight:700}
+/* 式: 数字の下に、その数字が何かを小さく書く */
+.fxrow{display:inline-flex;align-items:center;gap:10px;vertical-align:middle}
+.fxtag{color:#fff;font-size:14px;font-weight:800;border-radius:999px;padding:4px 12px;white-space:nowrap}
+.fx{display:inline-flex;align-items:flex-start;gap:7px}
+.check .fx{display:flex;justify-content:center;margin-top:4px}
+.fxpair{display:flex;justify-content:center;align-items:flex-start;gap:10px;margin-top:4px}.fxpair .fx{margin-top:0}
+.fx .tk{display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.fx .n{font-size:20px;font-weight:800;color:#2f3437;padding:0 2px;border-bottom:2px solid #e2dccf}
+.fx .c{font-size:11px;font-weight:700;color:#9a9184;margin-top:2px;white-space:nowrap}
+.fx .op{font-size:18px;font-weight:800;color:#9a9184;line-height:1.3}
+.fx .res .n{border-bottom-color:transparent;color:inherit;font-size:21px}
+/* はじめに（解説ページ） */
+.intro h2.ititle{margin:6px 0 0;font-size:clamp(19px,2.2vw,24px);font-weight:800;line-height:1.5}
+.introsvg{width:100%;height:auto;display:block;max-height:560px;font-family:inherit}
+.ifoot{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.ifoot a{font-size:14px;padding:6px 14px;color:#5b737b;text-decoration:none;font-weight:800;border:2px solid var(--edge);border-radius:999px;background:#fff}
+#introGo{font-size:16px;padding:8px 22px;background:#90ee90;border-color:#6fd16f;color:#1f5a26}
+.tabs button.introb{width:auto;padding:0 14px;margin-right:6px;background:#fff}
+@media(max-width:760px){main{padding:12px}.question{padding:16px}.panel{padding:10px}}
+@media(prefers-reduced-motion:reduce){.check.on,.first .shake{animation:none}}
+</style></head><body><main><h1 class="sr">植木算の部屋</h1>
+<div id="intro" class="intro" hidden>
+<div class="question"><small>植木算の部屋｜はじめに</small><h2 class="ititle">木の数と、間の数。1つちがうのはどっち？</h2></div>
+<section class="panel"><svg class="introsvg" viewBox="0 0 1100 500" role="img" aria-label="植木算：両はしにも植えると本数は間の数＋1、両はしなしは－1、1周なら同じ"><rect x="20" y="20" width="1060" height="460" rx="24" fill="#f7fbf8" stroke="#9fcfae" stroke-width="3"/><text x="550" y="60" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="800" fill="#2f6f37">木（本数）と、間（間の数）を数え分ける</text><text x="90" y="140" text-anchor="start" dominant-baseline="central" font-size="18" font-weight="800" fill="#2f3437">① 両はしにも</text><line x1="290" y1="150" x2="610" y2="150" stroke="#b9b2a5" stroke-width="7" stroke-linecap="round"/><line x1="290" y1="138" x2="290" y2="162" stroke="#7b766d" stroke-width="3"/><line x1="610" y1="138" x2="610" y2="162" stroke="#7b766d" stroke-width="3"/><line x1="290" y1="146" x2="290" y2="122" stroke="#9a7b55" stroke-width="3"/><circle cx="290" cy="116" r="10" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><line x1="370" y1="146" x2="370" y2="122" stroke="#9a7b55" stroke-width="3"/><circle cx="370" cy="116" r="10" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><line x1="450" y1="146" x2="450" y2="122" stroke="#9a7b55" stroke-width="3"/><circle cx="450" cy="116" r="10" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><line x1="530" y1="146" x2="530" y2="122" stroke="#9a7b55" stroke-width="3"/><circle cx="530" cy="116" r="10" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><line x1="610" y1="146" x2="610" y2="122" stroke="#9a7b55" stroke-width="3"/><circle cx="610" cy="116" r="10" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><text x="820" y="140" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#2f6f37">木 5本 ＝ 間 4 ＋ 1</text><text x="90" y="240" text-anchor="start" dominant-baseline="central" font-size="18" font-weight="800" fill="#2f3437">② 両はしなし</text><line x1="290" y1="250" x2="610" y2="250" stroke="#b9b2a5" stroke-width="7" stroke-linecap="round"/><line x1="290" y1="238" x2="290" y2="262" stroke="#7b766d" stroke-width="3"/><line x1="610" y1="238" x2="610" y2="262" stroke="#7b766d" stroke-width="3"/><line x1="370" y1="246" x2="370" y2="222" stroke="#9a7b55" stroke-width="3"/><circle cx="370" cy="216" r="10" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><line x1="450" y1="246" x2="450" y2="222" stroke="#9a7b55" stroke-width="3"/><circle cx="450" cy="216" r="10" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><line x1="530" y1="246" x2="530" y2="222" stroke="#9a7b55" stroke-width="3"/><circle cx="530" cy="216" r="10" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><text x="820" y="240" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#2f6f37">木 3本 ＝ 間 4 － 1</text><text x="90" y="340" text-anchor="start" dominant-baseline="central" font-size="18" font-weight="800" fill="#2f3437">1周（池）</text><circle cx="450" cy="344" r="34" fill="#dcf0f7" stroke="#9fd2e4" stroke-width="3"/><circle cx="484.0" cy="344.0" r="8" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><circle cx="450.0" cy="378.0" r="8" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><circle cx="416.0" cy="344.0" r="8" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><circle cx="450.0" cy="310.0" r="8" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/><text x="820" y="340" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="800" fill="#2f6f37">木 4本 ＝ 間 4</text><text x="550" y="440" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="800" fill="#7b766d">テープののりしろ・丸太を切る回数も「1つ少ない」</text></svg>
+<div class="ifoot"><a href="../">← 部屋への扉</a><button id="introGo">問題へ →</button></div></section>
+</div>
+<div id="roomMain">
+<div class="question"><div class="qtop"><small id="qTag"></small><div class="tabs" id="tabs"></div></div><div id="qText"></div></div>
+<section class="panel">
+  <div class="first" id="first">
+    <span class="q1" id="q1">本数は、間の数より？</span>
+    <span class="opts" id="opts"></span>
+    <span class="msg" id="msg"></span>
+  </div>
+  <svg class="diagram locked" id="diagram" viewBox="0 0 1100 400" role="img" aria-label="植木算の図。つまみで本数を動かすと、木がならびます"><g id="art"></g></svg>
+  <div class="panel-foot"><a class="back" href="../">← 部屋への扉</a><div class="check" id="check" role="status" aria-live="polite"></div><div class="fbtns"><button id="nextq" hidden>次の問題 →</button><button id="reset">はじめに戻す</button></div></div>
+</section>
+<p class="rnote">記録はこのiPadのブラウザに保存されます。<button id="clearRec" class="clearrec">記録をリセット</button></p>
+</div>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id), svg=$('diagram');
+const txt=(x,y,s,o={})=>'<text x="'+x+'" y="'+y+'" text-anchor="'+(o.a||'middle')+'" dominant-baseline="central" font-size="'+(o.fs||20)+'" font-weight="'+(o.fw||800)+'" fill="'+(o.c||'#2f3437')+'">'+s+'</text>';
+const tw=(s,fs)=>{let w=0;for(const ch of String(s))w+=/[ -~]/.test(ch)?0.6:1;return w*fs;};
+function dim(xa,xb,y,s,col,fs){
+  fs=fs||20;const w=tw(s,fs)+16;
+  if(xb-xa<4)return '';
+  return '<line x1="'+xa+'" y1="'+y+'" x2="'+xb+'" y2="'+y+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<line x1="'+xa+'" y1="'+(y-9)+'" x2="'+xa+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/><line x1="'+xb+'" y1="'+(y-9)+'" x2="'+xb+'" y2="'+(y+9)+'" stroke="'+col+'" stroke-width="3"/>'+
+    '<rect x="'+((xa+xb)/2-w/2)+'" y="'+(y-15)+'" width="'+w+'" height="30" rx="8" fill="#fff"/>'+txt((xa+xb)/2,y+1,s,{fs,c:col});
+}
+const pill=(x,y,s,fs)=>{fs=fs||22;const w=tw(s,fs)+40;return '<rect x="'+(x-w/2)+'" y="'+(y-20)+'" width="'+w+'" height="40" rx="20" fill="#90ee90"/>'+txt(x,y+1,s,{fs,c:'#25642c'});};
+const ROSE='#c9b8ec',ROSE_D='#7b62c4';
+
+/* 式を、数字と「その数字が何か」の組でならべる */
+const FXOPS=['×','＋','－','＝','÷','：','＜','＞','→'];
+const fx=(toks,col)=>'<div class="fx">'+toks.map((t,i)=>{const s=String(t[0]);if(FXOPS.includes(s))return '<div class="op">'+s+'</div>';
+  const last=i===toks.length-1;return '<div class="tk'+(last?' res':'')+'"'+(last?' style="color:'+(col||'#25642c')+'"':'')+'><div class="n">'+s+'</div><div class="c">'+(t[1]||'&nbsp;')+'</div></div>';}).join('')+'</div>';
+const fxRow=(tag,col,toks)=>'<span class="fxrow"><span class="fxtag" style="background:'+col+'">'+tag+'</span>'+fx(toks,col)+'</span>';
+
+let idx=0,P=null,t=0,picked=false,drag=false;
+const INTRO='mm-intro-ueki',PRETABS='';
+
+const KEY='ueki-done';
+/* ===== 問題 =====
+   both   … 両はしにも植える → 本数 ＝ 間の数＋1
+   none   … 両はしには植えない → 本数 ＝ 間の数－1
+   circle … 池のまわり（1周）→ 本数 ＝ 間の数
+   tape   … テープを重ねてつなぐ → のりしろの数 ＝ 枚数－1
+   cut    … 丸太を切る → 切る回数 ＝ 本数－1
+   つまみ … 本数（枚数・回数） */
+const PROBLEMS=[
+  {kind:'both',L:120,a:6,u:'m',it:'木',cu:'本',tag:'両はしにも',text:'120mの道の片側に、はしからはしまで6mおきに木を植えます。両はしにも植えると、木は何本いりますか？'},
+  {kind:'none',L:60,a:5,u:'m',it:'旗',cu:'本',tag:'両はしには植えない',text:'60mはなれた2本の柱の間に、5mおきに旗を立てます。柱のところには立てないとき、旗は何本いりますか？'},
+  {kind:'circle',L:80,a:4,u:'m',it:'木',cu:'本',tag:'池のまわり',text:'まわりの長さが80mの池のまわりに、4mおきに木を植えます。木は何本いりますか？'},
+  {kind:'both',L:200,a:25,u:'m',it:'電柱',cu:'本',tag:'両はしにも',text:'200mはなれたA地点からB地点まで、25mおきに電柱を立てます。A地点とB地点にも立てると、電柱は何本いりますか？'},
+  {kind:'tape',L:73,a:10,ov:1,u:'cm',it:'テープ',cu:'枚',tag:'のりしろ',text:'長さ10cmのテープを、のりしろを1cmにしてつないでいきます。全体の長さを73cmにするには、テープは何枚いりますか？'},
+  {kind:'cut',L:300,a:50,u:'cm',it:'丸太',cu:'回',tag:'丸太を切る',text:'長さ3mの丸太を、50cmずつに切り分けます。何回切ればよいですか？'}
+];
+const G=()=>P.L/P.a;                                     // 間の数（cut は できる本数）
+const ans=()=>({both:G()+1,none:G()-1,circle:G(),tape:(P.L-P.a)/(P.a-P.ov)+1,cut:G()-1})[P.kind];
+const tmin=()=>({tape:1,both:1})[P.kind]||0, tmax=()=>Math.ceil(ans()*1.4)+1;
+const snap=v=>Math.round(v), tickStep=()=>1, keyStep=()=>1;
+const sliderName=()=>({tape:'枚数',cut:'回数'})[P.kind]||'本数';
+const tlabel=()=>t+P.cu;
+const rightIsAdd=()=>P.kind==='both';
+const firstQ=()=>({both:'両はしにも植えると、本数は間の数より？',none:'両はしには植えないと、本数は間の数より？',circle:'1周すると、本数は間の数より？',
+  tape:'のりしろの数は、テープの枚数より？',cut:'切る回数は、できる丸太の本数より？'})[P.kind];
+const firstOpts=()=>({circle:['間の数＋1','間の数と同じ'],tape:['枚数＋1','枚数－1'],cut:['本数＋1','本数－1']})[P.kind]||['間の数＋1','間の数－1'];
+const pickedQ=()=>P.kind==='tape'?fxRow('2枚目から','#3f9b4a',[[P.a,'1枚'],['－'],[P.ov,'のりしろ'],['＝'],[(P.a-P.ov)+P.u+'ずつふえる']])
+  :P.kind==='cut'?fxRow('できる本数','#3f9b4a',[[P.L,'丸太（cm）'],['÷'],[P.a,'1本'],['＝'],[G()+'本']])
+  :fxRow('間の数','#3f9b4a',[[P.L,P.kind==='circle'?'1周':'長さ'],['÷'],[P.a,'間かく'],['＝'],[G()+'こ']]);
+const pickedMsg=()=>({both:'本数は 間の数＋1。',none:'本数は 間の数－1。',circle:'本数は 間の数と同じ。',tape:'',cut:'切る回数は 本数－1。'})[P.kind]+'つまみで'+sliderName()+'を動かそう';
+const wrongMsg=()=>({both:'両はしにもあるので、木は間より1本多いよ',none:'両はしにないので、木は間より1本少ないよ',circle:'1周すると、最初の木と最後の木が同じ。木と間は同じ数',
+  tape:'2枚をつなぐとのりしろ1つ。のりしろは枚数より1つ少ないよ',cut:'1回切ると2本。切る回数は本数より1つ少ないよ'})[P.kind];
+const checkHead=()=>'できた！ 答え '+ans()+P.cu;
+const checkLine=()=>({both:fx([[G(),'間の数'],['＋'],['1','両はし'],['＝'],[ans()+P.cu]]),none:fx([[G(),'間の数'],['－'],['1','両はしなし'],['＝'],[ans()+P.cu]]),
+  circle:fx([[P.L,'1周'],['÷'],[P.a,'間かく'],['＝'],[ans()+P.cu]]),cut:fx([[G(),'できる本数'],['－'],['1'],['＝'],[ans()+P.cu]]),
+  tape:fx([[P.L-P.a,'2枚目からの長さ'],['÷'],[P.a-P.ov,'1枚でふえる'],['＋'],['1','1枚目'],['＝'],[ans()+P.cu]])})[P.kind];
+
+/* 右の計算の1行（数字の下に、その数字が何か） */
+const SOPS=['×','＋','－','＝','÷','：'];
+function step(y,tag,col,toks,bw){
+  bw=bw||118;const X=650;
+  let h='<rect x="'+X+'" y="'+(y-16)+'" width="'+bw+'" height="32" rx="16" fill="'+col+'"/>'+txt(X+bw/2,y+1,tag,{fs:14,c:'#fff'});
+  let x=X+bw+12;
+  toks.forEach((tk,i)=>{
+    const s=String(tk[0]),last=i===toks.length-1,op=SOPS.includes(s),fs=last?23:21,w=tw(s,fs),slot=Math.max(w,tk[1]?tw(tk[1],12):0),mid=x+slot/2;
+    h+=txt(mid,y,s,{fs,c:op?'#9a9184':(last?col:'#2f3437')});
+    if(tk[1])h+='<line x1="'+(mid-w/2)+'" y1="'+(y+15)+'" x2="'+(mid+w/2)+'" y2="'+(y+15)+'" stroke="#e2dccf" stroke-width="2"/>'+txt(mid,y+28,tk[1],{fs:12,c:'#9a9184',fw:700});
+    x+=slot+(op?7:9);
+  });
+  return h;
+}
+const BH=32;
+const CB=['#add8e6','#3d9cc2'],CP=['#ffd1dc','#d9849b'],CO=['#fff1dc','#e8a24f'],CG=['#dff3df','#5cbf5c'];
+const seg=(x,w,y,c,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-BH/2)+'" width="'+w+'" height="'+BH+'" rx="6" fill="'+(dash?'#fff':c[0])+'" stroke="'+c[1]+'" stroke-width="2.5"'+(dash?' stroke-dasharray="6 5"':'')+'/>'+(lab!==''&&lab!=null&&w>tw(String(lab),15)+8?txt(x+w/2,y+1,lab,{fs:15,c:lc||c[1]}):'');
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;};
+
+const X0=100,XW=500,RY=150;
+function tree(x,y,ok){return '<line x1="'+x+'" y1="'+y+'" x2="'+x+'" y2="'+(y-26)+'" stroke="#9a7b55" stroke-width="3"/><circle cx="'+x+'" cy="'+(y-32)+'" r="10" fill="'+(ok?'#5cbf5c':'#90ee90')+'" stroke="#3f9b4a" stroke-width="2"/>';}
+function draw(){
+  const ok=solved(),n=t;let h='';
+  if(P.kind==='circle'){
+    const CX=360,CY=150,R=95;
+    h+='<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="#dcf0f7" stroke="#9fd2e4" stroke-width="4"/>'+txt(CX,CY,'池 1周 '+P.L+P.u,{fs:16,c:'#24617a'});
+    for(let i=0;i<n;i++){const an=i*P.a/P.L*2*Math.PI-Math.PI/2,x=CX+R*Math.cos(an),y=CY+R*Math.sin(an);
+      h+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="9" fill="#90ee90" stroke="#3f9b4a" stroke-width="2"/>';}
+    const cov=Math.min(n*P.a,P.L*1.5);
+    h+=txt(CX,CY+R+30,'木 '+n+'本 → '+P.a+'×'+n+'＝'+n*P.a+P.u+' 分',{fs:15,c:'#7b766d'});
+    if(ok)h+=pill(880,40,'1周ぴったり！');
+    h+=step(92,'間の数','#3f9b4a',[[P.L,'1周'],['÷'],[P.a,'間かく'],['＝'],[G()+'こ']]);
+    h+=step(164,'いま','#e8a24f',[[n,'本数'],['＝'],[n+'こ','間の数']]);
+    h+=step(236,'ずれ','#9a5a12',[[G(),'必要な間'],['－'],[n,'いまの間'],['＝'],[G()-n]]);
+    return h;
+  }
+  if(P.kind==='tape'){
+    const k=XW/(P.a*tmax()),tot=n?P.a*n-P.ov*(n-1):0;
+    for(let i=0;i<n;i++){const x=X0+i*(P.a-P.ov)*k;h+='<rect x="'+x+'" y="'+(RY-14-(i%2)*10)+'" width="'+P.a*k+'" height="22" rx="4" fill="'+(i%2?'#ffd1dc':'#add8e6')+'" stroke="'+(i%2?'#d9849b':'#3d9cc2')+'" stroke-width="2" opacity=".92"/>';}
+    const gx=X0+P.L*k;h+='<line x1="'+gx+'" y1="'+(RY-50)+'" x2="'+gx+'" y2="'+(RY+30)+'" stroke="#9a5a12" stroke-width="3" stroke-dasharray="6 5"/>'+txt(gx,RY+44,'めあて '+P.L+P.u,{fs:14,c:'#9a5a12'});
+    if(n)h+=dim(X0,X0+tot*k,RY+80,'全体 '+tot+P.u,'#3d9cc2',16);
+    if(ok)h+=pill(880,40,P.L+P.u+'！');
+    h+=step(92,'のりしろ','#3f9b4a',[[n,'枚数'],['－'],['1'],['＝'],[Math.max(n-1,0)+'こ']]);
+    h+=step(164,'全体','#e8a24f',[[P.a,'1枚'],['×'],[n,'枚'],['－'],[P.ov,'のりしろ'],['×'],[Math.max(n-1,0),'こ'],['＝'],[tot+P.u]]);
+    h+=step(236,'ずれ','#9a5a12',[[P.L,'めあて'],['－'],[tot,'いま'],['＝'],[(P.L-tot)+P.u]]);
+    return h;
+  }
+  if(P.kind==='cut'){
+    const k=XW/P.L;
+    h+='<rect x="'+X0+'" y="'+(RY-20)+'" width="'+P.L*k+'" height="40" rx="10" fill="#e9dccb" stroke="#9a7b55" stroke-width="3"/>';
+    for(let i=1;i<=n;i++){const x=X0+i*P.a*k;if(x>X0+P.L*k-1)break;h+='<line x1="'+x+'" y1="'+(RY-32)+'" x2="'+x+'" y2="'+(RY+32)+'" stroke="#d9534f" stroke-width="3"/>';}
+    const pieces=Math.min(n,G()-1)+1;
+    for(let i=0;i<G();i++)h+=txt(X0+(i+.5)*P.a*k,RY+48,P.a,{fs:13,c:i<pieces-1||n>=G()-1?'#7b766d':'#c9c3b8'});
+    h+=txt(X0,RY-50,'赤い線 ＝ 切るところ',{a:'start',fs:14,c:'#d9534f',fw:700});
+    if(ok)h+=pill(880,40,'全部50cm！');
+    h+=step(92,'できる本数','#3f9b4a',[[P.L,'丸太'],['÷'],[P.a,'1本'],['＝'],[G()+'本']]);
+    h+=step(164,'いま','#e8a24f',[[n,'切る回数'],['＋'],['1'],['＝'],[(n+1)+'本']]);
+    h+=step(236,'ずれ','#9a5a12',[[G(),'できる本数'],['－'],[n+1,'いま'],['＝'],[G()-n-1]]);
+    return h;
+  }
+  // both / none: 道に木を植える
+  const k=XW/P.L,both=P.kind==='both';
+  h+='<line x1="'+X0+'" y1="'+RY+'" x2="'+(X0+XW)+'" y2="'+RY+'" stroke="#b9b2a5" stroke-width="8" stroke-linecap="round"/>';
+  h+='<line x1="'+X0+'" y1="'+(RY-14)+'" x2="'+X0+'" y2="'+(RY+14)+'" stroke="#7b766d" stroke-width="3"/><line x1="'+(X0+XW)+'" y1="'+(RY-14)+'" x2="'+(X0+XW)+'" y2="'+(RY+14)+'" stroke="#7b766d" stroke-width="3"/>';
+  for(let i=0;i<n;i++){const m=(both?i:i+1)*P.a;if(m>P.L*1.2)break;h+=tree(X0+m*k,RY-4,ok);}
+  const gaps=both?Math.max(n-1,0):n+1;
+  for(let i=0;i<Math.min(gaps,G());i++)h+=txt(X0+(i+.5)*P.a*k,RY+22,'',{});
+  h+=dim(X0,X0+XW,RY+56,P.L+P.u,'#7b766d',16);
+  h+=txt(X0,RY+90,'間かく '+P.a+P.u+'　木 '+n+'本 → 間 '+gaps+'こ',{a:'start',fs:15,c:'#7b766d',fw:700});
+  if(ok)h+=pill(880,40,'はしまでぴったり！');
+  h+=step(92,'間の数','#3f9b4a',[[P.L,'長さ'],['÷'],[P.a,'間かく'],['＝'],[G()+'こ']]);
+  h+=step(164,'いま','#e8a24f',both?[[n,'本数'],['－'],['1'],['＝'],[gaps+'こ','間']]:[[n,'本数'],['＋'],['1'],['＝'],[gaps+'こ','間']]);
+  h+=step(236,'ずれ','#9a5a12',[[G(),'必要な間'],['－'],[gaps,'いまの間'],['＝'],[G()-gaps]]);
+  return h;
+}
+
+let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){done={};}
+const saveDone=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
+const solved=()=>picked&&Math.abs(t-ans())<1e-9;
+/* ===== 効果音（Web Audio） ===== */
+let actx=null;
+function audio(){
+  try{if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC();}
+  if(actx.state==='suspended')actx.resume();return actx;}catch(e){return null;}
+}
+// tone(周波数Hz, 長さ秒, 波形, 音量, 開始の遅れ秒)
+function tone(f,d,type,vol,delay){
+  const c=audio();if(!c)return;
+  type=type||'sine';vol=vol==null?.035:vol;delay=delay||0;
+  const t0=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t0);
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.02);
+}
+// 初動の正解音（ピンポン）
+const firstSound=()=>{tone(590,.10);tone(790,.13,'sine',.035,.08);};
+// 出会った／追いついたときの音（ドミソド↑）
+const meetSound=()=>{tone(523,.12,'sine',.034);tone(659,.12,'sine',.034,.09);tone(784,.14,'sine',.034,.18);tone(1047,.32,'sine',.038,.27);tone(1568,.30,'triangle',.012,.27);};
+// iPad: 最初のタッチで音を使えるようにする
+document.addEventListener('touchstart',function un(){audio();document.removeEventListener('touchstart',un);},{passive:true});
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+/* 時間のつまみ（tmin があれば、その値から） */
+const TX0=160,TX1=940,TY=345;
+const tlo=()=>typeof tmin==='function'?tmin():0;
+function drawSlider(){
+  const T=tmax(),L0=tlo(),tx=TX0+(TX1-TX0)*(t-L0)/(T-L0);let h='';
+  h+=txt(TX0-20,TY,typeof sliderName==='function'?sliderName():'時間',{a:'end',fs:18,c:'#7b766d'});
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+TX1+'" y2="'+TY+'" stroke="#e2dccf" stroke-width="10" stroke-linecap="round"/>';
+  h+='<line x1="'+TX0+'" y1="'+TY+'" x2="'+tx+'" y2="'+TY+'" stroke="#90ee90" stroke-width="10" stroke-linecap="round"/>';
+  const ts=tickStep();for(let i=L0;i<=T+1e-9;i+=ts){const x=TX0+(TX1-TX0)*(i-L0)/(T-L0);h+='<line x1="'+x+'" y1="'+(TY+10)+'" x2="'+x+'" y2="'+(TY+16)+'" stroke="#c9c3b8" stroke-width="2"/>';}
+  h+='<g class="thandle"><circle cx="'+tx+'" cy="'+TY+'" r="18" fill="#fff" stroke="#3f9b4a" stroke-width="4"/>'+txt(tx,TY+1,'↔',{fs:18,c:'#3f9b4a'})+'</g>';
+  const lb=tlabel(),lw=tw(lb,19)+28;
+  h+='<rect x="'+(tx-lw/2)+'" y="'+(TY-64)+'" width="'+lw+'" height="34" rx="17" fill="#90ee90"/>'+txt(tx,TY-46,lb,{fs:19,c:'#25642c'});
+  if(typeof extraSlider==='function')h+=extraSlider();
+  return h;
+}
+function celebrate(){const el=document.createElement('div');el.className='successMark';el.textContent='○';el.setAttribute('aria-hidden','true');document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());}
+function renderFirst(){
+  const el=$('first');el.classList.toggle('ok',picked);
+  if(picked){$('q1').innerHTML=pickedQ();$('opts').innerHTML='';$('msg').textContent=pickedMsg();}
+  else{$('q1').textContent=firstQ();const o=firstOpts();
+    $('opts').innerHTML='<button data-op="add"><span class="no">①</span>'+o[0]+'</button><button data-op="sub"><span class="no">②</span>'+o[1]+'</button>';$('msg').textContent='';}
+  svg.classList.toggle('locked',!picked);
+}
+$('opts').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-op]');if(!b)return;
+  if((b.dataset.op==='add')===rightIsAdd()){picked=true;renderFirst();update();celebrate();firstSound();}
+  else{b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');$('msg').textContent=wrongMsg();}
+});
+function updateCheck(){
+  const el=$('check');
+  if(!solved()){el.classList.remove('on');el.innerHTML='';$('nextq').hidden=true;return;}
+  if(el.classList.contains('on'))return;
+  if(!done[idx]){done[idx]=1;saveDone();renderTabs();}
+  const cl=checkLine();el.innerHTML='<b>'+checkHead()+'</b>'+(cl.charAt(0)==='<'?cl:'<span>'+cl+'</span>');el.classList.add('on');meetSound();
+  $('nextq').hidden=idx>=PROBLEMS.length-1;
+}
+function update(){$('art').innerHTML=draw()+drawSlider();updateCheck();}
+function setT(v){if(!picked)return;t=Math.max(tlo(),Math.min(tmax(),v));update();}
+function localPt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const m=svg.getScreenCTM();return m?p.matrixTransform(m.inverse()):null;}
+svg.addEventListener('pointerdown',e=>{
+  if(!picked)return;
+  const l=localPt(e);if(!l)return;
+  if(typeof hitExtra==='function'&&hitExtra(l)){e.preventDefault();return;}
+  if(l.y<300)return;
+  drag=true;svg.setPointerCapture(e.pointerId);setT(snap(tlo()+(l.x-TX0)/(TX1-TX0)*(tmax()-tlo())));e.preventDefault();
+});
+svg.addEventListener('pointermove',e=>{if(!drag)return;const l=localPt(e);if(l)setT(snap(tlo()+(l.x-TX0)/(TX1-TX0)*(tmax()-tlo())));});
+const stop=()=>drag=false;svg.addEventListener('pointerup',stop);svg.addEventListener('pointercancel',stop);
+svg.setAttribute('tabindex','0');
+svg.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowUp'){setT(t+keyStep());e.preventDefault();}if(e.key==='ArrowLeft'||e.key==='ArrowDown'){setT(t-keyStep());e.preventDefault();}});
+function renderTabs(){
+  $('tabs').innerHTML=(INTRO?'<button class="introb" id="introOpen">はじめに</button>':'')+PRETABS+PROBLEMS.map((q,j)=>'<button data-i="'+j+'" aria-pressed="'+(j===idx)+'"'+(done[j]?' class="done"':'')+'>'+(j+1)+'</button>').join('');
+}
+function load(i){
+  idx=i;P=PROBLEMS[i];picked=false;t=typeof t0==='function'?t0():tlo();
+  $('qTag').textContent='問題 '+String(i+1).padStart(2,'0')+'｜'+P.tag;
+  $('qText').textContent=P.text;
+  renderTabs();renderFirst();
+  $('check').classList.remove('on');$('nextq').hidden=true;
+  update();
+}
+$('reset').addEventListener('click',()=>load(idx));
+$('nextq').addEventListener('click',()=>{if(idx<PROBLEMS.length-1)load(idx+1);});
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)load(+b.dataset.i);});
+$('clearRec').addEventListener('click',()=>{if(!confirm('この部屋の記録（クリアした問題の✓）を消して、はじめからにします。\nよろしいですか？'))return;done={};try{localStorage.removeItem(KEY);}catch(e){}load(0);});
+function startRoom(){started=true;const hq=/^#q(\d+)$/.exec(location.hash);load(hq?Math.max(0,Math.min(PROBLEMS.length-1,+hq[1]-1)):0);}
+let started=false;
+if(!INTRO)startRoom();
+else{
+  /* はじめに: 初回だけ自動で出す。2回目からは「はじめに」ボタンで開く */
+  const showIntro=()=>{$('intro').hidden=false;$('roomMain').hidden=true;window.scrollTo(0,0);};
+  const hideIntro=()=>{$('intro').hidden=true;$('roomMain').hidden=false;try{localStorage.setItem(INTRO,'1');}catch(e){}if(!started)startRoom();};
+  $('introGo').addEventListener('click',hideIntro);
+  $('tabs').addEventListener('click',e=>{if(e.target.closest('#introOpen'))showIntro();});
+  let seen=false;try{seen=localStorage.getItem(INTRO)==='1';}catch(e){}
+  if(seen||/^#q\d+$/.test(location.hash))startRoom();else showIntro();
+}
+})();
+</script></body></html>
