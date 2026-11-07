@@ -43,7 +43,7 @@ main{position:relative}
 .room .enter{font-size:13px;font-weight:800;color:var(--blue-d);white-space:nowrap}
 .r-lab .ic{background:#e9f5f9}
 .r-bal .ic{background:#fff0f4}
-.r-tsuru .ic{background:#fff1dc}.r-tabi .ic{background:#ebfbea}.r-ryu .ic{background:#e9f5f9}.r-tsuka .ic{background:#fff0f4}.r-tokei .ic{background:#efe9fd}.r-wasa .ic{background:#fff1dc}.r-haibun .ic{background:#fff0f4}.r-nenrei .ic{background:#efe9fd}.r-baisu .ic{background:#fff1dc}.r-average .ic{background:#e7f5e9}
+.r-tsuru .ic{background:#fff1dc}.r-tabi .ic{background:#ebfbea}.r-ryu .ic{background:#e9f5f9}.r-tsuka .ic{background:#fff0f4}.r-tokei .ic{background:#efe9fd}.r-wasa .ic{background:#fff1dc}.r-haibun .ic{background:#fff0f4}.r-nenrei .ic{background:#efe9fd}.r-baisu .ic{background:#fff1dc}.r-kabusoku .ic{background:#fff1dc}.r-shigoto .ic{background:#ebfbea}.r-newton .ic{background:#e9f5f9}.r-soneki .ic{background:#fff0f4}.r-soto .ic{background:#ebfbea}.r-ueki .ic{background:#ebfbea}.r-shuki .ic{background:#efe9fd}.r-suiso .ic{background:#e9f5f9}.r-tenido .ic{background:#fff1dc}.r-average .ic{background:#e7f5e9}
 /* 準備中の扉 */
 .soon{display:flex;align-items:center;gap:16px;border:2px dashed #d9d3c6;border-radius:24px;padding:20px 22px;color:#a39d91;background:rgba(255,255,255,.5)}
 .soon .ic{flex:none;width:64px;height:64px;border-radius:18px;background:#f0ede6;display:flex;align-items:center;justify-content:center;font-size:28px}
@@ -90,7 +90,7 @@ main{position:relative}
 </section>
 
 <section class="floor">
-  <div class="fhead"><span class="fno">FLOOR 02</span><h2 class="fname">速さを合わせる</h2></div>
+  <div class="fhead"><span class="fno">FLOOR 02</span><h2 class="fname">合わせる</h2></div>
   <div class="rooms">
     <a class="room r-tabi" href="./tabibito/">
       <div class="ic" aria-hidden="true">🏃</div>
@@ -112,6 +112,16 @@ main{position:relative}
       <div><div class="st">ROOM 08 · 時計算 · 試作</div><h3>時計算の部屋</h3><p>長針と短針の追いかけっこ。</p></div>
       <div class="pg"><svg class="ring" id="ringTokei" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
     </a>
+    <a class="room r-shigoto" href="./shigoto/">
+      <div class="ic" aria-hidden="true">🛠️</div>
+      <div><div class="st">ROOM 09 · 仕事算</div><h3>仕事算の部屋</h3><p>1日の量を合わせて、全体をうめる。</p></div>
+      <div class="pg"><svg class="ring" id="ringShigoto" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+    <a class="room r-newton" href="./newton/">
+      <div class="ic" aria-hidden="true">🚶</div>
+      <div><div class="st">ROOM 10 · ニュートン算</div><h3>ニュートン算の部屋</h3><p>ふえる分を引いて、なくなるまで。</p></div>
+      <div class="pg"><svg class="ring" id="ringNewton" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
   </div>
 </section>
 
@@ -120,30 +130,78 @@ main{position:relative}
   <div class="rooms">
     <a class="room r-wasa" href="./wasa/">
       <div class="ic" aria-hidden="true">📏</div>
-      <div><div class="st">ROOM 09 · 和差算</div><h3>和差算の部屋</h3><p>差をのぞくか、たすか。そろえよう。</p></div>
+      <div><div class="st">ROOM 11 · 和差算</div><h3>和差算の部屋</h3><p>差をのぞくか、たすか。そろえよう。</p></div>
       <div class="pg"><svg class="ring" id="ringWasa" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
     </a>
     <a class="room r-haibun" href="./haibun/">
       <div class="ic" aria-hidden="true">🍰</div>
-      <div><div class="st">ROOM 10 · 分配算</div><h3>分配算の部屋</h3><p>ちょうど○倍にそろえて、1つ分。</p></div>
+      <div><div class="st">ROOM 12 · 分配算</div><h3>分配算の部屋</h3><p>ちょうど○倍にそろえて、1つ分。</p></div>
       <div class="pg"><svg class="ring" id="ringHaibun" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
     </a>
     <a class="room r-nenrei" href="./nenrei/">
       <div class="ic" aria-hidden="true">🎂</div>
-      <div><div class="st">ROOM 11 · 年齢算</div><h3>年齢算の部屋</h3><p>何年たっても、差は変わらない。</p></div>
+      <div><div class="st">ROOM 13 · 年齢算</div><h3>年齢算の部屋</h3><p>何年たっても、差は変わらない。</p></div>
       <div class="pg"><svg class="ring" id="ringNenrei" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
     </a>
     <a class="room r-baisu" href="./baisu/">
       <div class="ic" aria-hidden="true">🪙</div>
-      <div><div class="st">ROOM 12 · 倍数算</div><h3>倍数算の部屋</h3><p>変わらないのは、和か差か。</p></div>
+      <div><div class="st">ROOM 14 · 倍数算</div><h3>倍数算の部屋</h3><p>変わらないのは、和か差か。</p></div>
       <div class="pg"><svg class="ring" id="ringBaisu" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+    <a class="room r-kabusoku" href="./kabusoku/">
+      <div class="ic" aria-hidden="true">🍊</div>
+      <div><div class="st">ROOM 15 · 過不足算</div><h3>過不足算の部屋</h3><p>全体の差を、1人の差で分ける。</p></div>
+      <div class="pg"><svg class="ring" id="ringKabusoku" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
     </a>
   </div>
 </section>
 
 <section class="floor">
-  <div class="fhead"><span class="fno">FLOOR 04</span><h2 class="fname">図形</h2></div>
-  <div class="soon"><div class="ic">🔒</div><div><b>準備中</b><small>新しい部屋を準備しています</small></div></div>
+  <div class="fhead"><span class="fno">FLOOR 04</span><h2 class="fname">割合</h2></div>
+  <div class="rooms">
+    <a class="room r-soneki" href="./soneki/">
+      <div class="ic" aria-hidden="true">🏷️</div>
+      <div><div class="st">ROOM 16 · 損益算</div><h3>損益算の部屋</h3><p>もとを1として、何倍？</p></div>
+      <div class="pg"><svg class="ring" id="ringSoneki" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+    <a class="room r-soto" href="./soto/">
+      <div class="ic" aria-hidden="true">📖</div>
+      <div><div class="st">ROOM 17 · 相当算</div><h3>相当算の部屋</h3><p>わかっている量は、全体のどれだけ？</p></div>
+      <div class="pg"><svg class="ring" id="ringSoto" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+  </div>
+</section>
+
+<section class="floor">
+  <div class="fhead"><span class="fno">FLOOR 05</span><h2 class="fname">規則性</h2></div>
+  <div class="rooms">
+    <a class="room r-ueki" href="./ueki/">
+      <div class="ic" aria-hidden="true">🌳</div>
+      <div><div class="st">ROOM 18 · 植木算</div><h3>植木算の部屋</h3><p>木の数と間の数、1つちがうのは？</p></div>
+      <div class="pg"><svg class="ring" id="ringUeki" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+    <a class="room r-shuki" href="./shuki/">
+      <div class="ic" aria-hidden="true">🔁</div>
+      <div><div class="st">ROOM 19 · 周期算</div><h3>周期算の部屋</h3><p>くり返しの1まとまりで割る。</p></div>
+      <div class="pg"><svg class="ring" id="ringShuki" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+  </div>
+</section>
+
+<section class="floor">
+  <div class="fhead"><span class="fno">FLOOR 06</span><h2 class="fname">図形</h2></div>
+  <div class="rooms">
+    <a class="room r-suiso" href="./suiso/">
+      <div class="ic" aria-hidden="true">🫙</div>
+      <div><div class="st">ROOM 20 · 水そうとグラフ</div><h3>水そうとグラフの部屋</h3><p>水の量を、底面積で高さに直す。</p></div>
+      <div class="pg"><svg class="ring" id="ringSuiso" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+    <a class="room r-tenido" href="./tenido/">
+      <div class="ic" aria-hidden="true">📐</div>
+      <div><div class="st">ROOM 21 · 点の移動</div><h3>点の移動の部屋</h3><p>Pが動くと、高さが変わる。</p></div>
+      <div class="pg"><svg class="ring" id="ringTenido" viewBox="0 0 64 64"></svg><span class="enter">入室 →</span></div>
+    </a>
+  </div>
 </section>
 
 <div class="foot">中学受験 算数 · miss maths</div>
@@ -164,6 +222,15 @@ const ROOMS={lab:{key:'lab-done',total:10,name:'食塩水の部屋',path:'./lab/
              haibun:{key:'haibun-done',total:6,name:'分配算の部屋',path:'./haibun/',ring:'ringHaibun',col:'#d9849b'},
              nenrei:{key:'nenrei-done',total:6,name:'年齢算の部屋',path:'./nenrei/',ring:'ringNenrei',col:'#9b84de'},
              baisu:{key:'baisu-done',total:6,name:'倍数算の部屋',path:'./baisu/',ring:'ringBaisu',col:'#e8a24f'},
+             kabusoku:{key:'kabusoku-done',total:6,name:'',path:'./kabusoku/',ring:'ringKabusoku',col:'#e8a24f'},
+             shigoto:{key:'shigoto-done',total:6,name:'',path:'./shigoto/',ring:'ringShigoto',col:'#3f9b4a'},
+             newton:{key:'newton-done',total:6,name:'',path:'./newton/',ring:'ringNewton',col:'#3d9cc2'},
+             soneki:{key:'soneki-done',total:6,name:'',path:'./soneki/',ring:'ringSoneki',col:'#d9849b'},
+             soto:{key:'soto-done',total:6,name:'',path:'./soto/',ring:'ringSoto',col:'#3f9b4a'},
+             ueki:{key:'ueki-done',total:6,name:'',path:'./ueki/',ring:'ringUeki',col:'#5cbf5c'},
+             shuki:{key:'shuki-done',total:6,name:'',path:'./shuki/',ring:'ringShuki',col:'#9b84de'},
+             suiso:{key:'suiso-done',total:6,name:'',path:'./suiso/',ring:'ringSuiso',col:'#3d9cc2'},
+             tenido:{key:'tenido-done',total:6,name:'',path:'./tenido/',ring:'ringTenido',col:'#e8a24f'},
              tokei:{key:'tokei-done',total:10,name:'時計算の部屋',path:'./tokei/',ring:'ringTokei',col:'#9b84de'}};
 function ring(id,n,total,col){
   const r=26,c=2*Math.PI*r,f=Math.min(1,n/total);
