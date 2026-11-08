@@ -1,0 +1,1079 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html{color-scheme:light}body{margin:0}</style>
+<title>MATH⚡PARK</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Fredoka:wght@600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: 明るい黄色のグラデーションの上に大きな白いパネル。分野ごとに色のちがう大きなカードを並べる。 */
+:root{
+  color-scheme:light;
+  --bg:#ffffff;
+  --bg-top:#fff3df;
+  --ink:#4a3438;
+  --ink2:#8e7770;
+  --line:#f1e6dc;
+  --card:#ffffff;
+  --soft:#fff8f0;
+  --grid:#e6cdb8;
+  --accent:#d0656d;
+  --accent2:#ffa9a9;
+  --btn:linear-gradient(135deg,#ffbdbd,#ffddb3);
+  --accent-ink:#4a3438;
+  --pen:#e0456f;
+  --pen-soft:#ffe6e6;
+  --miss:var(--ok);
+  --ok:#14966a;
+  --ok-soft:#e5f6ee;
+  --c-f:#ffc9a3;--c-m:#bfeaa8;--c-n:#ffe48a;--c-u:#b3dcf5;--c-z:#d9c6f5;
+  --ci-f:#3a2f45;--ci-m:#3a2f45;--ci-n:#3a2f45;--ci-u:#3a2f45;--ci-z:#3a2f45;
+  --f-ui:"Hiragino Sans","Hiragino Kaku Gothic ProN","ヒラギノ角ゴ ProN","Noto Sans JP","Yu Gothic","Meiryo",sans-serif;
+  --f-disp:var(--f-ui);
+  --cs:clamp(40px,9.5vw,60px);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background-color:var(--bg);
+  background-image:linear-gradient(180deg,var(--bg-top) 0,var(--bg) 460px);
+  background-repeat:no-repeat;
+  color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 56px;
+}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid #d0656d;outline-offset:2px}
+#app{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+small{font-size:12px;color:var(--ink2);letter-spacing:.04em}
+h2{margin:0;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--ink2)}
+
+/* マス目 */
+.cells{display:flex;flex-wrap:wrap;padding:1px 0 0 1px}
+.cell{
+  width:var(--cs);height:var(--cs);display:grid;place-items:center;
+  border:2px solid var(--grid);margin:0 -2px -2px 0;background:#fff;
+  font-weight:700;font-size:calc(var(--cs)*.6);line-height:1;
+}
+.cell.blank{border:2.5px dashed var(--pen);background:var(--pen-soft);position:relative;z-index:1}
+.cell.blank.filled{border-style:solid;color:var(--pen);animation:pop .35s ease-out}
+@keyframes pop{from{transform:scale(.7);opacity:.3}to{transform:scale(1);opacity:1}}
+
+/* ホーム: 見出し */
+/* 見出し: 入試カウントは右上、タイトルは中央 */
+.hero{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px}
+.hrow{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.hrow>*{pointer-events:auto}
+.plaza{display:inline-flex;align-items:center;gap:4px;min-height:34px;padding:0 12px;border-radius:999px;background:#fff;border:2px solid var(--line);color:var(--ink2);font-size:13px;font-weight:800;text-decoration:none;letter-spacing:.02em}
+.plaza:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.bwrap{position:static;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.ver{font-size:11px;font-weight:700;color:var(--ink2);letter-spacing:.04em;margin-right:8px}
+.badge{display:inline-flex;align-items:baseline;gap:8px;background:#fff;border:2.5px solid #e6cdb8;color:#a8454d;font-weight:700;font-size:13px;border-radius:999px;padding:2px 16px}
+.badge b{font-size:18px;color:var(--accent);font-weight:800}
+.title{margin:0;font-family:'Trajan Pro','Trajan Pro 3',Trajan,'Cinzel','Times New Roman',Times,serif;font-size:clamp(28px,6vw,50px);font-weight:800;line-height:1.15;letter-spacing:.04em}
+.lead{margin:0;font-weight:700;color:var(--ink2);font-size:clamp(13px,2.4vw,17px);letter-spacing:.06em}
+
+.status{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px}
+.panel.zk{flex-direction:row;align-items:center;gap:10px;padding:8px 14px}
+.zk .fz{flex:none;width:52px}
+.zk .zt{min-width:0;flex:1}
+.zk .zn{font-size:14px;font-weight:700;color:var(--ink)}
+.zk .zc b{font-size:22px;color:var(--accent)}
+.zk .zc small{font-size:12px;color:var(--ink2);font-weight:700}
+.zk .bar{margin-top:3px}
+.panel{background:#fff;border-radius:16px;padding:8px 16px;min-width:0;box-shadow:0 4px 18px rgba(200,140,100,.16);display:flex;flex-direction:column;gap:2px}
+.l1{display:flex;align-items:baseline;gap:12px}
+.l2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.l2 .bar{flex:1 1 90px;margin:0}
+.panel b{font-size:20px;font-weight:800;line-height:1.4}
+.bar{display:block;height:8px;background:#f6ede4;border-radius:4px;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:var(--accent2);border-radius:4px}
+
+.stage{background:#fff;border-radius:26px;padding:clamp(14px,3vw,24px);box-shadow:0 10px 36px rgba(200,140,100,.2);display:flex;flex-direction:column;gap:16px}
+.stage h2.big{text-align:center;font-size:clamp(20px,3.6vw,28px);font-weight:800;color:var(--ink);letter-spacing:.02em}
+.lab{font-size:14px;font-weight:700;color:var(--ink2);margin:0 0 8px}
+.seg{display:flex;gap:10px}
+.seg button{flex:1;min-height:50px;border:2px solid var(--line);background:#fff;border-radius:14px;font-weight:700}
+.seg button[aria-pressed="true"]{background:#fff0e3;color:#a8454d;border-color:#e6cdb8}
+
+.cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.card{
+  grid-column:span 2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;
+  color:var(--ci);border:0;border-radius:20px;padding:14px 14px 12px;
+  box-shadow:0 8px 18px rgba(30,30,60,.16);transition:transform .15s ease;
+}
+.card .hd{display:flex;align-items:center;justify-content:center;gap:10px;flex:1}
+.card:hover{transform:translateY(-3px)}
+.card:active{transform:scale(.98)}
+.g-k{--ci:var(--ci-k);background:linear-gradient(145deg,#ffd6d6,#ffbdbd)}
+.g-g{--ci:var(--ci-g);background:linear-gradient(145deg,#ddd6f2,#c4b8e6)}
+.g-t{--ci:var(--ci-t);background:linear-gradient(145deg,#cdeaf6,#a8d8ec)}
+.g-w{--ci:var(--ci-w);background:linear-gradient(145deg,#d3f1bf,#b3e394)}
+.g-b{--ci:var(--ci-b);background:linear-gradient(145deg,#fffde0,#f8f3b0)}
+.g-y{--ci:var(--ci-y);background:linear-gradient(145deg,#ffe9cf,#ffd9a8)}
+.fic{width:.95em;height:.95em;display:block}
+.card .ic{font-size:40px;line-height:1.1;flex:none}
+.card .nm{font-size:20px;font-weight:800;line-height:1.35;text-align:left}
+.card .mm{width:100%;display:block;font-size:12px;font-weight:700}
+.card .bar{background:rgba(42,27,77,.16);margin:0 0 4px}
+.card .bar i{background:currentColor}
+
+.primary{
+  background:var(--btn);color:var(--accent-ink);border:0;border-radius:18px;padding:16px 22px;
+  font-weight:800;font-size:19px;min-height:56px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;
+  box-shadow:0 6px 14px rgba(255,170,150,.42);
+}
+.ghost{
+  background:#fff;border:2px dashed #e6cdb8;border-radius:18px;padding:14px 18px;min-height:64px;width:100%;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:700;text-align:left
+}
+.ghost:disabled{opacity:.55;cursor:default}
+.tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:end}
+.tools .ghost{height:100%;padding:10px 14px;min-height:0;flex-wrap:wrap}
+.tools .ghost .gl{gap:10px}
+.tools .ghost small{font-size:11px;line-height:1.4;display:block;margin-top:2px}
+.tools .seg{gap:6px}
+.tools .seg button{padding:0 4px}
+.gl{display:flex;align-items:center;gap:14px;min-width:0}
+.nicon{width:56px;height:42px;flex:none}
+.ghost b{color:var(--pen);font-size:22px;font-weight:800;white-space:nowrap}
+.note{font-size:12px;color:var(--ink2);text-align:center;margin:0}
+
+/* クイズ */
+.qbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.back{border:2px solid var(--line);background:#fff;border-radius:14px;min-height:46px;padding:0 16px;font-weight:700}
+/* コンボゲージ: 正解の丸が点灯し、続けて正解した丸どうしを線でつなぐ */
+.pips{display:flex;gap:8px;flex:1;min-width:140px;flex-wrap:wrap;align-items:center}
+.pips i{position:relative;width:20px;height:20px;border:2px solid #ecd5c0;background:#fff;display:block;border-radius:50%}
+.pips i.ok{background:var(--ok);border-color:var(--ok)}
+.pips i.ng{border-color:var(--pen);background:var(--pen-soft)}
+.pips i.now{border-color:var(--ink)}
+.pips i.lk::before{content:"";position:absolute;right:100%;top:50%;width:12px;height:4px;margin-top:-2px;margin-right:0;background:var(--ok);border-radius:2px}
+.pips i.lit{animation:pop .35s ease-out}
+.pips i.lit.lk::before{transform-origin:left;animation:link .3s ease-out}
+@keyframes link{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.chip{font-size:15px;font-weight:900;color:var(--ok);white-space:nowrap}
+/* コンボ演出 */
+.combo{position:absolute;left:50%;top:-6px;z-index:6;pointer-events:none;white-space:nowrap;font-weight:900;line-height:1;color:var(--ok);
+  -webkit-text-stroke:2px #fff;paint-order:stroke fill;text-shadow:0 4px 10px rgba(40,90,60,.25);opacity:0;transform:translate(-50%,0);animation:combo 1.9s cubic-bezier(.2,.8,.3,1) forwards}
+.combo.c3{font-size:40px}
+.combo.c5{font-size:52px;color:#e0456f;text-shadow:0 4px 12px rgba(224,69,111,.3)}
+.combo.c8{font-size:58px;color:#7b5cd6;text-shadow:0 4px 14px rgba(123,92,214,.35)}
+.combo.c10{font-size:72px;letter-spacing:.04em;color:#ff7a59;background:linear-gradient(90deg,#ff6b8b,#ffa34d,#ffd84d,#5fd38d,#4db8ff,#9b7bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:0;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff) drop-shadow(0 5px 10px rgba(120,80,200,.35))}
+@keyframes combo{0%{opacity:0;transform:translate(-50%,10px) scale(.4)}14%{opacity:1;transform:translate(-50%,-22px) scale(1.15)}24%{transform:translate(-50%,-18px) scale(1) rotate(-3deg)}34%{transform:translate(-50%,-18px) scale(1) rotate(2deg)}44%{transform:translate(-50%,-18px) rotate(0)}80%{opacity:1;transform:translate(-50%,-18px) scale(1)}100%{opacity:0;transform:translate(-50%,-34px) scale(1.04)}}
+.qcard.glow5{box-shadow:0 0 0 4px #ffbdbd,0 10px 36px rgba(224,69,111,.28)}
+.qcard.glow8{box-shadow:0 0 0 5px #cec4e9,0 10px 40px rgba(123,92,214,.32)}
+.qcard.glow10{box-shadow:0 0 0 6px #ffddb3,0 0 0 10px #ffbdbd,0 12px 44px rgba(255,140,90,.4)}
+.best{font-size:13px;font-weight:800;color:var(--ink2);margin-left:auto;white-space:nowrap}
+.best b{color:var(--ok);font-size:16px}
+.newbest{display:inline-block;margin-left:4px;padding:1px 10px;border-radius:999px;background:var(--btn);color:var(--ink);font-weight:900;font-size:13px;animation:settle .5s ease-out .3s both}
+.qcard{position:relative;background:#fff;border-radius:26px;padding:clamp(18px,3.4vw,28px);display:flex;flex-direction:column;gap:16px;box-shadow:0 10px 36px rgba(200,140,100,.2)}
+.tag{align-self:flex-start;font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--tci,#fff);border:2px solid var(--tc,var(--accent));border-radius:999px;padding:0 12px;background:var(--tc,var(--accent))}
+.ins{margin:0;color:var(--ink2);font-size:14px;line-height:1.6}
+.body{font-weight:800;font-size:clamp(22px,4.6vw,30px);line-height:1.7;margin:0;text-wrap:balance}
+.qs{font-size:.62em;font-weight:700;color:var(--ink2)}
+.yomi{display:inline-block;white-space:nowrap;font-size:.58em;font-weight:500;color:var(--ink2);margin-left:1px;letter-spacing:0}
+.body .u{text-decoration:underline;text-decoration-color:var(--pen);text-decoration-thickness:3px;text-underline-offset:6px}
+.body .blank{display:inline-block;min-width:3.6em;border-bottom:3px solid var(--ink);text-align:center;color:var(--pen);line-height:1.3;margin:0 4px}
+.body .wd{font-size:clamp(28px,6vw,40px)}
+.mean{margin:0;padding:10px 14px;background:var(--soft);border-radius:12px;font-size:15px}
+.mean b{color:var(--accent)}
+.choices{display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
+.choices.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.choice{
+  position:relative;display:flex;align-items:center;gap:12px;min-height:66px;padding:10px 16px;text-align:left;
+  background:#fff;border:2px solid var(--line);border-radius:16px;color:var(--ink);line-height:1.5;font-weight:500;
+}
+.choice:not(:disabled):hover{border-color:#e6cdb8}
+.choice:not(:disabled):active{transform:scale(.99)}
+.choice:disabled{cursor:default;color:var(--ink)}
+.choice .mk{flex:none;width:32px;height:32px;border:2px solid #ecd5c0;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--ink2)}
+.choice .tx{min-width:0;overflow-wrap:anywhere}
+.choices.two .choice .tx{font-weight:800;font-size:24px}
+.choice.dim{opacity:.5}
+.choice.right{background:var(--pen-soft);border-color:var(--pen)}
+.choice.wrong{border:2px dashed var(--miss);opacity:.8}
+.choice .bt{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:34px;line-height:1;color:var(--pen);font-weight:700;animation:pop .3s ease-out}
+.maru{position:absolute;inset:-4px;border:4.5px solid var(--pen);border-radius:19px;pointer-events:none;clip-path:inset(-8px 100% -8px -8px);animation:draw .5s cubic-bezier(.3,.7,.3,1) forwards}
+@keyframes draw{to{clip-path:inset(-8px -8px -8px -8px)}}
+.fb{border-top:2px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:10px}
+.fb .h{font-weight:900;font-size:28px;color:var(--pen);line-height:1.3}
+.fb .h.ng{color:var(--ink);font-size:24px}
+.fb .h.ng span{color:var(--pen)}
+.fb p{margin:0}
+.fb .done{font-weight:800;font-size:20px}
+.fb .ex{color:var(--ink);font-size:15px}
+.next{align-self:flex-end;min-width:210px;min-height:58px;border:0;border-radius:16px;background:var(--btn);color:var(--accent-ink);font-weight:800;font-size:18px;padding:0 26px;box-shadow:0 6px 14px rgba(255,170,150,.42)}
+
+/* 結果・復習ノート */
+.res{align-items:center;text-align:center;gap:14px}
+.score{display:flex;align-items:baseline;justify-content:center;gap:10px;color:var(--pen);font-weight:900}
+.score b{font-size:80px;line-height:1;border-bottom:5px double var(--pen);padding:0 8px 2px}
+.score span{font-size:22px}
+.msg{margin:0;font-weight:700;font-size:17px}
+.res .pips{flex:none;justify-content:center;min-width:0}
+.pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pill{display:inline-flex;align-items:baseline;gap:6px;background:var(--soft);border-radius:999px;padding:2px 16px;font-weight:700;font-size:14px}
+.pill b{color:var(--accent);font-size:18px;font-weight:800}
+.up{width:100%;background:var(--btn);color:var(--ink);border-radius:18px;padding:12px 16px;font-weight:800;font-size:18px;box-shadow:0 6px 14px rgba(255,170,150,.42)}
+.perfect{background:linear-gradient(145deg,#def7ea,#b5e8d0);color:var(--ink);border-radius:22px;padding:18px;text-align:center;font-weight:900;font-size:24px;box-shadow:0 8px 18px rgba(30,30,60,.16)}
+.sbtns{display:flex;gap:8px;flex-wrap:wrap}
+.sb{min-height:44px;padding:0 16px;border-radius:14px;border:2px solid var(--ink);background:#fff;font-weight:800;font-size:15px;color:var(--ink)}
+.sb.fill{background:var(--btn);border:0;color:var(--accent-ink);box-shadow:0 4px 10px rgba(255,170,150,.42)}
+.sec{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sec h2{font-size:clamp(18px,3.2vw,22px);font-weight:800;color:var(--ink)}
+.list{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.miss{background:var(--soft);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.miss .tag{font-size:12px}
+.miss .q{font-weight:800;font-size:19px;line-height:1.5}
+.miss .hl{color:var(--pen)}
+.miss .a{font-size:15px}
+.miss .a b{color:var(--pen)}
+.miss .e{font-size:14px;color:var(--ink)}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>button{flex:1 1 200px}
+.btn{min-height:58px;border-radius:18px;font-weight:800;font-size:17px;border:2px solid var(--ink);background:#fff;padding:0 20px}
+.btn.fill{background:var(--btn);border:0;color:var(--accent-ink);box-shadow:0 6px 14px rgba(255,170,150,.42)}
+.sticky{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:6}
+.hero.sm .title{font-size:clamp(26px,5.6vw,40px)}
+.empty{color:var(--ink);padding:28px 20px;text-align:center;border:2px dashed #e6cdb8;border-radius:22px;background:#fff;font-weight:700;line-height:1.8}
+
+/* 問題カードの上段: 左に分野と本文、右に〇・おしい！ */
+.qtop{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}
+.qmain{display:flex;flex-direction:column;gap:12px;min-width:0}
+.trow{display:flex;align-items:center;gap:12px}
+.prog{font-size:18px;font-weight:800;color:var(--ink2);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.slot{min-width:0;display:flex;justify-content:flex-end;align-items:flex-start;padding:4px 6px 0 0}
+/* 「おしい！」はまちがいが続くほど大きくなる（1回目→3回目）。「正解！」は3段階目と同じ大きさ */
+.oshii,.seikai{font-weight:900;color:var(--pen);line-height:1.2;white-space:nowrap;transform:rotate(-7deg);transform-origin:center;animation:shake .5s ease-out}
+.oshii.l1{font-size:24px}
+.oshii.l2{font-size:38px}
+.oshii.l3,.seikai{font-size:54px}
+/* 正解のときに中央へポンと出て、消えていく大きな〇 */
+.bigmaru{position:absolute;left:50%;top:50%;height:min(120%,530px);aspect-ratio:1/1;z-index:5;pointer-events:none;opacity:0;transform:translate(-50%,-50%);animation:maru 2.1s ease-out forwards}
+.bigmaru svg{width:100%;height:100%;display:block;overflow:visible}
+.bigmaru circle{fill:none;stroke:var(--pen);stroke-width:3.6;opacity:.75}
+@keyframes maru{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}11%{transform:translate(-50%,-50%) scale(1.08);opacity:1}17%{transform:translate(-50%,-50%) scale(1);opacity:1}79%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(1.05);opacity:0}}
+/* 「正解！」はまっすぐ（安定）。ぽんと出て落ち着く */
+.seikai{transform:none;animation:settle .45s ease-out}
+@keyframes settle{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+@keyframes shake{0%{transform:rotate(-7deg) scale(.6);opacity:0}40%{transform:rotate(-12deg) scale(1.1);opacity:1}70%{transform:rotate(-4deg)}100%{transform:rotate(-7deg)}}
+
+button.panel.zk{border:0;width:100%;font:inherit;text-align:left;cursor:pointer;color:inherit}
+.zk .zgo{flex:none;font-size:22px;font-weight:800;color:var(--accent)}
+.reset{margin-top:6px;background:none;border:0;color:var(--ink2);font-size:11px;text-decoration:underline;padding:6px 10px}
+.ztot{display:flex;align-items:baseline;gap:6px;margin-bottom:8px}
+.ztot b{font-size:32px;color:var(--accent);font-weight:900}
+.ztot span{font-size:13px;font-weight:700;color:var(--ink2)}
+.wall{display:grid;grid-template-columns:repeat(50,minmax(0,1fr));gap:2px}
+.wall i{display:block;aspect-ratio:1;border-radius:2px;background:#f3eae2}
+.rank{margin-top:14px;padding-top:10px;border-top:2px dashed #f1e6dc}
+.rk-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:800;color:var(--ink2);margin-bottom:6px}
+.rk-h b{color:var(--ink);font-size:15px}
+.track{position:relative;height:78px}
+.tl{position:absolute;left:4%;right:4%;top:22px;height:10px;border-radius:6px;background:#f3eae2}
+.tf{position:absolute;left:4%;top:22px;height:10px;border-radius:6px;background:linear-gradient(90deg,#ffa9a9,#ffcf99)}
+.sh{position:absolute;top:0;width:13%;transform:translateX(-50%);text-align:center}
+.sh svg{width:100%;max-width:44px;display:block;margin:0 auto}
+.sh small{display:block;font-size:10px;font-weight:800;margin-top:2px;white-space:nowrap}
+.sh.off small{color:#bba99f}
+.you{position:absolute;top:17px;width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--accent);transform:translateX(-50%);box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.ztabs{display:flex;gap:6px;margin-bottom:12px}
+.ztab{flex:1;min-width:0;border:2px solid #f1e6dc;background:#fff;border-radius:12px;padding:9px 2px;font-size:12px;font-weight:800;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:clip}
+.ztab.on{background:var(--c);border-color:var(--c);color:var(--ci)}
+.zgrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.zc2{position:relative;display:flex;flex-direction:column;align-items:stretch;padding:0;aspect-ratio:1/1;border:3px solid var(--c);border-radius:12px;background:#fff;overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,.12);font:inherit;color:var(--ink);width:100%}
+.zt2{display:flex;align-items:center;justify-content:center;height:26%;background:var(--c);color:var(--ci);font-size:11px;font-weight:800;letter-spacing:1px}
+.cw{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-weight:900;line-height:1.25;padding:3px 4px;word-break:break-all}
+.cw small.cs{font-size:9px;font-weight:700;color:var(--ink2);margin-top:2px;line-height:1.2}
+.cw .yomi{font-size:.55em;display:block}
+.zc2.lock{border-color:#e6dcd2;background:#f3eae2;box-shadow:none}
+.zc2.lock .zt2{background:#e6dcd2}
+.zc2.lock .cw{color:#bba99f;font-size:26px}
+.znew{position:absolute;left:-2px;top:30%;background:var(--pen);color:#fff;font-size:9px;font-weight:900;padding:1px 6px;border-radius:0 6px 6px 0}
+.zmodal{position:fixed;inset:0;z-index:50;background:rgba(20,30,50,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px}
+.zbig{width:min(300px,86vw);background:#fff;border:4px solid var(--c);border-radius:20px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.3);animation:pop .3s ease-out}
+.ztop{display:flex;justify-content:space-between;background:var(--c);color:var(--ci);padding:8px 14px;font-weight:800;font-size:14px}
+.zttl{padding:16px 12px 4px;text-align:center;font-size:24px;font-weight:900;line-height:1.35}
+.zttl .yomi{display:block;font-size:.5em}
+.zbody{padding:4px 18px 18px;font-size:14px;line-height:1.7;font-weight:700}
+.zbody p{margin:6px 0}
+.zhint{margin:0;color:#fff;font-size:12px;font-weight:700}
+.zwrap{position:relative;opacity:0;animation:zget .7s cubic-bezier(.2,.8,.3,1) forwards}
+.zwrap .zspark{position:absolute;right:-4px;top:-8px;z-index:2;color:#ffc933;font-size:22px;text-shadow:0 0 6px #fff;animation:zsp 1.4s ease-in-out .5s 2}
+@keyframes zget{0%{opacity:0;transform:rotateY(90deg) scale(.6)}60%{opacity:1;transform:rotateY(0) scale(1.12)}100%{opacity:1;transform:rotateY(0) scale(1)}}
+@keyframes zsp{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1.2) rotate(20deg)}}
+@media (max-width:560px){
+  .wall{grid-template-columns:repeat(40,minmax(0,1fr));gap:1.5px}
+  .zgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .ztab{font-size:10px;padding:8px 0}
+  .rk-h{flex-direction:column;gap:2px}
+  .sh small{font-size:8px}
+}
+@media (prefers-reduced-motion:reduce){.zwrap{animation:none;opacity:1}.zspark{display:none}}
+
+@media (max-width:560px){
+  .status{grid-template-columns:minmax(0,1fr)}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .card,.card:nth-child(4){grid-column:span 1}
+  .tools{gap:10px}
+  .tools .ghost{flex-direction:column;align-items:flex-start;justify-content:center;gap:4px}
+  .tools .ghost .gl{flex-direction:column;align-items:flex-start;gap:4px}
+  .tools .ghost small{display:none}
+  .hrow{position:static;width:100%;margin-bottom:4px}
+  .card .nm{font-size:16px}
+  .card .ic{font-size:32px}
+  .card .hd{gap:6px}
+  .choices.two .choice .tx{font-size:22px}
+  .next{align-self:stretch}
+  .oshii.l1{font-size:17px}
+  .oshii.l2{font-size:26px}
+  .oshii.l3,.seikai{font-size:36px}
+  .bigmaru{height:min(100%,360px)}
+  .score b{font-size:60px}
+}
+@media (prefers-reduced-motion:reduce){
+  .maru{animation:none;clip-path:none}
+  .oshii,.seikai{animation:none}
+  .bigmaru{animation:none}
+  .combo{animation:none;opacity:1;transform:translate(-50%,-18px)}
+  .pips i.lit,.pips i.lit.lk::before,.newbest{animation:none}
+  .cell.blank.filled,.choice .bt{animation:none}
+  .card{transition:none}
+}
+
+/* ===== 巻・賞状 ===== */
+.status{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:560px){.status{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.status>.panel:first-child{grid-column:1/-1}}
+.card .mm .vol{font-weight:900;margin-right:2px}
+.card .mm .tot{display:block;font-size:10.5px;opacity:.7;margin-top:-2px}
+.cer{position:fixed;inset:0;z-index:60;background:rgba(40,28,20,.6);display:flex;align-items:center;justify-content:center;padding:14px;overflow:hidden}
+.cbox{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;max-height:100%}
+.ctop{margin:0;color:#fff;font-weight:900;font-size:clamp(20px,3.4vw,28px);letter-spacing:.06em;text-shadow:0 2px 8px rgba(0,0,0,.35);animation:cpop .5s ease-out both}
+.cwrap{position:relative;width:min(92vw,calc((100vh - 170px)*900/640),900px);aspect-ratio:900/640;animation:cin .7s cubic-bezier(.2,1.3,.4,1) both}
+.cwrap canvas{width:100%;height:100%;display:block;border-radius:4px;box-shadow:0 14px 40px rgba(0,0,0,.4)}
+.hanko{position:absolute;opacity:0;transform:scale(2.4) rotate(-24deg);pointer-events:none}
+.hanko.on{animation:stamp .34s cubic-bezier(.6,0,.9,.5) forwards}
+@keyframes stamp{0%{opacity:0;transform:scale(2.4) rotate(-24deg)}70%{opacity:.95;transform:scale(.92) rotate(-10deg)}100%{opacity:.9;transform:scale(1) rotate(-10deg)}}
+@keyframes cin{from{opacity:0;transform:translateY(30px) scale(.85)}to{opacity:1;transform:none}}
+@keyframes cpop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+.cbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.cbtns .sb{background:#fff}
+.cbtns .sb.fill{background:var(--btn)}
+.cfti{position:absolute;inset:0;pointer-events:none;z-index:3}
+.cfti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:2px;animation:fall linear both}
+@keyframes fall{from{transform:translateY(0) rotate(0)}to{transform:translateY(110vh) rotate(var(--r))}}
+.cbox.nk,.cbox.lockm{background:#fff;border-radius:24px;padding:26px 28px;width:min(440px,92vw);box-shadow:0 14px 40px rgba(0,0,0,.3)}
+.cbox.nk .ctop{color:var(--accent);text-shadow:none}
+.clead{margin:0;font-weight:700;text-align:center}
+.nickin,.nkrow input{font:inherit;font-size:22px;font-weight:800;text-align:center;border:2px solid var(--line);border-radius:14px;padding:8px 12px;width:100%;color:var(--ink);background:var(--soft)}
+.nickin:focus,.nkrow input:focus{outline:3px solid var(--accent2);border-color:transparent}
+.cbox.nk .primary{width:100%}
+.lmsg{margin:0;text-align:center;font-weight:700;line-height:1.8}
+.lmsg b{font-size:28px;color:var(--accent)}
+.cwords{background:#fffdf6;border:6px solid #e8d6a8;border-radius:8px;padding:16px 18px;width:min(560px,92vw);max-height:calc(100vh - 120px);overflow:auto}
+.cwords p{margin:0 0 10px;font-weight:900;text-align:center}
+.cwords div{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.cwords span{background:var(--c);border-radius:10px;padding:4px 10px;font-weight:700;font-size:14px}
+/* 賞状ファイル */
+.stop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.nkrow{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--ink2)}
+.nkrow input{width:160px;font-size:16px;padding:6px 10px}
+.shint{margin:0;font-size:13px;color:var(--ink2)}
+.srow{display:flex;align-items:center;gap:12px}
+.sh2{flex:none;width:132px;font-weight:800;font-size:13px;background:var(--c);border-radius:12px;padding:6px 10px;text-align:center;line-height:1.3}
+.ths{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sep{width:2px;height:60px;background:var(--line);margin:0 2px}
+.th{width:58px;height:78px;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px;position:relative;border:0}
+.th.got{background:#fffdf6;box-shadow:inset 0 0 0 4px var(--fc),inset 0 0 0 6px #fffdf6,inset 0 0 0 7px #c9a24a,0 3px 8px rgba(120,80,40,.22)}
+.th.got.k-f,.th.got.k-all{box-shadow:inset 0 0 0 5px #e3b23c,inset 0 0 0 7px #fff3c4,inset 0 0 0 8px #b8860b,0 3px 10px rgba(180,130,20,.45)}
+.th .sjv{display:block;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-weight:900;font-size:16px;line-height:1.05}
+.th .sjl{display:block;font-size:10px;font-weight:800;line-height:1.1;white-space:nowrap}
+.th.lock{background:#f3efea;border:2px dashed #d8cfc4;color:#a89c90}
+.th.lock .sjv{font-family:inherit}
+.th .sjp{display:block;width:40px;height:4px;border-radius:2px;background:#e3dbd2;overflow:hidden}
+.th .sjp i{display:block;height:100%;background:var(--fc)}
+.th .sjn{display:block;font-size:10px;font-weight:800;line-height:1}
+.th:active{transform:scale(.96)}
+@media (max-width:560px){.srow{flex-direction:column;align-items:flex-start}.sh2{width:auto}}
+
+/* ===== MATH⚡PARK ===== */
+:root{--bg-top:#e6f3ff;--ink:#3a2f45;--ink2:#7a7090;--line:#e3e6f2;--soft:#f5f8ff;--grid:#cfd8ee;--accent:#4a6fd8;--accent2:#a9c4ff;
+  --btn:linear-gradient(135deg,#a9d6ff,#d3c2ff);--accent-ink:#2c2350;--pen:#4a6fd8;--pen-soft:#e7eeff}
+.title.mp{font-family:'Fredoka','Hiragino Maru Gothic ProN',var(--f-ui);font-weight:700;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:2px;color:#2c2350}
+.title .bolt{height:.95em;width:auto;margin:0 -.02em;filter:drop-shadow(0 2px 3px rgba(224,138,0,.35));animation:zap 2.4s ease-in-out infinite}
+@keyframes zap{0%,86%,100%{transform:none;filter:drop-shadow(0 2px 3px rgba(224,138,0,.35))}90%{transform:scale(1.18) rotate(-6deg);filter:drop-shadow(0 0 10px #ffd23f)}}
+.g-f{--ci:var(--ci-f);background:linear-gradient(145deg,#ffdcc2,#ffbf94)}
+.g-m{--ci:var(--ci-m);background:linear-gradient(145deg,#d6f3c5,#b0e396)}
+.g-n{--ci:var(--ci-n);background:linear-gradient(145deg,#fff1b8,#ffdf73)}
+.g-u{--ci:var(--ci-u);background:linear-gradient(145deg,#cde9fa,#a3d3f2)}
+.g-z{--ci:var(--ci-z);background:linear-gradient(145deg,#e7dbfa,#cfb8f2)}
+@media (min-width:561px){.card:nth-child(4){grid-column:2 / span 2}}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin:0 .1em;font-size:.86em}
+.fr>span:first-child{border-bottom:.08em solid currentColor;padding:0 .15em}
+.body .qq{display:block;font-size:clamp(26px,4.4vw,38px);font-weight:900;line-height:1.35}
+.body .qs{display:block;font-size:16px;font-weight:700;color:var(--ink2);margin-top:4px}
+.choices.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.choices.three .choice .tx{font-weight:800;font-size:24px}
+@media (max-width:560px){.choices.three{grid-template-columns:minmax(0,1fr)}}
+.choice .tx{font-size:18px;font-weight:700}
+.seikai .bolt{height:1em;width:auto;vertical-align:-.12em;margin-right:2px}
+.zans{font-size:20px;font-weight:900;color:var(--accent);margin:0 0 6px}
+.zttl .zp{display:block;font-size:12px;color:var(--ink2);font-weight:700}
+.miss .q small{color:var(--ink2);font-weight:700}
+.choice .mk{border-color:#d6dcf0}
+</style>
+
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===== 問題データ =====
+   t … 分野　q … 問い　a … 正解　d … まちがい2つ（よくあるまちがい）　e … 解説　p … 問いのそえ書き
+   r … 逆向きの問い（半分の確率でこちらを出す）　{a/b} は分数で表示 */
+const DATA=[{"t": "f", "q": "長方形の面積", "a": "たて×横", "d": ["(たて＋横)×2", "たて×横÷2"], "e": "(たて＋横)×2 は、まわりの長さ。", "p": "求める式は？"}, {"t": "f", "q": "正方形の面積", "a": "1辺×1辺", "d": ["1辺×4", "1辺×1辺÷2"], "e": "1辺×4 は、まわりの長さ。", "p": "求める式は？"}, {"t": "f", "q": "平行四辺形の面積", "a": "底辺×高さ", "d": ["底辺×高さ÷2", "底辺×ななめの辺"], "e": "高さは底辺に垂直な長さ。ななめの辺ではない。", "p": "求める式は？"}, {"t": "f", "q": "三角形の面積", "a": "底辺×高さ÷2", "d": ["底辺×高さ", "底辺×高さ÷3"], "e": "平行四辺形の半分だから ÷2。", "p": "求める式は？"}, {"t": "f", "q": "台形の面積", "a": "(上底＋下底)×高さ÷2", "d": ["上底×下底×高さ÷2", "(上底＋下底)×高さ"], "e": "同じ台形を2つ合わせると平行四辺形。だから ÷2。", "p": "求める式は？"}, {"t": "f", "q": "ひし形の面積", "a": "対角線×対角線÷2", "d": ["対角線×対角線", "1辺×1辺÷2"], "e": "対角線を辺とする長方形の半分。", "p": "求める式は？"}, {"t": "f", "q": "円の面積", "a": "半径×半径×3.14", "d": ["直径×直径×3.14", "半径×2×3.14"], "e": "直径ではなく半径を2回かける。", "p": "求める式は？"}, {"t": "f", "q": "円周の長さ", "a": "直径×3.14", "d": ["半径×3.14", "半径×半径×3.14"], "e": "円周 ＝ 直径×3.14（半径×2×3.14）。", "p": "求める式は？"}, {"t": "f", "q": "おうぎ形の弧の長さ", "a": "直径×3.14×{中心角/360}", "d": ["半径×3.14×{中心角/360}", "半径×半径×3.14×{中心角/360}"], "e": "円周のうち、中心角の分だけ。", "p": "求める式は？"}, {"t": "f", "q": "おうぎ形の面積", "a": "半径×半径×3.14×{中心角/360}", "d": ["直径×3.14×{中心角/360}", "半径×半径×3.14÷中心角"], "e": "円の面積のうち、中心角の分だけ。", "p": "求める式は？"}, {"t": "f", "q": "おうぎ形の面積（弧の長さを使う）", "a": "弧の長さ×半径÷2", "d": ["弧の長さ×半径", "弧の長さ×直径÷2"], "e": "三角形の面積（底辺×高さ÷2）と同じ形。", "p": "求める式は？"}, {"t": "f", "q": "直方体の体積", "a": "たて×横×高さ", "d": ["(たて＋横)×2×高さ", "たて×横×高さ÷3"], "e": "底面積×高さ と同じ。", "p": "求める式は？"}, {"t": "f", "q": "立方体の体積", "a": "1辺×1辺×1辺", "d": ["1辺×1辺×6", "1辺×12"], "e": "1辺×1辺×6 は表面積。", "p": "求める式は？"}, {"t": "f", "q": "角柱・円柱の体積", "a": "底面積×高さ", "d": ["底面積×高さ÷3", "底面積×高さ÷2"], "e": "柱は、底面を高さの分だけ積み重ねた形。", "p": "求める式は？"}, {"t": "f", "q": "角すい・円すいの体積", "a": "底面積×高さ÷3", "d": ["底面積×高さ÷2", "底面積×高さ"], "e": "すいは、同じ底面・高さの柱の{1/3}。", "p": "求める式は？"}, {"t": "f", "q": "立方体の表面積", "a": "1辺×1辺×6", "d": ["1辺×1辺×4", "1辺×1辺×1辺"], "e": "正方形の面が6つ。", "p": "求める式は？"}, {"t": "f", "q": "柱の表面積", "a": "底面積×2＋側面積", "d": ["底面積＋側面積", "底面積×側面積"], "e": "底面は上と下の2つ。", "p": "求める式は？"}, {"t": "f", "q": "柱の側面積", "a": "底面のまわりの長さ×高さ", "d": ["底面積×高さ", "底面のまわりの長さ×高さ÷2"], "e": "側面を開くと、たてが高さ、横が底面のまわりの長方形。", "p": "求める式は？"}, {"t": "f", "q": "円すいの側面積", "a": "母線×半径×3.14", "d": ["母線×母線×3.14", "母線×直径×3.14"], "e": "「母線×半径×3.14」はよく使う近道。", "p": "求める式は？"}, {"t": "f", "q": "円すいの展開図の中心角", "a": "360×{半径/母線}", "d": ["360×{母線/半径}", "180×{半径/母線}"], "e": "中心角 ＝ 360×底面の半径÷母線。", "p": "求める式は？"}, {"t": "f", "q": "速さ", "a": "道のり÷時間", "d": ["時間÷道のり", "道のり×時間"], "e": "「は・じ・き」：速さ＝道のり÷時間。", "p": "求める式は？"}, {"t": "f", "q": "時間", "a": "道のり÷速さ", "d": ["速さ÷道のり", "道のり×速さ"], "e": "時間＝道のり÷速さ。", "p": "求める式は？"}, {"t": "f", "q": "道のり", "a": "速さ×時間", "d": ["速さ÷時間", "時間÷速さ"], "e": "道のり＝速さ×時間。", "p": "求める式は？"}, {"t": "f", "q": "2人が出会うまでの時間", "a": "2人の間のきょり÷速さの和", "d": ["2人の間のきょり÷速さの差", "2人の間のきょり×速さの和"], "e": "向かい合って進むときは、速さを足す。", "p": "求める式は？"}, {"t": "f", "q": "追いつくまでの時間", "a": "2人の間のきょり÷速さの差", "d": ["2人の間のきょり÷速さの和", "2人の間のきょり×速さの差"], "e": "同じ向きに進むときは、速さを引く。", "p": "求める式は？"}, {"t": "f", "q": "下りの速さ", "a": "静水時の速さ＋流れの速さ", "d": ["静水時の速さ－流れの速さ", "(静水時の速さ＋流れの速さ)÷2"], "e": "下りは流れに乗るので足す。", "p": "求める式は？"}, {"t": "f", "q": "上りの速さ", "a": "静水時の速さ－流れの速さ", "d": ["静水時の速さ＋流れの速さ", "静水時の速さ÷流れの速さ"], "e": "上りは流れにさからうので引く。", "p": "求める式は？"}, {"t": "f", "q": "静水時の速さ", "a": "(下りの速さ＋上りの速さ)÷2", "d": ["(下りの速さ－上りの速さ)÷2", "下りの速さ＋上りの速さ"], "e": "下りと上りのちょうど真ん中。", "p": "求める式は？"}, {"t": "f", "q": "流れの速さ", "a": "(下りの速さ－上りの速さ)÷2", "d": ["(下りの速さ＋上りの速さ)÷2", "下りの速さ－上りの速さ"], "e": "下りと上りの差の半分。", "p": "求める式は？"}, {"t": "f", "q": "列車が鉄橋をわたり終わるまでに進む長さ", "a": "鉄橋の長さ＋列車の長さ", "d": ["鉄橋の長さ", "鉄橋の長さ－列車の長さ"], "e": "列車の先頭が入ってから、最後尾が出るまで。", "p": "求める式は？"}, {"t": "f", "q": "割合", "a": "くらべる量÷もとにする量", "d": ["もとにする量÷くらべる量", "くらべる量×もとにする量"], "e": "「〜の」の前がもとにする量。", "p": "求める式は？"}, {"t": "f", "q": "くらべる量", "a": "もとにする量×割合", "d": ["もとにする量÷割合", "割合÷もとにする量"], "e": "くらべる量＝もとにする量×割合。", "p": "求める式は？"}, {"t": "f", "q": "もとにする量", "a": "くらべる量÷割合", "d": ["くらべる量×割合", "割合÷くらべる量"], "e": "もとにする量＝くらべる量÷割合。", "p": "求める式は？"}, {"t": "f", "q": "食塩の重さ", "a": "食塩水の重さ×濃度", "d": ["食塩水の重さ÷濃度", "水の重さ×濃度"], "e": "濃度は、食塩水全体に対する割合。", "p": "求める式は？"}, {"t": "f", "q": "食塩水の濃度", "a": "食塩÷食塩水", "d": ["食塩÷水", "食塩水÷食塩"], "e": "わる数は水ではなく、食塩水（水＋食塩）。", "p": "求める式は？"}, {"t": "f", "q": "食塩水の重さ", "a": "食塩÷濃度", "d": ["食塩×濃度", "食塩＋濃度"], "e": "もとにする量＝くらべる量÷割合。", "p": "求める式は？"}, {"t": "f", "q": "平均", "a": "合計÷個数", "d": ["合計×個数", "個数÷合計"], "e": "平均＝合計÷個数。", "p": "求める式は？"}, {"t": "f", "q": "定価（原価の□割の利益を見こむ）", "a": "原価×(1＋割合)", "d": ["原価＋割合", "原価×割合"], "e": "原価を1とすると、定価は1＋割合。", "p": "求める式は？"}, {"t": "f", "q": "売り値（定価の□割引き）", "a": "定価×(1－割合)", "d": ["定価×割合", "定価－割合"], "e": "定価を1とすると、売り値は1－割合。", "p": "求める式は？"}, {"t": "f", "q": "利益", "a": "売り値－原価", "d": ["原価－売り値", "定価－売り値"], "e": "もうけ＝売れた値段－仕入れた値段。", "p": "求める式は？"}, {"t": "f", "q": "植木の本数（まっすぐな道、両はしにも植える）", "a": "間の数＋1", "d": ["間の数", "間の数－1"], "e": "両はしにも植えると、木は間より1本多い。", "p": "求める式は？"}, {"t": "f", "q": "植木の本数（池のまわり）", "a": "間の数", "d": ["間の数＋1", "間の数－1"], "e": "1周すると、木と間の数は同じ。", "p": "求める式は？"}, {"t": "f", "q": "植木の本数（両はしには植えない）", "a": "間の数－1", "d": ["間の数", "間の数＋1"], "e": "両はしに植えないと、木は間より1本少ない。", "p": "求める式は？"}, {"t": "f", "q": "間の数", "a": "全体の長さ÷間かく", "d": ["全体の長さ×間かく", "間かく÷全体の長さ"], "e": "全体を、1つ分の長さで分ける。", "p": "求める式は？"}, {"t": "f", "q": "1からnまでの和", "a": "(1＋n)×n÷2", "d": ["n×n÷2", "(1＋n)×n"], "e": "逆向きに並べて足すと (1＋n) が n こ。その半分。", "p": "求める式は？"}, {"t": "f", "q": "等差数列のn番目の数", "a": "はじめの数＋差×(n－1)", "d": ["はじめの数＋差×n", "差×n"], "e": "はじめの数から、差が (n－1) 回ふえる。", "p": "求める式は？"}, {"t": "f", "q": "等差数列の和", "a": "(はじめの数＋終わりの数)×個数÷2", "d": ["(はじめの数＋終わりの数)×個数", "終わりの数×個数÷2"], "e": "1からnまでの和と同じ考え方。", "p": "求める式は？"}, {"t": "f", "q": "つるかめ算：かめの数（足が2本と4本）", "a": "(足の合計－2×全部の数)÷(4－2)", "d": ["足の合計÷4", "(足の合計－4×全部の数)÷2"], "e": "全部つるだとすると、足が足りない分を (4－2) でわる。", "p": "求める式は？"}, {"t": "f", "q": "比例の式", "a": "y＝決まった数×x", "d": ["y＝決まった数÷x", "y＝決まった数＋x"], "e": "xが2倍、3倍…になると、yも2倍、3倍…。", "p": "求める式は？"}, {"t": "f", "q": "反比例の式", "a": "x×y＝決まった数", "d": ["y＝決まった数×x", "x＋y＝決まった数"], "e": "xが2倍になると、yは{1/2}倍。", "p": "求める式は？"}, {"t": "m", "q": "91", "a": "7×13", "d": ["7×15", "9×13"], "e": "91＝7×13。7の倍数は見ぬきにくい。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "7×13", "a": "91", "d": ["98", "84"], "p": "答えは？"}}, {"t": "m", "q": "111", "a": "3×37", "d": ["3×39", "7×37"], "e": "111＝3×37。3の倍数は、各位の数の和が3の倍数。", "p": "かけ算で表すと？", "r": {"q": "3×37", "a": "111", "d": ["121", "101"], "p": "答えは？"}}, {"t": "m", "q": "119", "a": "7×17", "d": ["7×19", "9×17"], "e": "119＝7×17。7の倍数は見ぬきにくい。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "7×17", "a": "119", "d": ["126", "112"], "p": "答えは？"}}, {"t": "m", "q": "133", "a": "7×19", "d": ["7×21", "9×19"], "e": "133＝7×19。7の倍数は見ぬきにくい。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "7×19", "a": "133", "d": ["140", "126"], "p": "答えは？"}}, {"t": "m", "q": "143", "a": "11×13", "d": ["11×15", "13×13"], "e": "143＝11×13。11の倍数は、1つおきの位の数の和の差が0か11の倍数。", "p": "かけ算で表すと？", "r": {"q": "11×13", "a": "143", "d": ["154", "132"], "p": "答えは？"}}, {"t": "m", "q": "161", "a": "7×23", "d": ["7×25", "9×23"], "e": "161＝7×23。7の倍数は見ぬきにくい。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "7×23", "a": "161", "d": ["168", "154"], "p": "答えは？"}}, {"t": "m", "q": "187", "a": "11×17", "d": ["11×19", "13×17"], "e": "187＝11×17。11の倍数は、1つおきの位の数の和の差が0か11の倍数。", "p": "かけ算で表すと？", "r": {"q": "11×17", "a": "187", "d": ["198", "176"], "p": "答えは？"}}, {"t": "m", "q": "203", "a": "7×29", "d": ["7×31", "9×29"], "e": "203＝7×29。7の倍数は見ぬきにくい。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "7×29", "a": "203", "d": ["210", "196"], "p": "答えは？"}}, {"t": "m", "q": "209", "a": "11×19", "d": ["11×21", "13×19"], "e": "209＝11×19。11の倍数は、1つおきの位の数の和の差が0か11の倍数。", "p": "かけ算で表すと？", "r": {"q": "11×19", "a": "209", "d": ["220", "198"], "p": "答えは？"}}, {"t": "m", "q": "217", "a": "7×31", "d": ["7×33", "9×31"], "e": "217＝7×31。7の倍数は見ぬきにくい。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "7×31", "a": "217", "d": ["224", "210"], "p": "答えは？"}}, {"t": "m", "q": "221", "a": "13×17", "d": ["13×19", "15×17"], "e": "221＝13×17。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "13×17", "a": "221", "d": ["234", "208"], "p": "答えは？"}}, {"t": "m", "q": "247", "a": "13×19", "d": ["13×21", "15×19"], "e": "247＝13×19。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "13×19", "a": "247", "d": ["260", "234"], "p": "答えは？"}}, {"t": "m", "q": "253", "a": "11×23", "d": ["11×25", "13×23"], "e": "253＝11×23。11の倍数は、1つおきの位の数の和の差が0か11の倍数。", "p": "かけ算で表すと？", "r": {"q": "11×23", "a": "253", "d": ["264", "242"], "p": "答えは？"}}, {"t": "m", "q": "299", "a": "13×23", "d": ["13×25", "15×23"], "e": "299＝13×23。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "13×23", "a": "299", "d": ["312", "286"], "p": "答えは？"}}, {"t": "m", "q": "319", "a": "11×29", "d": ["11×31", "13×29"], "e": "319＝11×29。11の倍数は、1つおきの位の数の和の差が0か11の倍数。", "p": "かけ算で表すと？", "r": {"q": "11×29", "a": "319", "d": ["330", "308"], "p": "答えは？"}}, {"t": "m", "q": "323", "a": "17×19", "d": ["17×21", "19×19"], "e": "323＝17×19。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "17×19", "a": "323", "d": ["340", "306"], "p": "答えは？"}}, {"t": "m", "q": "341", "a": "11×31", "d": ["11×33", "13×31"], "e": "341＝11×31。11の倍数は、1つおきの位の数の和の差が0か11の倍数。", "p": "かけ算で表すと？", "r": {"q": "11×31", "a": "341", "d": ["352", "330"], "p": "答えは？"}}, {"t": "m", "q": "377", "a": "13×29", "d": ["13×31", "15×29"], "e": "377＝13×29。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "13×29", "a": "377", "d": ["390", "364"], "p": "答えは？"}}, {"t": "m", "q": "391", "a": "17×23", "d": ["17×25", "19×23"], "e": "391＝17×23。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "17×23", "a": "391", "d": ["408", "374"], "p": "答えは？"}}, {"t": "m", "q": "437", "a": "19×23", "d": ["19×25", "21×23"], "e": "437＝19×23。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "19×23", "a": "437", "d": ["456", "418"], "p": "答えは？"}}, {"t": "m", "q": "51", "a": "3×17", "d": ["3×19", "7×17"], "e": "51＝3×17。3の倍数は、各位の数の和が3の倍数。", "p": "かけ算で表すと？", "r": {"q": "3×17", "a": "51", "d": ["61", "41"], "p": "答えは？"}}, {"t": "m", "q": "57", "a": "3×19", "d": ["3×21", "7×19"], "e": "57＝3×19。3の倍数は、各位の数の和が3の倍数。", "p": "かけ算で表すと？", "r": {"q": "3×19", "a": "57", "d": ["67", "47"], "p": "答えは？"}}, {"t": "m", "q": "87", "a": "3×29", "d": ["3×31", "7×29"], "e": "87＝3×29。3の倍数は、各位の数の和が3の倍数。", "p": "かけ算で表すと？", "r": {"q": "3×29", "a": "87", "d": ["97", "77"], "p": "答えは？"}}, {"t": "m", "q": "703", "a": "19×37", "d": ["19×39", "21×37"], "e": "703＝19×37。37は、111＝3×37 から出てくることが多い。", "p": "かけ算で表すと？", "r": {"q": "19×37", "a": "703", "d": ["722", "684"], "p": "答えは？"}}, {"t": "m", "q": "851", "a": "23×37", "d": ["23×39", "25×37"], "e": "851＝23×37。37は、111＝3×37 から出てくることが多い。", "p": "かけ算で表すと？", "r": {"q": "23×37", "a": "851", "d": ["874", "828"], "p": "答えは？"}}, {"t": "m", "q": "999", "a": "27×37", "d": ["27×39", "29×37"], "e": "999＝27×37。37は、111＝3×37 から出てくることが多い。", "p": "かけ算で表すと？", "r": {"q": "27×37", "a": "999", "d": ["1026", "972"], "p": "答えは？"}}, {"t": "m", "q": "1111", "a": "11×101", "d": ["11×103", "13×101"], "e": "1111＝11×101。11の倍数は、1つおきの位の数の和の差が0か11の倍数。", "p": "かけ算で表すと？", "r": {"q": "11×101", "a": "1111", "d": ["1122", "1100"], "p": "答えは？"}}, {"t": "m", "q": "69", "a": "3×23", "d": ["3×25", "7×23"], "e": "69＝3×23。3の倍数は、各位の数の和が3の倍数。", "p": "かけ算で表すと？", "r": {"q": "3×23", "a": "69", "d": ["79", "59"], "p": "答えは？"}}, {"t": "m", "q": "93", "a": "3×31", "d": ["3×33", "7×31"], "e": "93＝3×31。3の倍数は、各位の数の和が3の倍数。", "p": "かけ算で表すと？", "r": {"q": "3×31", "a": "93", "d": ["103", "83"], "p": "答えは？"}}, {"t": "m", "q": "117", "a": "9×13", "d": ["9×15", "11×13"], "e": "117＝9×13。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "9×13", "a": "117", "d": ["126", "108"], "p": "答えは？"}}, {"t": "m", "q": "153", "a": "9×17", "d": ["9×19", "11×17"], "e": "153＝9×17。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "9×17", "a": "153", "d": ["162", "144"], "p": "答えは？"}}, {"t": "m", "q": "171", "a": "9×19", "d": ["9×21", "11×19"], "e": "171＝9×19。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "9×19", "a": "171", "d": ["180", "162"], "p": "答えは？"}}, {"t": "m", "q": "1001", "a": "7×11×13", "d": ["7×11×15", "7×11×11"], "e": "1001＝7×11×13。一見わり切れなさそうな数。この形で覚えよう。", "p": "かけ算で表すと？", "r": {"q": "7×11×13", "a": "1001", "d": ["991", "1011"], "p": "答えは？"}}, {"t": "m", "q": "777", "a": "3×7×37", "d": ["3×7×39", "3×7×35"], "e": "777＝3×7×37。3の倍数は、各位の数の和が3の倍数。", "p": "かけ算で表すと？", "r": {"q": "3×7×37", "a": "777", "d": ["767", "787"], "p": "答えは？"}}, {"t": "m", "q": "121", "a": "11×11", "d": ["10×12", "11×12"], "e": "121＝11×11（11の2乗）。10×12＝120と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "11×11", "a": "121", "d": ["120", "132"], "p": "答えは？"}}, {"t": "m", "q": "144", "a": "12×12", "d": ["11×13", "12×13"], "e": "144＝12×12（12の2乗）。11×13＝143と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "12×12", "a": "144", "d": ["143", "156"], "p": "答えは？"}}, {"t": "m", "q": "169", "a": "13×13", "d": ["12×14", "13×14"], "e": "169＝13×13（13の2乗）。12×14＝168と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "13×13", "a": "169", "d": ["168", "182"], "p": "答えは？"}}, {"t": "m", "q": "196", "a": "14×14", "d": ["13×15", "14×15"], "e": "196＝14×14（14の2乗）。13×15＝195と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "14×14", "a": "196", "d": ["195", "210"], "p": "答えは？"}}, {"t": "m", "q": "225", "a": "15×15", "d": ["14×16", "15×16"], "e": "225＝15×15（15の2乗）。14×16＝224と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "15×15", "a": "225", "d": ["224", "240"], "p": "答えは？"}}, {"t": "m", "q": "256", "a": "16×16", "d": ["15×17", "16×17"], "e": "256＝16×16（16の2乗）。15×17＝255と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "16×16", "a": "256", "d": ["255", "272"], "p": "答えは？"}}, {"t": "m", "q": "289", "a": "17×17", "d": ["16×18", "17×18"], "e": "289＝17×17（17の2乗）。16×18＝288と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "17×17", "a": "289", "d": ["288", "306"], "p": "答えは？"}}, {"t": "m", "q": "324", "a": "18×18", "d": ["17×19", "18×19"], "e": "324＝18×18（18の2乗）。17×19＝323と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "18×18", "a": "324", "d": ["323", "342"], "p": "答えは？"}}, {"t": "m", "q": "361", "a": "19×19", "d": ["18×20", "19×20"], "e": "361＝19×19（19の2乗）。18×20＝360と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "19×19", "a": "361", "d": ["360", "380"], "p": "答えは？"}}, {"t": "m", "q": "400", "a": "20×20", "d": ["19×21", "20×21"], "e": "400＝20×20（20の2乗）。19×21＝399と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "20×20", "a": "400", "d": ["399", "420"], "p": "答えは？"}}, {"t": "m", "q": "441", "a": "21×21", "d": ["20×22", "21×22"], "e": "441＝21×21（21の2乗）。20×22＝440と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "21×21", "a": "441", "d": ["440", "462"], "p": "答えは？"}}, {"t": "m", "q": "484", "a": "22×22", "d": ["21×23", "22×23"], "e": "484＝22×22（22の2乗）。21×23＝483と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "22×22", "a": "484", "d": ["483", "506"], "p": "答えは？"}}, {"t": "m", "q": "529", "a": "23×23", "d": ["22×24", "23×24"], "e": "529＝23×23（23の2乗）。22×24＝528と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "23×23", "a": "529", "d": ["528", "552"], "p": "答えは？"}}, {"t": "m", "q": "576", "a": "24×24", "d": ["23×25", "24×25"], "e": "576＝24×24（24の2乗）。23×25＝575と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "24×24", "a": "576", "d": ["575", "600"], "p": "答えは？"}}, {"t": "m", "q": "625", "a": "25×25", "d": ["24×26", "25×26"], "e": "625＝25×25（25の2乗）。24×26＝624と1ちがい。", "p": "かけ算で表すと？", "r": {"q": "25×25", "a": "625", "d": ["624", "650"], "p": "答えは？"}}, {"t": "m", "q": "1024", "a": "2を10回かけた数", "d": ["2を8回かけた数", "4を10回かけた数"], "e": "2×2×…（10回）＝1024。512は2を9回。", "p": "は？", "r": {"q": "2を10回かけた数", "a": "1024", "d": ["1000", "2048"], "p": "は？"}}, {"t": "n", "q": "3.14×1", "a": "3.14", "d": ["3.41", "3.24"], "e": "3.14×1＝3.14。3.14×(1〜9)は暗記しておくと計算が速い。"}, {"t": "n", "q": "3.14×2", "a": "6.28", "d": ["9.42", "6.18"], "e": "3.14×2＝6.28。3.14×(1〜9)は暗記しておくと計算が速い。", "r": {"q": "6.28÷3.14", "a": "2", "d": ["3", "1"], "p": ""}}, {"t": "n", "q": "3.14×3", "a": "9.42", "d": ["12.56", "9.52"], "e": "3.14×3＝9.42。3.14×(1〜9)は暗記しておくと計算が速い。", "r": {"q": "9.42÷3.14", "a": "3", "d": ["4", "2"], "p": ""}}, {"t": "n", "q": "3.14×4", "a": "12.56", "d": ["15.7", "12.46"], "e": "3.14×4＝12.56。3.14×(1〜9)は暗記しておくと計算が速い。", "r": {"q": "12.56÷3.14", "a": "4", "d": ["5", "3"], "p": ""}}, {"t": "n", "q": "3.14×5", "a": "15.7", "d": ["18.84", "15.8"], "e": "3.14×5＝15.7。3.14×(1〜9)は暗記しておくと計算が速い。", "r": {"q": "15.7÷3.14", "a": "5", "d": ["6", "4"], "p": ""}}, {"t": "n", "q": "3.14×6", "a": "18.84", "d": ["21.98", "18.74"], "e": "3.14×6＝18.84。3.14×(1〜9)は暗記しておくと計算が速い。", "r": {"q": "18.84÷3.14", "a": "6", "d": ["7", "5"], "p": ""}}, {"t": "n", "q": "3.14×7", "a": "21.98", "d": ["25.12", "22.08"], "e": "3.14×7＝21.98。3.14×(1〜9)は暗記しておくと計算が速い。", "r": {"q": "21.98÷3.14", "a": "7", "d": ["8", "6"], "p": ""}}, {"t": "n", "q": "3.14×8", "a": "25.12", "d": ["28.26", "25.02"], "e": "3.14×8＝25.12。3.14×(1〜9)は暗記しておくと計算が速い。", "r": {"q": "25.12÷3.14", "a": "8", "d": ["9", "7"], "p": ""}}, {"t": "n", "q": "3.14×9", "a": "28.26", "d": ["31.4", "28.36"], "e": "3.14×9＝28.26。3.14×(1〜9)は暗記しておくと計算が速い。", "r": {"q": "28.26÷3.14", "a": "9", "d": ["10", "8"], "p": ""}}, {"t": "n", "q": "3.14×12", "a": "37.68", "d": ["40.82", "37.58"], "e": "3.14×12＝37.68。円の面積でよく出る。", "r": {"q": "37.68÷3.14", "a": "12", "d": ["13", "11"], "p": ""}}, {"t": "n", "q": "3.14×16", "a": "50.24", "d": ["53.38", "50.14"], "e": "3.14×16＝50.24。円の面積でよく出る。", "r": {"q": "50.24÷3.14", "a": "16", "d": ["17", "15"], "p": ""}}, {"t": "n", "q": "3.14×18", "a": "56.52", "d": ["59.66", "56.42"], "e": "3.14×18＝56.52。円の面積でよく出る。", "r": {"q": "56.52÷3.14", "a": "18", "d": ["19", "17"], "p": ""}}, {"t": "n", "q": "3.14×24", "a": "75.36", "d": ["78.5", "75.26"], "e": "3.14×24＝75.36。円の面積でよく出る。", "r": {"q": "75.36÷3.14", "a": "24", "d": ["25", "23"], "p": ""}}, {"t": "n", "q": "3.14×25", "a": "78.5", "d": ["81.64", "78.6"], "e": "3.14×25＝78.5。円の面積でよく出る。", "r": {"q": "78.5÷3.14", "a": "25", "d": ["26", "24"], "p": ""}}, {"t": "n", "q": "3.14×36", "a": "113.04", "d": ["116.18", "112.94"], "e": "3.14×36＝113.04。円の面積でよく出る。", "r": {"q": "113.04÷3.14", "a": "36", "d": ["37", "35"], "p": ""}}, {"t": "n", "q": "{1/4}", "a": "0.25", "d": ["0.025", "0.05"], "e": "{1/4}＝1÷4＝0.25。", "p": "を小数にすると？", "r": {"q": "0.25", "a": "{1/4}", "d": ["{1/5}", "{1/2}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{3/4}", "a": "0.75", "d": ["0.075", "0.15"], "e": "{3/4}＝3÷4＝0.75。", "p": "を小数にすると？", "r": {"q": "0.75", "a": "{3/4}", "d": ["{2/3}", "{3/5}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{1/8}", "a": "0.125", "d": ["0.18", "0.025"], "e": "{1/8}＝1÷8＝0.125。", "p": "を小数にすると？", "r": {"q": "0.125", "a": "{1/8}", "d": ["{1/6}", "{1/5}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{3/8}", "a": "0.375", "d": ["0.38", "0.075"], "e": "{3/8}＝3÷8＝0.375。", "p": "を小数にすると？", "r": {"q": "0.375", "a": "{3/8}", "d": ["{3/5}", "{2/5}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{5/8}", "a": "0.625", "d": ["0.58", "0.125"], "e": "{5/8}＝5÷8＝0.625。", "p": "を小数にすると？", "r": {"q": "0.625", "a": "{5/8}", "d": ["{5/6}", "{3/5}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{7/8}", "a": "0.875", "d": ["0.78", "0.175"], "e": "{7/8}＝7÷8＝0.875。", "p": "を小数にすると？", "r": {"q": "0.875", "a": "{7/8}", "d": ["{7/9}", "{5/6}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{1/16}", "a": "0.0625", "d": ["0.062", "0.625"], "e": "{1/16}＝1÷16＝0.0625。", "p": "を小数にすると？", "r": {"q": "0.0625", "a": "{1/16}", "d": ["{1/6}", "{1/15}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{1/20}", "a": "0.05", "d": ["0.005", "0.5"], "e": "{1/20}＝1÷20＝0.05。", "p": "を小数にすると？", "r": {"q": "0.05", "a": "{1/20}", "d": ["{1/5}", "{1/50}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{1/25}", "a": "0.04", "d": ["0.004", "0.4"], "e": "{1/25}＝1÷25＝0.04。", "p": "を小数にすると？", "r": {"q": "0.04", "a": "{1/25}", "d": ["{1/4}", "{1/40}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{1/40}", "a": "0.025", "d": ["0.0025", "0.25"], "e": "{1/40}＝1÷40＝0.025。", "p": "を小数にすると？", "r": {"q": "0.025", "a": "{1/40}", "d": ["{1/4}", "{1/25}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{1/125}", "a": "0.008", "d": ["0.0008", "0.08"], "e": "{1/125}＝1÷125＝0.008。", "p": "を小数にすると？", "r": {"q": "0.008", "a": "{1/125}", "d": ["{1/8}", "{1/80}"], "p": "を分数にすると？"}}, {"t": "n", "q": "{3/5}", "a": "0.6", "d": ["0.06", "0.12"], "e": "{3/5}＝3÷5＝0.6。", "p": "を小数にすると？", "r": {"q": "0.6", "a": "{3/5}", "d": ["{3/4}", "{2/3}"], "p": "を分数にすると？"}}, {"t": "n", "q": "25×4", "a": "100", "d": ["1000", "125"], "e": "25×4＝100。25の倍数が出たら4を探そう。"}, {"t": "n", "q": "125×8", "a": "1000", "d": ["100", "10000"], "e": "125×8＝1000。0.125＝{1/8} とセットで。"}, {"t": "n", "q": "625×16", "a": "10000", "d": ["1000", "100000"], "e": "625×16＝10000。"}, {"t": "n", "q": "375×8", "a": "3000", "d": ["2500", "3500"], "e": "375×8＝3000。0.375＝{3/8}。"}, {"t": "n", "q": "37×3", "a": "111", "d": ["101", "121"], "e": "37×3＝111。37×6＝222、37×9＝333…と続く。"}, {"t": "n", "q": "1から10までの和", "a": "55", "d": ["50", "45"], "e": "(1＋10)×10÷2＝55。"}, {"t": "n", "q": "1から100までの和", "a": "5050", "d": ["5000", "10100"], "e": "(1＋100)×100÷2＝5050。"}, {"t": "n", "q": "1＋3＋5＋7＋9", "a": "25", "d": ["20", "30"], "e": "1から始まる奇数の和は、個数×個数。5こなので 5×5。"}, {"t": "n", "q": "1から50までの和", "a": "1275", "d": ["1250", "2550"], "e": "(1＋50)×50÷2＝1275。"}, {"t": "n", "q": "1＋3＋5＋…＋19", "a": "100", "d": ["90", "110"], "e": "1から始まる奇数10こ。10×10＝100。"}, {"t": "n", "q": "100までの素数の個数", "a": "25こ", "d": ["20こ", "30こ"], "e": "2、3、5、7、11…97 の25こ。"}, {"t": "n", "q": "長針が1分で進む角度", "a": "6°", "d": ["0.5°", "30°"], "e": "60分で360°。360÷60＝6°。"}, {"t": "n", "q": "短針が1分で進む角度", "a": "0.5°", "d": ["6°", "1°"], "e": "60分で30°。30÷60＝0.5°。"}, {"t": "n", "q": "短針が1時間で進む角度", "a": "30°", "d": ["60°", "6°"], "e": "12時間で360°。360÷12＝30°。"}, {"t": "n", "q": "長針と短針が1分で近づく角度", "a": "5.5°", "d": ["6.5°", "6°"], "e": "6－0.5＝5.5°。"}, {"t": "n", "q": "素数はどれ？", "a": "61", "d": ["51", "57"], "e": "61は素数。51＝3×17、57＝3×19。"}, {"t": "n", "q": "素数はどれ？", "a": "67", "d": ["69", "77"], "e": "67は素数。69＝3×23、77＝7×11。"}, {"t": "n", "q": "素数はどれ？", "a": "79", "d": ["81", "91"], "e": "79は素数。81＝3×27、91＝7×13。"}, {"t": "n", "q": "素数はどれ？", "a": "97", "d": ["87", "91"], "e": "97は素数。87＝3×29、91＝7×13。"}, {"t": "n", "q": "素数はどれ？", "a": "101", "d": ["111", "119"], "e": "101は素数。111＝3×37、119＝7×17。"}, {"t": "n", "q": "素数はどれ？", "a": "113", "d": ["117", "133"], "e": "113は素数。117＝3×39、133＝7×19。"}, {"t": "n", "q": "素数はどれ？", "a": "127", "d": ["121", "143"], "e": "127は素数。121＝11×11、143＝11×13。"}, {"t": "n", "q": "素数はどれ？", "a": "131", "d": ["133", "161"], "e": "131は素数。133＝7×19、161＝7×23。"}, {"t": "u", "q": "1km", "a": "1000m", "d": ["100m", "10000m"], "e": "k（キロ）は1000倍。", "p": "＝ ？"}, {"t": "u", "q": "1m", "a": "100cm", "d": ["10cm", "1000cm"], "e": "c（センチ）は{1/100}。", "p": "＝ ？"}, {"t": "u", "q": "1cm", "a": "10mm", "d": ["100mm", "{1/10}mm"], "e": "m（ミリ）は{1/1000}。1cm＝10mm。", "p": "＝ ？"}, {"t": "u", "q": "2.5km", "a": "2500m", "d": ["250m", "25000m"], "e": "1km＝1000m。2.5×1000。", "p": "＝ ？"}, {"t": "u", "q": "1m²", "a": "10000cm²", "d": ["100cm²", "1000cm²"], "e": "100cm×100cm＝10000cm²。", "p": "＝ ？"}, {"t": "u", "q": "1a（アール）", "a": "100m²", "d": ["10m²", "1000m²"], "e": "10m×10m＝100m²。", "p": "＝ ？"}, {"t": "u", "q": "1ha（ヘクタール）", "a": "10000m²", "d": ["1000m²", "100m²"], "e": "100m×100m＝10000m²。1ha＝100a。", "p": "＝ ？"}, {"t": "u", "q": "1ha", "a": "100a", "d": ["10a", "1000a"], "e": "1a＝100m²、1ha＝10000m²。", "p": "＝ ？"}, {"t": "u", "q": "1km²", "a": "100ha", "d": ["10ha", "1000ha"], "e": "1000m×1000m＝1000000m²＝100ha。", "p": "＝ ？"}, {"t": "u", "q": "1cm²", "a": "100mm²", "d": ["10mm²", "1000mm²"], "e": "10mm×10mm＝100mm²。", "p": "＝ ？"}, {"t": "u", "q": "0.6m²", "a": "6000cm²", "d": ["600cm²", "60000cm²"], "e": "1m²＝10000cm²。0.6×10000。", "p": "＝ ？"}, {"t": "u", "q": "1.5ha", "a": "15000m²", "d": ["1500m²", "150000m²"], "e": "1ha＝10000m²。", "p": "＝ ？"}, {"t": "u", "q": "250a", "a": "2.5ha", "d": ["25ha", "0.25ha"], "e": "100a＝1ha。250÷100。", "p": "＝ ？"}, {"t": "u", "q": "1L", "a": "1000cm³", "d": ["100cm³", "10000cm³"], "e": "10cm×10cm×10cm＝1000cm³。", "p": "＝ ？"}, {"t": "u", "q": "1dL", "a": "100cm³", "d": ["10cm³", "1000cm³"], "e": "1L＝10dL。1000÷10。", "p": "＝ ？"}, {"t": "u", "q": "1mL", "a": "1cm³", "d": ["10cm³", "1000cm³"], "e": "1L＝1000mL＝1000cm³。", "p": "＝ ？"}, {"t": "u", "q": "1L", "a": "10dL", "d": ["100dL", "1000dL"], "e": "dL（デシ）は{1/10}L。", "p": "＝ ？"}, {"t": "u", "q": "1m³", "a": "1000L", "d": ["100L", "10000L"], "e": "100cm×100cm×100cm＝1000000cm³＝1000L。", "p": "＝ ？"}, {"t": "u", "q": "1m³", "a": "1000000cm³", "d": ["10000cm³", "1000cm³"], "e": "100×100×100。", "p": "＝ ？"}, {"t": "u", "q": "1kL", "a": "1000L", "d": ["100L", "10L"], "e": "k（キロ）は1000倍。", "p": "＝ ？"}, {"t": "u", "q": "3.2L", "a": "3200cm³", "d": ["320cm³", "32000cm³"], "e": "1L＝1000cm³。", "p": "＝ ？"}, {"t": "u", "q": "4500cm³", "a": "4.5L", "d": ["45L", "0.45L"], "e": "1000cm³＝1L。", "p": "＝ ？"}, {"t": "u", "q": "750mL", "a": "7.5dL", "d": ["75dL", "0.75dL"], "e": "1dL＝100mL。", "p": "＝ ？"}, {"t": "u", "q": "1kg", "a": "1000g", "d": ["100g", "10000g"], "e": "k（キロ）は1000倍。", "p": "＝ ？"}, {"t": "u", "q": "1t（トン）", "a": "1000kg", "d": ["100kg", "10000kg"], "e": "1t＝1000kg。", "p": "＝ ？"}, {"t": "u", "q": "1g", "a": "1000mg", "d": ["100mg", "10mg"], "e": "m（ミリ）は{1/1000}。", "p": "＝ ？"}, {"t": "u", "q": "0.3kg", "a": "300g", "d": ["30g", "3000g"], "e": "1kg＝1000g。", "p": "＝ ？"}, {"t": "u", "q": "水1Lの重さ", "a": "1kg", "d": ["100g", "10kg"], "e": "水は1cm³で1g。1L＝1000cm³なので1kg。", "p": "＝ ？"}, {"t": "u", "q": "水1cm³の重さ", "a": "1g", "d": ["1kg", "10g"], "e": "水1cm³＝1mL＝1g。", "p": "＝ ？"}, {"t": "u", "q": "水1m³の重さ", "a": "1t", "d": ["100kg", "10t"], "e": "1m³＝1000L、水1L＝1kg。", "p": "＝ ？"}, {"t": "u", "q": "1時間", "a": "3600秒", "d": ["360秒", "600秒"], "e": "60×60＝3600。", "p": "＝ ？"}, {"t": "u", "q": "1日", "a": "1440分", "d": ["1400分", "2400分"], "e": "24×60＝1440。", "p": "＝ ？"}, {"t": "u", "q": "0.1時間", "a": "6分", "d": ["10分", "1分"], "e": "60×0.1＝6分。", "p": "＝ ？"}, {"t": "u", "q": "0.25時間", "a": "15分", "d": ["25分", "2.5分"], "e": "60×0.25＝15分。", "p": "＝ ？"}, {"t": "u", "q": "1.2時間", "a": "1時間12分", "d": ["1時間20分", "1時間2分"], "e": "0.2時間＝60×0.2＝12分。", "p": "＝ ？"}, {"t": "u", "q": "0.4分", "a": "24秒", "d": ["40秒", "4秒"], "e": "60×0.4＝24秒。", "p": "＝ ？"}, {"t": "u", "q": "{1/3}時間", "a": "20分", "d": ["30分", "33分"], "e": "60×{1/3}＝20分。", "p": "＝ ？"}, {"t": "u", "q": "45分", "a": "0.75時間", "d": ["0.45時間", "0.8時間"], "e": "45÷60＝0.75。", "p": "＝ ？"}, {"t": "u", "q": "2時間15分", "a": "2.25時間", "d": ["2.15時間", "2.5時間"], "e": "15分＝{1/4}時間＝0.25時間。", "p": "＝ ？"}, {"t": "u", "q": "2.4時間", "a": "2時間24分", "d": ["2時間40分", "2時間4分"], "e": "0.4時間＝60×0.4＝24分。", "p": "＝ ？"}, {"t": "u", "q": "秒速25m", "a": "時速90km", "d": ["時速25km", "時速250km"], "e": "25×3.6＝90。", "p": "＝ ？"}, {"t": "u", "q": "18分", "a": "0.3時間", "d": ["0.18時間", "0.6時間"], "e": "18÷60＝0.3。", "p": "＝ ？"}, {"t": "u", "q": "時速36km", "a": "秒速10m", "d": ["秒速36m", "秒速100m"], "e": "時速→秒速は ÷3.6。36÷3.6＝10。", "p": "＝ ？"}, {"t": "u", "q": "時速72km", "a": "秒速20m", "d": ["秒速7.2m", "秒速72m"], "e": "72÷3.6＝20。", "p": "＝ ？"}, {"t": "u", "q": "時速18km", "a": "秒速5m", "d": ["秒速1.8m", "秒速50m"], "e": "18÷3.6＝5。", "p": "＝ ？"}, {"t": "u", "q": "秒速1m", "a": "分速60m", "d": ["分速100m", "分速6m"], "e": "1分＝60秒。1×60。", "p": "＝ ？"}, {"t": "u", "q": "分速60m", "a": "時速3.6km", "d": ["時速36km", "時速6km"], "e": "60×60＝3600m＝3.6km。", "p": "＝ ？"}, {"t": "u", "q": "時速60km", "a": "分速1km", "d": ["分速6km", "分速10km"], "e": "60km÷60分＝1km。", "p": "＝ ？"}, {"t": "u", "q": "分速80m", "a": "時速4.8km", "d": ["時速48km", "時速8km"], "e": "80×60＝4800m＝4.8km。", "p": "＝ ？"}, {"t": "u", "q": "秒速15m", "a": "時速54km", "d": ["時速15km", "時速90km"], "e": "秒速→時速は ×3.6。15×3.6＝54。", "p": "＝ ？"}, {"t": "z", "q": "三角形の内角の和", "a": "180°", "d": ["360°", "90°"], "e": "どんな三角形も180°。"}, {"t": "z", "q": "四角形の内角の和", "a": "360°", "d": ["180°", "540°"], "e": "対角線で三角形2つ。180×2。"}, {"t": "z", "q": "五角形の内角の和", "a": "540°", "d": ["720°", "360°"], "e": "三角形3つ。180×3。"}, {"t": "z", "q": "六角形の内角の和", "a": "720°", "d": ["540°", "900°"], "e": "三角形4つ。180×4。"}, {"t": "z", "q": "八角形の内角の和", "a": "1080°", "d": ["1440°", "900°"], "e": "三角形6つ。180×6。"}, {"t": "z", "q": "十角形の内角の和", "a": "1440°", "d": ["1800°", "1260°"], "e": "三角形8つ。180×8。"}, {"t": "z", "q": "n角形の内角の和", "a": "180°×(n－2)", "d": ["180°×n", "360°×(n－2)"], "e": "三角形が (n－2) こに分けられる。"}, {"t": "z", "q": "多角形の外角の和", "a": "360°", "d": ["180°", "540°"], "e": "何角形でも外角の和は360°。"}, {"t": "z", "q": "正五角形の1つの内角", "a": "108°", "d": ["120°", "72°"], "e": "540÷5＝108°。外角は72°。"}, {"t": "z", "q": "正六角形の1つの内角", "a": "120°", "d": ["108°", "135°"], "e": "720÷6＝120°。"}, {"t": "z", "q": "正八角形の1つの内角", "a": "135°", "d": ["120°", "145°"], "e": "1080÷8＝135°。外角は45°。"}, {"t": "z", "q": "正三角形の1つの内角", "a": "60°", "d": ["90°", "45°"], "e": "180÷3＝60°。"}, {"t": "z", "q": "正n角形の1つの外角", "a": "360°÷n", "d": ["180°÷n", "360°×n"], "e": "外角の和360°を n こで分ける。"}, {"t": "z", "q": "n角形の対角線の本数", "a": "n×(n－3)÷2", "d": ["n×(n－3)", "n×(n－2)÷2"], "e": "1つの頂点から (n－3) 本。重なりがあるので ÷2。"}, {"t": "z", "q": "五角形の対角線の本数", "a": "5本", "d": ["10本", "4本"], "e": "5×2÷2＝5。"}, {"t": "z", "q": "六角形の対角線の本数", "a": "9本", "d": ["6本", "12本"], "e": "6×3÷2＝9。"}, {"t": "z", "q": "八角形の対角線の本数", "a": "20本", "d": ["16本", "40本"], "e": "8×5÷2＝20。"}, {"t": "z", "q": "立方体の辺の数", "a": "12本", "d": ["8本", "6本"], "e": "面6、辺12、頂点8。"}, {"t": "z", "q": "立方体の頂点の数", "a": "8こ", "d": ["6こ", "12こ"], "e": "面6、辺12、頂点8。"}, {"t": "z", "q": "三角柱の辺の数", "a": "9本", "d": ["6本", "12本"], "e": "面5、辺9、頂点6。"}, {"t": "z", "q": "三角柱の面の数", "a": "5つ", "d": ["3つ", "6つ"], "e": "側面3つ＋底面2つ。"}, {"t": "z", "q": "四角すいの辺の数", "a": "8本", "d": ["5本", "12本"], "e": "面5、辺8、頂点5。"}, {"t": "z", "q": "三角すいの面の数", "a": "4つ", "d": ["3つ", "5つ"], "e": "面4、辺6、頂点4。"}, {"t": "z", "q": "相似比が 2：3 のとき、面積比は", "a": "4：9", "d": ["2：3", "8：27"], "e": "面積比は相似比を2回かける。"}, {"t": "z", "q": "相似比が 2：3 のとき、体積比は", "a": "8：27", "d": ["4：9", "6：9"], "e": "体積比は相似比を3回かける。"}, {"t": "z", "q": "相似比が 1：2 のとき、面積比は", "a": "1：4", "d": ["1：2", "1：8"], "e": "1×1：2×2。"}, {"t": "z", "q": "三角形の1つの外角は", "a": "となりにない2つの内角の和", "d": ["となりの内角と同じ", "180°－となりにない内角"], "e": "外角＋となりの内角＝180°、内角の和も180°。"}, {"t": "z", "q": "対頂角", "a": "等しい", "d": ["合わせて180°", "合わせて90°"], "e": "交わる2直線で、向かい合う角は等しい。"}, {"t": "z", "q": "平行線の錯角", "a": "等しい", "d": ["合わせて180°", "合わせて90°"], "e": "Z の形の角は等しい。"}, {"t": "z", "q": "平行線の同側内角", "a": "合わせて180°", "d": ["等しい", "合わせて90°"], "e": "コの字の内側の2つの角は合わせて180°。"}, {"t": "z", "q": "二等辺三角形の2つの底角", "a": "等しい", "d": ["合わせて90°", "頂角と等しい"], "e": "長さの等しい2辺の、下の2つの角が等しい。"}, {"t": "z", "q": "直角二等辺三角形の底角", "a": "45°", "d": ["60°", "30°"], "e": "(180－90)÷2＝45°。"}, {"t": "z", "q": "30°・60°・90°の三角形で、30°の向かいの辺は", "a": "いちばん長い辺の{1/2}", "d": ["いちばん長い辺と同じ", "いちばん長い辺の{1/3}"], "e": "正三角形を半分にした形。"}, {"t": "z", "q": "半円の弧の上の点と直径の両はしを結んだ角", "a": "90°", "d": ["180°", "60°"], "e": "直径に対する円周角は90°。"}, {"t": "z", "q": "中心角90°のおうぎ形の面積は、円の", "a": "{1/4}", "d": ["{1/2}", "{1/3}"], "e": "90÷360＝{1/4}。"}, {"t": "z", "q": "中心角60°のおうぎ形の面積は、円の", "a": "{1/6}", "d": ["{1/4}", "{1/3}"], "e": "60÷360＝{1/6}。"}, {"t": "z", "q": "中心角120°のおうぎ形の面積は、円の", "a": "{1/3}", "d": ["{1/2}", "{1/4}"], "e": "120÷360＝{1/3}。"}, {"t": "z", "q": "半径1cmの円の面積", "a": "3.14cm²", "d": ["6.28cm²", "1cm²"], "e": "1×1×3.14。"}, {"t": "z", "q": "1辺10cmの正方形にぴったり入る円の面積", "a": "78.5cm²", "d": ["314cm²", "100cm²"], "e": "半径5cm。5×5×3.14＝78.5。"}, {"t": "z", "q": "正方形の対角線の長さが10cmのとき、面積", "a": "50cm²", "d": ["100cm²", "25cm²"], "e": "ひし形と同じ。10×10÷2。"}];
+const TYPES={
+  f:{name:'公式',ic:'📐'},
+  m:{name:'見ぬく数',ic:'🔎'},
+  n:{name:'覚える数',ic:'💡'},
+  u:{name:'単位',ic:'📏'},
+  z:{name:'図形',ic:'🔷'}
+};
+const NOTE_ICON='<svg class="nicon" viewBox="0 0 64 48" aria-hidden="true">'+
+  '<rect x="2" y="6" width="60" height="38" rx="5" fill="#ffa9a9"/>'+
+  '<path d="M6 10 Q19 6 31 11 L31 42 Q19 37 6 41 Z" fill="#fff"/>'+
+  '<path d="M58 10 Q45 6 33 11 L33 42 Q45 37 58 41 Z" fill="#fff"/>'+
+  '<path d="M10 18 Q19 15 27 18 M10 24 Q19 21 27 24 M10 30 Q19 27 27 30 M10 36 Q19 33 27 36" stroke="#e6cdb8" stroke-width="2" stroke-linecap="round" fill="none"/>'+
+  '<path d="M37 18 Q45 15 54 18 M37 24 Q45 21 54 24 M37 30 Q45 27 54 30" stroke="#e6cdb8" stroke-width="2" stroke-linecap="round" fill="none"/>'+
+  '<path d="M38 36 L42 40 L52 31" stroke="#e0392d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'+
+  '<path d="M32 11 L32 42" stroke="#d9a066" stroke-width="2"/></svg>';
+const PCOL=['#beeaa4','#b8e0f0','#cec4e9','#ffbdbd','#ffddb3','#f8ee8c'];
+function petInner(st){
+  const line='#7a4a12',body=st===6?'#ffcf33':'#ffb347';
+  let s='';
+  if(st>=6)s+='<circle cx="50" cy="52" r="46" fill="#fff0a8" opacity=".75"/><g fill="#ffd54a"><path d="M50 2l4 10h-8zM92 28l-9 6 2-8zM8 28l9 6-2-8z"/></g>';
+  if(st===1)return s+'<ellipse cx="50" cy="56" rx="28" ry="34" fill="#fff6e3" stroke="'+line+'" stroke-width="3"/><path d="M30 52l8 8 7-9 8 9 7-8 8 8" fill="none" stroke="'+line+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="40" cy="38" r="3" fill="#ffd9a0"/><circle cx="62" cy="34" r="3" fill="#ffd9a0"/>';
+  if(st>=3){const w=st>=4?1.25:1;s+='<g fill="#ff8a3d" stroke="'+line+'" stroke-width="2.5" stroke-linejoin="round"><path d="M22 54Q'+(6/w)+' 40 8 '+(30-(w-1)*20)+'Q24 36 30 46Z"/><path d="M78 54Q94 40 92 '+(30-(w-1)*20)+'Q76 36 70 46Z"/></g>';}
+  if(st>=4)s+='<path d="M34 24l-4-14 12 9zM66 24l4-14-12 9z" fill="#fff" stroke="'+line+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  s+='<ellipse cx="50" cy="58" rx="30" ry="29" fill="'+body+'" stroke="'+line+'" stroke-width="3"/><ellipse cx="50" cy="68" rx="18" ry="16" fill="#fff2cc"/>';
+  s+='<circle cx="40" cy="52" r="4.2" fill="'+line+'"/><circle cx="60" cy="52" r="4.2" fill="'+line+'"/><circle cx="41.5" cy="50.5" r="1.4" fill="#fff"/><circle cx="61.5" cy="50.5" r="1.4" fill="#fff"/><path d="M43 61Q50 67 57 61" stroke="'+line+'" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  if(st===2)s+='<path d="M24 42Q50 4 76 42L70 46Q50 34 30 46Z" fill="#fff6e3" stroke="'+line+'" stroke-width="3" stroke-linejoin="round"/><path d="M30 46l6 6 6-7 8 7 8-7 6 7 6-6" fill="none" stroke="'+line+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  if(st>=5)s+='<path d="M30 80Q50 92 70 80L66 90Q50 98 34 90Z" fill="#e0392d" stroke="'+line+'" stroke-width="2.5" stroke-linejoin="round"/><path d="M76 58l10 3v10q0 8-10 12-10-4-10-12V61z" fill="#5a9cf5" stroke="'+line+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  if(st>=6)s+='<path d="M30 28l6 10 8-12 6 12 6-12 8 12 6-10-3 16H33z" fill="#ffe27a" stroke="'+line+'" stroke-width="2.5" stroke-linejoin="round"/>';
+  return s;
+}
+function zukanIcon(st){
+  return '<svg class="fz" viewBox="0 0 80 88" aria-hidden="true"><path d="M40 3l30 11v26c0 21-13 35-30 42C23 75 10 61 10 40V14z" fill="'+PCOL[st-1]+'" stroke="#4a3a22" stroke-width="3.5" stroke-linejoin="round"/><path d="M40 3l30 11v26c0 21-13 35-30 42z" fill="#fff" opacity=".16"/><path d="M17 20l23-8 23 8v20c0 16-9 28-23 34-14-6-23-18-23-34z" fill="#fff6e3" opacity=".96"/><g transform="translate(17 17) scale(.46)">'+petInner(st)+'</g></svg>';
+}
+const BOLT='<svg class="bolt" viewBox="0 0 24 40" aria-hidden="true"><path d="M15 1 L3 23 H11 L8 39 L21 14 H13 Z" fill="#ffd23f" stroke="#e08a00" stroke-width="2" stroke-linejoin="round"/></svg>';
+/* 分数 {a/b} を、たての分数で表示 */
+function fmt(t){return esc(t).replace(/\{([^{}\/]+)\/([^{}]+)\}/g,'<span class="fr"><span>$1</span><span>$2</span></span>');}
+const plain=t=>String(t).replace(/\{([^{}\/]+)\/([^{}]+)\}/g,'$1/$2');
+function yomi(t){return fmt(t);}
+const ORDER=['f','m','n','u','z'];
+const ITEMS=DATA.map(o=>Object.assign({id:o.t+'|'+o.q+'|'+o.a,type:o.t},o));
+
+/* ===== 保存 ===== */
+const LS='mathpark-v1';
+const blank=()=>({st:{},xp:0,day:{d:'',n:0,c:0},len:10,col:[],best:0,aw:{}});
+let store=blank();
+try{
+  const raw=localStorage.getItem(LS);
+  if(raw){const o=JSON.parse(raw);if(o&&typeof o==='object')store=Object.assign(blank(),o);}
+}catch(e){}
+try{if(!store.nick){const w=JSON.parse(localStorage.getItem('gokudojo-v1')||'{}');if(w&&w.nick)store.nick=w.nick;}}catch(e){}
+function save(){try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}}
+
+/* ===== 道具 ===== */
+const MARKS=['ア','イ','ウ'];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const sample=(a,n)=>shuffle(a).slice(0,n);
+const uniq=a=>a.filter((x,i)=>a.indexOf(x)===i);
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const RANKS=[[0,'算数の見習い'],[100,'算数の戦士'],[300,'算数の勇者'],[600,'算数の賢者'],[1000,'算数の英雄'],[1600,'算数の伝説']];
+function rankOf(xp){let r=0;RANKS.forEach((x,i)=>{if(xp>=x[0])r=i;});return r;}
+function daysLeft(){
+  const now=new Date();const t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  return Math.round((new Date(2027,1,1)-t0)/864e5);
+}
+const stat=id=>store.st[id];
+const mastered=it=>{const s=stat(it.id);return !!(s&&s.r>=2&&!s.w);};
+const inNote=it=>{const s=stat(it.id);return !!(s&&s.w);};
+/* 図鑑: 一度覚えた語は消えない。col は獲得順 */
+if(!Array.isArray(store.col))store.col=[];
+ITEMS.forEach(it=>{if(mastered(it)&&store.col.indexOf(it.id)<0)store.col.push(it.id);});
+const collected=it=>store.col.indexOf(it.id)>=0;
+const lvl=it=>{const s=stat(it.id);const r=s?s.r:0;return r>=6?3:r>=4?2:r>=2?1:0;};
+const starsHTML=n=>'★'.repeat(n)+'☆'.repeat(3-n);
+
+function weight(it){
+  const s=stat(it.id);let w=1;
+  if(!s||!s.s)w+=1.5;else{w+=(1-s.c/s.s)*2;if(s.r>=2)w-=0.6;}
+  if(s&&s.w)w+=3;
+  if(BOOST.has(it.id))w*=3;
+  return Math.max(w,0.3);
+}
+let BOOST=new Set();
+function pickWeighted(pool,n){
+  const arr=pool.map(it=>({it,w:weight(it)}));const out=[];
+  while(out.length<n&&arr.length){
+    const sum=arr.reduce((t,x)=>t+x.w,0);let r=Math.random()*sum,k=0;
+    for(;k<arr.length;k++){r-=arr[k].w;if(r<=0)break;}
+    if(k>=arr.length)k=arr.length-1;
+    out.push(arr.splice(k,1)[0].it);
+  }
+  return out;
+}
+function makeQ(it){
+  const rv=it.r&&Math.random()<.5;
+  const q=rv?it.r.q:it.q,a=rv?it.r.a:it.a,d=rv?it.r.d:it.d,p=rv?(it.r.p||''):(it.p||'');
+  return {it,rv,q,a,p,choices:shuffle([a].concat(d)),first:null,done:false,wrong:[],ok:false};
+}
+
+/* ===== 画面の部品 ===== */
+function plainStem(it){return plain(it.q)+(it.p&&it.p!=='＝ ？'?' '+it.p:'')+' → '+plain(it.a);}
+function bodyHTML(q){
+  return '<p class="body"><span class="qq">'+fmt(q.q)+'</span>'+(q.p?'<span class="qs">'+esc(q.p)+'</span>':'')+'</p>';
+}
+/* ===== 状態 ===== */
+const app=document.getElementById('app');
+const state={screen:'home',round:null,zTab:'f',zOpen:-1};
+const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function startRound(key){
+  let pool;
+  if(key==='review')pool=ITEMS.filter(inNote);
+  else if(key==='all')pool=ITEMS;
+  else if(key.slice(0,2)==='v:'){const p=key.split(':');pool=VOLS[p[1]][+p[2]];}
+  else pool=ITEMS.filter(i=>i.type===key);
+  if(!pool.length)return;
+  const n=Math.min(store.len,pool.length);
+  // いまの巻の、まだ覚えていない語を出やすくする
+  BOOST=new Set();ORDER.forEach(k=>{const v=curVol(k);if(v>=0)VOLS[k][v].forEach(it=>{if(!collected(it))BOOST.add(it.id);});});
+  state.cv=null;
+  state.round={key,qs:pickWeighted(pool,n).map(makeQ),i:0,score:0,streak:0,maxStreak:0,best0:store.best||0,xp:0,rank0:rankOf(store.xp),newCards:[]};
+  state.screen='quiz';
+  render(true);
+}
+/* コンボ演出: 連続正解数 → [表示, 段階] */
+const COMBO={3:'c3',5:'c5',8:'c8',10:'c10'};
+const COMBO_TXT={c3:'3連続！',c5:'すごい！',c8:'8連続！！',c10:'SUPER！！'};
+function comboLv(n){return n>=10?10:n>=8?8:n>=5?5:0;}
+/* ゲージ: 正解の丸は点灯、直前も正解なら線でつなぐ */
+function gauge(qs,cur,litIdx){
+  return qs.map((x,i)=>{
+    const st=x.first===null?null:x.first;
+    let c=st===null?(i===cur?'now':''):(st?'ok':'ng');
+    if(st&&i>0&&qs[i-1].first===true)c+=' lk';
+    if(i===litIdx&&st)c+=' lit';
+    return '<i class="'+c+'"></i>';
+  }).join('');
+}
+/* ===== 効果音（Web Audio） ===== */
+let actx=null;
+function audio(){
+  if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;actx=new AC();}
+  if(actx.state==='suspended')actx.resume();
+  return actx;
+}
+// tone(周波数Hz, 長さ秒, 波形, 音量, 開始の遅れ秒)
+function tone(f,d,type,vol,delay){
+  const c=audio();if(!c)return;
+  type=type||'sine';vol=vol==null?.035:vol;delay=delay||0;
+  const t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol,t+.008);
+  g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(c.destination);
+  o.start(t);o.stop(t+d+.02);
+}
+// 正解音
+const correctSound=()=>{
+  tone(590,.10);
+  tone(790,.13,'sine',.035,.08);
+};
+// 不正解音（おしい音）
+const closeSound=()=>{
+  tone(660,.07,'triangle',.025);
+  tone(760,.08,'triangle',.022,.065);
+};
+// iPad: 最初のタッチで音声を有効にする
+document.addEventListener('touchstart',function un(){audio();document.removeEventListener('touchstart',un);},{passive:true});
+
+function choose(j){
+  const R=state.round,q=R.qs[R.i];
+  if(!q||q.done||q.wrong.indexOf(j)>=0)return;
+  const ok=q.choices[j]===q.a;
+  if(q.first===null){
+    // 1回目の答えだけを成績にする
+    q.first=ok;q.ok=ok;
+    const s=store.st[q.it.id]||(store.st[q.it.id]={s:0,c:0,r:0,w:0});
+    s.s++;
+    if(ok){s.c++;s.r++;if(s.r>=2)s.w=0;}else{s.r=0;s.w=1;}
+    if(ok&&s.r>=2&&!s.w&&store.col.indexOf(q.it.id)<0){store.col.push(q.it.id);R.newCards.push(q.it);}
+    const d=todayStr();if(store.day.d!==d)store.day={d:d,n:0,c:0};
+    store.day.n++;if(ok)store.day.c++;
+    if(ok){R.score++;R.streak++;const g=10+2*Math.min(R.streak-1,5);R.xp+=g;store.xp+=g;
+      if(R.streak>R.maxStreak)R.maxStreak=R.streak;
+      if(R.streak>(store.best||0))store.best=R.streak;
+      q.combo=COMBO[R.streak]||0;
+    }else R.streak=0;
+    save();
+  }
+  if(ok){q.done=true;correctSound();}else{q.wrong.push(j);closeSound();}
+  render(false);
+}
+function next(){
+  const R=state.round;
+  if(R.i+1>=R.qs.length){state.screen='result';checkAwards();render(true);}
+  else{R.i++;render(true);}
+}
+
+/* ===== 画面 ===== */
+function viewHome(){
+  const dl=daysLeft();
+  const r=rankOf(store.xp);const cur=RANKS[r][0];const nx=RANKS[r+1];
+  const pct=nx?Math.round((store.xp-cur)/(nx[0]-cur)*100):100;
+  const d=store.day.d===todayStr()?store.day:{n:0,c:0};
+  const noteN=ITEMS.filter(inNote).length;
+  const badge=dl>0?'<b>あと '+dl+' 日</b>':dl===0?'<b>今日が入試当日</b>':'入試おつかれさま';
+  const best=RANKS[RANKS.length-1][1];
+  const cards=ORDER.map(k=>{
+    const pool=ITEMS.filter(i=>i.type===k);const m=pool.filter(collected).length;
+    const cv=curVol(k),vg=cv>=0?volGot(k,cv):0,vn=cv>=0?VOLS[k][cv].length:1;
+    return '<button class="card g-'+k+'" data-a="start" data-t="'+k+'">'+
+      '<span class="hd"><span class="ic" aria-hidden="true">'+TYPES[k].ic+'</span><span class="nm">'+TYPES[k].name.split('・').map(x=>'<span style="white-space:nowrap">'+x+'</span>').join('・<wbr>')+'</span></span>'+
+      '<span class="mm"><span class="bar"><i style="width:'+Math.round((cv>=0?vg/vn:1)*100)+'%"></i></span>'+(cv>=0?'<b class="vol">'+volName(cv)+'</b> '+vg+' / '+vn+'<span class="tot">全 '+m+' / '+pool.length+'</span>':'<b class="vol">制覇！</b> '+m+' / '+pool.length)+'</span></button>';
+  }).join('');
+  const allM=store.col.length;
+  return '<header class="hero"><div class="hrow"><a class="plaza" href="https://ainotenoue.github.io/">← ひろばへ</a><div class="bwrap"><span class="badge">'+badge+'</span><span class="ver">v1.0</span></div></div><h1 class="title mp">MATH'+BOLT+'PARK</h1>'+
+      '<p class="lead">〜ひらめいて、'+best+'を目指そう〜</p></header>'+
+    '<section class="status">'+
+      '<div class="panel"><div class="l1"><small>称号</small><b>'+RANKS[r][1]+'</b>'+(store.best?'<span class="best">最大コンボ <b>'+store.best+'</b></span>':'')+'</div>'+
+      '<div class="l2"><span class="bar"><i style="width:'+pct+'%"></i></span><small>'+(nx?'次の称号まで あと '+(nx[0]-store.xp)+' ポイント':'最高の称号です')+'</small></div></div>'+
+      '<button class="panel zk" data-a="zukan">'+zukanIcon(r+1)+'<div class="zt"><div class="zn">スパーク図鑑</div><div class="zc"><b>'+allM+'</b><small> / '+ITEMS.length+'</small></div><span class="bar"><i style="width:'+Math.round(allM/ITEMS.length*100)+'%"></i></span></div><span class="zgo" aria-hidden="true">›</span></button>'+
+      '<button class="panel zk sj" data-a="shojo">'+SJ_ICON+'<div class="zt"><div class="zn">賞状ファイル</div><div class="zc"><b>'+AWARD_IDS.filter(id=>store.aw[id]).length+'</b><small> / '+AWARD_IDS.length+'</small></div></div><span class="zgo" aria-hidden="true">›</span></button>'+
+    '</section>'+
+    '<section class="stage"><div class="cards">'+cards+'</div>'+
+    '<button class="primary" data-a="start" data-t="all"><span>全分野に挑戦！</span><span aria-hidden="true">→</span></button>'+
+    '<div class="tools"><div><p class="lab">1回の問題数</p><div class="seg">'+
+      [5,10,20].map(n=>'<button data-a="len" data-n="'+n+'" aria-pressed="'+(store.len===n)+'">'+n+'問</button>').join('')+'</div></div>'+
+    '<button class="ghost" data-a="notebook" '+(noteN?'':'disabled')+'><span class="gl">'+NOTE_ICON+'<span>復習ノート<br><small>つまづいた問題を攻略してパワーアップ！</small></span></span><b>'+noteN+'問</b></button></div>'+
+    '</section>'+
+    '<p class="note">進み具合は、この端末のブラウザに保存されます。<br><button class="reset" data-a="reset">記録をリセット</button></p>';
+}
+
+function viewQuiz(){
+  const R=state.round,q=R.qs[R.i],it=q.it;
+  const pips=gauge(R.qs,R.i,q.done&&q.first?R.i:-1);
+  const maxLen=Math.max.apply(null,q.choices.map(c=>Array.from(plain(c)).length));
+  const two=maxLen<=9;
+  const ch=q.choices.map((c,j)=>{
+    let cls='choice',extra='',dis='';
+    const bad=q.wrong.indexOf(j)>=0;
+    if(q.done){
+      dis=' disabled';
+      if(c===q.a){cls+=' right';extra='<span class="maru"></span>';}
+      else if(bad){cls+=' wrong';extra='<span class="bt" aria-hidden="true">×</span>';}
+      else cls+=' dim';
+    }else if(bad){cls+=' wrong';dis=' disabled';extra='<span class="bt" aria-hidden="true">×</span>';}
+    return '<button class="'+cls+'" data-a="choose" data-i="'+j+'"'+dis+'><span class="mk">'+MARKS[j]+'</span><span class="tx">'+fmt(c)+'</span>'+extra+'</button>';
+  }).join('');
+  let stamp='';
+  if(q.done)stamp='<div class="seikai" role="status">'+BOLT+'正解！</div>';
+  else if(q.wrong.length)stamp='<div class="oshii l'+Math.min(q.wrong.length,3)+'" role="status">おしい！</div>';
+  const maru=q.done?'<div class="bigmaru" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42"/></svg></div>':'';
+  let fb='';
+  if(q.done){
+    const last=R.i+1>=R.qs.length;
+    const done='';
+    fb='<div class="fb" id="fb" aria-live="polite">'+
+      done+'<p class="ex">'+fmt(it.e)+'</p>'+
+      '<button class="next" data-a="next">'+(last?'結果を見る':'次へ')+'</button></div>';
+  }
+  const mean='';
+  return '<div class="qbar"><button class="back" data-a="home">もどる</button><div class="pips" aria-label="'+(R.i+1)+'問目 / '+R.qs.length+'問">'+pips+'</div>'+
+    (R.streak>=2?'<span class="chip">'+R.streak+'連続</span>':'')+'</div>'+
+    '<article class="qcard'+(comboLv(R.streak)?' glow'+comboLv(R.streak):'')+'">'+maru+
+    (q.done&&q.combo?'<div class="combo '+q.combo+'" role="status">'+COMBO_TXT[q.combo]+'</div>':'')+'<div class="qtop"><div class="qmain">'+
+    '<div class="trow"><span class="tag" style="--tc:var(--c-'+it.type+');--tci:var(--ci-'+it.type+')">'+(R.key==='review'?'復習　':'')+TYPES[it.type].name+'</span>'+
+    '<span class="prog" aria-hidden="true">'+(R.i+1)+'/'+R.qs.length+'</span></div>'+
+    bodyHTML(q)+'</div><div class="slot">'+stamp+'</div></div>'+mean+
+    '<div class="choices'+(two?' three':'')+'">'+ch+'</div>'+fb+'</article>';
+}
+
+function missRows(list){
+  return '<ul class="list">'+list.map(it=>
+    '<li class="miss"><span class="tag" style="--tc:var(--c-'+it.type+');--tci:var(--ci-'+it.type+')">'+TYPES[it.type].name+'</span><span class="q">'+fmt(it.q)+(it.p&&it.p!=='＝ ？'?' <small>'+esc(it.p)+'</small>':'')+'</span>'+
+    '<span class="a">正解：<b>'+fmt(it.a)+'</b></span><span class="e">'+fmt(it.e)+'</span></li>').join('')+'</ul>';
+}
+function viewResult(){
+  const R=state.round,n=R.qs.length,p=R.score/n;
+  const miss=R.qs.filter(q=>!q.ok).map(q=>q.it);
+  const r1=rankOf(store.xp);
+  const up=r1>R.rank0?'<div class="up">称号が上がりました：'+RANKS[r1][1]+'</div>':'';
+  const noteN=ITEMS.filter(inNote).length;
+  const sb='<div class="sbtns"><button class="sb fill" data-a="start" data-t="'+(R.key==='review'?'all':R.key)+'">もう一度</button>'+(noteN?'<button class="sb" data-a="notebook">復習ノートへ行く</button>':'')+'</div>';
+  const pips=gauge(R.qs,-1,-1);
+  const nb=R.maxStreak>=2&&R.maxStreak>R.best0?'<span class="newbest">ベスト更新！</span>':'';
+  return '<div class="qbar"><button class="back" data-a="home">ホームへ</button></div>'+
+    '<section class="stage res"><h2 class="big">結果発表！</h2>'+
+    '<div class="score"><b>'+R.score+'</b><span>／ '+n+' 問正解</span></div>'+
+    '<div class="pips" aria-hidden="true">'+pips+'</div>'+
+    '<div class="pills"><span class="pill">獲得 <b>+'+R.xp+'</b> ポイント</span><span class="pill">最大コンボ <b>'+R.maxStreak+'</b>'+nb+'</span><span class="pill">称号 <b>'+RANKS[r1][1]+'</b></span></div>'+up+'</section>'+
+    newCardsSection(R)+(miss.length?'<section class="stage"><div class="sec"><h2>まちがえた問題　'+miss.length+'問</h2>'+sb+'</div>'+missRows(miss)+'</section>':
+      '<div class="perfect">パーフェクト！！</div><section class="stage"><div class="sec"><h2>つぎは？</h2>'+sb+'</div></section>');
+}
+function viewNotebook(){
+  const list=ITEMS.filter(inNote);
+  return '<div class="qbar"><button class="back" data-a="home">ホームへ</button></div>'+
+    '<header class="hero sm"><h1 class="title">復習ノート</h1><p class="lead">つまづいた問題を攻略してパワーアップ！</p></header>'+
+    (list.length?'<section class="stage"><div class="sec"><h2>まちがえた問題　'+list.length+'問</h2></div>'+missRows(list)+'</section>'+
+      '<div class="sticky"><button class="primary" data-a="review"><span>復習をはじめる（'+Math.min(list.length,store.len)+'問）</span><span aria-hidden="true">→</span></button></div>':
+      '<div class="empty">復習する問題はありません。<br><small>問題をまちがえると、ここにたまります。</small></div>');
+}
+
+/* ===== スパーク図鑑 ===== */
+const ZC={f:'#ffc9a3',m:'#bfeaa8',n:'#ffe48a',u:'#b3dcf5',z:'#d9c6f5'};
+const ZI={f:'#3a2f45',m:'#3a2f45',n:'#3a2f45',u:'#3a2f45',z:'#3a2f45'};
+const SPCOL=['#beeaa4','#b8e0f0','#cec4e9','#ffbdbd','#ffddb3','#f8ee8c'];
+const itemAt=id=>{for(let i=0;i<ITEMS.length;i++)if(ITEMS[i].id===id)return ITEMS[i];return null;};
+const uline=t=>esc(t).replace('〔','<span class="u">').replace('〕','</span>');
+function cardFace(it){
+  const n=Array.from(plain(it.q)).length;
+  const sz=n<=5?19:n<=8?16:n<=12?13:n<=18?11:10;
+  return '<span class="cw" style="font-size:'+sz+'px">'+fmt(it.q)+'</span>';
+}
+function cardBack(it){
+  return '<div class="zbig" style="--c:'+ZC[it.type]+';--ci:'+ZI[it.type]+'"><div class="ztop"><span>'+esc(TYPES[it.type].name)+'</span><span>'+starsHTML(lvl(it))+'</span></div>'+
+    '<div class="zttl">'+fmt(it.q)+(it.p&&it.p!=='＝ ？'?'<small class="zp">'+esc(it.p)+'</small>':'')+'</div><div class="zbody"><p class="zans">'+fmt(it.a)+'</p><p>'+fmt(it.e)+'</p></div></div>';
+}
+function zcard(it,extra){
+  return '<button class="zc2" style="--c:'+ZC[it.type]+';--ci:'+ZI[it.type]+'" data-a="zopen" data-i="'+ITEMS.indexOf(it)+'"><span class="zt2">'+starsHTML(lvl(it))+'</span>'+(extra||'')+cardFace(it)+'</button>';
+}
+function shieldSVG(i,on){
+  const c=on?SPCOL[i]:'#c9ced8',d=on?'#4a3a22':'#9aa0ad';
+  let s='<svg viewBox="0 0 60 66" aria-hidden="true"><path d="M30 3l22 8v20c0 16-10 26-22 31C18 57 8 47 8 31V11z" fill="'+c+'" stroke="'+d+'" stroke-width="3" stroke-linejoin="round"/>';
+  if(on){s+='<path d="M30 3l22 8v20c0 16-10 26-22 31z" fill="#fff" opacity=".18"/>';const n=i+1;for(let k=0;k<n;k++){const cx=30+(k-(n-1)/2)*(n>4?8:10);s+='<circle cx="'+cx+'" cy="34" r="'+(n>4?3.2:3.8)+'" fill="#fff"/>';}}
+  else s+='<text x="30" y="42" text-anchor="middle" font-size="22" font-weight="900" fill="#fff">?</text>';
+  return s+'</svg>';
+}
+function rankTrack(){
+  const r=rankOf(store.xp),nx=RANKS[r+1];
+  const pos=i=>4+i*(92/5);
+  const frac=nx?(store.xp-RANKS[r][0])/(nx[0]-RANKS[r][0]):1;
+  const you=pos(r)+frac*(nx?92/5:0);
+  let h='<div class="rank"><div class="rk-h"><span>称号　<b>'+RANKS[r][1]+'</b></span><span>'+(nx?'次の「'+nx[1]+'」まで あと '+(nx[0]-store.xp)+' ポイント':'最高の称号です')+'</span></div><div class="track"><div class="tl"></div><div class="tf" style="width:'+(you-4)+'%"></div>';
+  for(let i=0;i<RANKS.length;i++)h+='<div class="sh'+(i>r?' off':'')+'" style="left:'+pos(i)+'%">'+shieldSVG(i,i<=r)+'<small>'+(i<=r?RANKS[i][1]:'？？？')+'</small></div>';
+  return h+'<div class="you" style="left:'+you+'%"></div></div></div>';
+}
+function viewZukan(){
+  const tab=state.zTab;
+  const total=ITEMS.length,got=store.col.length;
+  let wall='<div class="wall" aria-hidden="true">';
+  for(let i=0;i<total;i++){
+    const it=i<got?itemAt(store.col[i]):null;
+    wall+='<i'+(it?' style="background:'+ZC[it.type]+'"':'')+'></i>';
+  }
+  wall+='</div>';
+  const tabs='<div class="ztabs">'+ORDER.map(k=>'<button class="ztab'+(k===tab?' on':'')+'" style="--c:'+ZC[k]+';--ci:'+ZI[k]+'" data-a="ztab" data-t="'+k+'">'+TYPES[k].name+'</button>').join('')+'</div>';
+  const mine=store.col.map(itemAt).filter(it=>it&&it.type===tab);
+  const all=ITEMS.filter(i=>i.type===tab).length;
+  let grid=mine.map(it=>zcard(it)).join('');
+  for(let i=mine.length;i<all;i++)grid+='<div class="zc2 lock" aria-hidden="true"><span class="zt2"></span><span class="cw">？</span></div>';
+  const open=state.zOpen>=0&&ITEMS[state.zOpen]&&collected(ITEMS[state.zOpen])?'<div class="zmodal" data-a="zclose">'+cardBack(ITEMS[state.zOpen])+'<p class="zhint">タップでとじる</p></div>':'';
+  return '<div class="qbar"><button class="back" data-a="home">ホームへ</button></div>'+
+    '<header class="hero sm"><h1 class="title">スパーク図鑑</h1></header>'+
+    '<section class="stage"><div class="ztot"><b>'+got+'</b><span> / '+total+' 枚　あつめたよ！</span></div>'+wall+rankTrack()+'</section>'+
+    '<section class="stage zs">'+tabs+'<div class="zgrid">'+grid+'</div></section>'+open;
+}
+function newCardsSection(R){
+  if(!R.newCards||!R.newCards.length)return '';
+  return '<section class="stage"><div class="sec"><h2>あたらしく覚えたカード　'+R.newCards.length+'枚</h2><div class="sbtns"><button class="sb" data-a="zukan">スパーク図鑑へ行く</button></div></div><div class="zgrid newg">'+
+    R.newCards.map((it,i)=>'<div class="zwrap" style="animation-delay:'+(0.15+i*0.18)+'s"><span class="zspark" aria-hidden="true">✦</span>'+
+      '<div class="zc2" style="--c:'+ZC[it.type]+';--ci:'+ZI[it.type]+'"><span class="zt2">'+starsHTML(lvl(it))+'</span><span class="znew">NEW</span>'+cardFace(it)+'</div></div>').join('')+'</div></section>';
+}
+
+/* ===== 巻と賞状 =====
+   各分野を10問ずつの「巻」に分ける。巻の問題をすべて覚える（図鑑に入る）と賞状。
+   賞状のid … 'v:分野:巻番号'（巻）、'f:分野'（分野制覇）、'r:称号番号'（称号）、'all'（皆伝） */
+const VOL_SIZE=10;
+const VOLS={};
+ORDER.forEach(k=>{
+  const pool=ITEMS.filter(i=>i.type===k),n=Math.ceil(pool.length/VOL_SIZE),vols=[];let s=0;
+  for(let v=0;v<n;v++){const sz=Math.floor(pool.length/n)+(v<pool.length%n?1:0);vols.push(pool.slice(s,s+sz));s+=sz;}
+  VOLS[k]=vols;
+});
+const volOf={};ORDER.forEach(k=>VOLS[k].forEach((vs,v)=>vs.forEach(it=>volOf[it.id]=v)));
+const volGot=(k,v)=>VOLS[k][v].filter(collected).length;
+const curVol=k=>{for(let v=0;v<VOLS[k].length;v++)if(volGot(k,v)<VOLS[k][v].length)return v;return -1;};
+const KD='〇一二三四五六七八九';
+function kan(n){
+  if(n<10)return KD[n];
+  if(n<100)return (n>=20?KD[Math.floor(n/10)]:'')+'十'+(n%10?KD[n%10]:'');
+  const h=Math.floor(n/100),r=n%100;return (h>1?KD[h]:'')+'百'+(r?kan(r):'');
+}
+const volName=v=>'第'+kan(v+1)+'巻';
+const AWARD_IDS=[];
+ORDER.forEach(k=>{VOLS[k].forEach((_,v)=>AWARD_IDS.push('v:'+k+':'+v));AWARD_IDS.push('f:'+k);});
+for(let i=1;i<RANKS.length;i++)AWARD_IDS.push('r:'+i);
+AWARD_IDS.push('all');
+if(!store.aw||typeof store.aw!=='object')store.aw={};
+Object.keys(store.aw).forEach(id=>{if(AWARD_IDS.indexOf(id)<0||(id[0]==='v'&&!earned(id)))delete store.aw[id];});
+function earned(id){
+  const p=id.split(':');
+  if(p[0]==='v')return volGot(p[1],+p[2])===VOLS[p[1]][+p[2]].length;
+  if(p[0]==='f')return VOLS[p[1]].every((_,v)=>volGot(p[1],v)===VOLS[p[1]][v].length);
+  if(p[0]==='r')return rankOf(store.xp)>=+p[1];
+  return store.col.length>=ITEMS.length;
+}
+/* まだもらっていない賞状を調べて、授与の列に入れる */
+function checkAwards(){
+  const d=todayStr(),nw=AWARD_IDS.filter(id=>!store.aw[id]&&earned(id));
+  nw.forEach(id=>store.aw[id]=d);
+  if(nw.length){save();state.cer=(state.cer||[]).concat(nw);}
+}
+function awardInfo(id){
+  const p=id.split(':');
+  if(p[0]==='v'){const k=p[1],v=+p[2],n=VOLS[k][v].length;
+    return {kind:'v',k,v,frame:ZC[k],thumb:volName(v),
+      body:['あなたは　'+TYPES[k].name+'　'+volName(v)+'の'+kan(n)+'問を','見事に覚えました','よってここにこれを賞します']};}
+  if(p[0]==='f'){const k=p[1],n=ITEMS.filter(i=>i.type===k).length;
+    return {kind:'f',k,frame:'#e3b23c',thumb:'制覇',
+      body:['あなたは　'+TYPES[k].name+'の全'+kan(n)+'問を覚え','この分野を制覇しました','その努力をたたえ　これを賞します']};}
+  if(p[0]==='r'){const r=+p[1];
+    return {kind:'r',r,frame:SPCOL[r],thumb:RANKS[r][1].replace('ことばの',''),
+      body:['あなたは日々の努力をかさね','「'+RANKS[r][1]+'」の称号を得ました','よってここにこれを賞します']};}
+  return {kind:'all',frame:'#e3b23c',thumb:'皆伝',
+    body:['あなたは全'+kan(ITEMS.length)+'問をすべて覚え','算数の皆伝となりました','心からこれを賞します']};
+}
+const wordLabel=it=>plain(it.q)+(it.q==='素数はどれ？'?'':' → ')+(it.q==='素数はどれ？'?' '+plain(it.a):plain(it.a));
+
+/* --- 賞状を canvas にかく（たて書き） --- */
+const CW=900,CH=640;
+const MINCHO='"Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","YuMincho","Noto Serif JP","Noto Serif CJK JP",serif';
+const ROT='ー－―～〜…‥（）「」『』〔〕【】-~()';
+function vtext(ctx,s,x,y,size,gap){
+  // 1文字ずつ下へ。のばす音やかっこは90度回す。全角スペースは半分あける
+  ctx.font='700 '+size+'px '+MINCHO;ctx.textAlign='center';ctx.textBaseline='middle';
+  const step=size*(gap||1.08);
+  for(const ch of s){
+    if(ch==='　'){y+=step*.5;continue;}
+    if(ROT.indexOf(ch)>=0){ctx.save();ctx.translate(x,y+step/2);ctx.rotate(Math.PI/2);ctx.fillText(ch,0,0);ctx.restore();}
+    else if('、。'.indexOf(ch)>=0)ctx.fillText(ch,x+size*.6,y+step/2-size*.6);
+    else ctx.fillText(ch,x,y+step/2);
+    y+=step;
+  }
+  return y;
+}
+const vlen=(s,size,gap)=>{let n=0;for(const ch of s)n+=ch==='　'?.5:1;return n*size*(gap||1.08);};
+function frame(ctx,col,gold){
+  ctx.fillStyle='#fffdf6';ctx.fillRect(0,0,CW,CH);
+  // 和紙の風合い
+  for(let i=0;i<260;i++){ctx.fillStyle='rgba(190,160,110,'+(Math.random()*.07)+')';ctx.fillRect(Math.random()*CW,Math.random()*CH,Math.random()*28+4,1.2);}
+  ctx.lineWidth=16;ctx.strokeStyle=col;ctx.strokeRect(22,22,CW-44,CH-44);
+  ctx.lineWidth=3;ctx.strokeStyle=gold?'#b8860b':'#c9a24a';ctx.strokeRect(10,10,CW-20,CH-20);ctx.strokeRect(38,38,CW-76,CH-76);
+  // 枠の飾り（ひし形の列）
+  ctx.fillStyle=gold?'#fff3c4':'rgba(255,255,255,.75)';
+  for(let x=46;x<CW-30;x+=26){dia(ctx,x,30,4);dia(ctx,x,CH-30,4);}
+  for(let y=46;y<CH-30;y+=26){dia(ctx,30,y,4);dia(ctx,CW-30,y,4);}
+  // 四すみの飾り
+  [[54,54],[CW-54,54],[54,CH-54],[CW-54,CH-54]].forEach(([x,y])=>{ctx.fillStyle=gold?'#d4a017':'#c9a24a';dia(ctx,x,y,10);ctx.fillStyle='#fffdf6';dia(ctx,x,y,4);});
+}
+function dia(ctx,x,y,r){ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();ctx.fill();}
+function reiwa(d){const p=d.split('-').map(Number);return '令和'+kan(p[0]-2018)+'年'+kan(p[1])+'月'+kan(p[2])+'日';}
+function drawCert(cv,id,withHanko){
+  const A=awardInfo(id),dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=CW*dpr;cv.height=CH*dpr;const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  const gold=A.kind==='f'||A.kind==='all';
+  frame(ctx,A.frame,gold);
+  const put=(t,x,y,size,align,col,w)=>{ctx.font=(w||700)+' '+size+'px '+MINCHO;ctx.textAlign=align||'left';ctx.textBaseline='middle';ctx.fillStyle=col||'#2b2220';ctx.fillText(t,x,y);};
+  // 題（中央）
+  put('賞　　状',CW/2,122,74,'center','#2b2220',900);
+  if(A.kind==='r'||A.kind==='all'||A.kind==='f'){ // 格の高い賞状は、題の両わきに紋章
+    [CW/2-200,CW/2+200].forEach(cx=>{
+      ctx.save();ctx.translate(cx,122);
+      ctx.fillStyle=A.kind==='r'?SPCOL[A.r]:'#f2c94c';ctx.strokeStyle='#7a5a12';ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(0,-34);ctx.lineTo(28,-24);ctx.lineTo(28,2);ctx.quadraticCurveTo(26,26,0,38);ctx.quadraticCurveTo(-26,26,-28,2);ctx.lineTo(-28,-24);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.restore();put(A.kind==='r'?kan(A.r+1):A.kind==='f'?'覇':'極',cx,124,26,'center','#fff',900);
+    });
+  }
+  // 名前
+  const nick=(store.nick||'').trim()||'なまえ';
+  put(nick,120,222,44);
+  ctx.font='700 44px '+MINCHO;const nw=ctx.measureText(nick).width;
+  put('殿',120+nw+22,224,38);
+  ctx.strokeStyle='#c9a24a';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(116,252);ctx.lineTo(120+nw+70,252);ctx.stroke();
+  // 本文（横書き）
+  let y=316;
+  A.body.forEach(line=>{
+    ctx.font='700 32px '+MINCHO;const w=ctx.measureText(line).width,max=CW-300;
+    put(line,160,y,w>max?Math.floor(32*max/w):32);y+=54;
+  });
+  // 日付・発行
+  put(reiwa(store.aw[id]||todayStr()),160,y+22,24,'left','#4a3a30');
+  ctx.font='700 30px "Cinzel",'+MINCHO;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='#2b2220';ctx.fillText('MATH PARK',HX-HR+14,HY+4);
+  return withHanko?hankoImg().then(img=>{ctx.drawImage(img,HX-HR,HY-HR,HR*2,HR*2);}):Promise.resolve();
+}
+/* はんこ: 相棒の顔を朱色で */
+const HR=54,HX=CW-128,HY=CH-118;
+let hankoCache={};
+function hankoImg(){
+  const st=rankOf(store.xp)+1;
+  if(hankoCache[st])return Promise.resolve(hankoCache[st]);
+  return new Promise(res=>{
+    const body=petInner(st).replace(/#7a4a12/g,'#d23a2a').replace(/fill="#(?!d23a2a)[0-9a-fA-F]{3,6}"/g,'fill="#fffdf6"').replace(/opacity="[^"]*"/g,'');
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">'+body+'</svg>';
+    const im=new Image();
+    im.onload=()=>{
+      const c=document.createElement('canvas');c.width=c.height=240;const g=c.getContext('2d');
+      g.fillStyle='#fffdf6';g.beginPath();g.arc(120,120,104,0,Math.PI*2);g.fill();
+      g.drawImage(im,24,26,192,192);
+      g.strokeStyle='#d23a2a';g.lineWidth=12;g.beginPath();g.arc(120,120,110,0,Math.PI*2);g.stroke();
+      g.lineWidth=4;g.beginPath();g.arc(120,120,96,0,Math.PI*2);g.stroke();
+      // かすれ
+      g.globalCompositeOperation='destination-out';
+      for(let i=0;i<90;i++){g.fillStyle='rgba(0,0,0,'+(Math.random()*.5)+')';g.beginPath();g.arc(Math.random()*240,Math.random()*240,Math.random()*3+.5,0,Math.PI*2);g.fill();}
+      g.globalCompositeOperation='source-over';
+      const out=new Image();out.onload=()=>{hankoCache[st]=out;res(out);};out.src=c.toDataURL();
+    };
+    im.onerror=()=>{const c=document.createElement('canvas');c.width=c.height=240;const g=c.getContext('2d');g.strokeStyle='#d23a2a';g.lineWidth=12;g.beginPath();g.arc(120,120,110,0,Math.PI*2);g.stroke();g.fillStyle='#d23a2a';g.font='900 90px '+MINCHO;g.textAlign='center';g.textBaseline='middle';g.fillText('賞',120,124);const out=new Image();out.onload=()=>res(out);out.src=c.toDataURL();};
+    im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  });
+}
+function saveCert(id){
+  const c=document.createElement('canvas');
+  drawCert(c,id,true).then(()=>c.toBlob(blob=>{
+    if(!blob)return;
+    const file=new File([blob],'shojo.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).catch(()=>{});return;}
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='shojo.png';document.body.appendChild(a);a.click();a.remove();
+  },'image/png'));
+}
+/* --- 授与の音 --- */
+const fanfare=()=>{[[523,0],[659,.12],[784,.24],[1047,.40]].forEach(([f,d])=>tone(f,d===.40?.6:.16,'triangle',.05,d));tone(1319,.5,'sine',.025,.40);};
+const ponSound=()=>{tone(150,.16,'sine',.16);tone(95,.22,'sine',.12,.02);tone(1200,.05,'triangle',.02,.01);};
+
+/* --- 授与式（結果画面やホームの上に出る） --- */
+function confettiHTML(){
+  if(reduce)return '';
+  const cols=['#ffbdbd','#ffddb3','#fdf28a','#beeaa4','#b8e0f0','#cec4e9','#f5c542'];let h='<div class="cfti" aria-hidden="true">';
+  for(let i=0;i<46;i++)h+='<i style="left:'+(Math.random()*100)+'%;background:'+cols[i%cols.length]+';animation-delay:'+(Math.random()*1.2+.5).toFixed(2)+'s;animation-duration:'+(Math.random()*2+2.6).toFixed(2)+'s;--r:'+(Math.random()*720-360|0)+'deg"></i>';
+  return h+'</div>';
+}
+function cerHTML(){
+  if(!store.nick)return '<div class="cer"><div class="cbox nk"><p class="ctop">賞状をもらえるよ！</p><p class="clead">賞状に書く なまえ（ニックネーム）を入れてね</p>'+
+    '<input id="nick" class="nickin" maxlength="8" autocomplete="off" placeholder="ニックネーム"><button class="primary" data-a="nickset"><span>けってい</span><span aria-hidden="true">→</span></button></div></div>';
+  const id=state.cer[0],A=awardInfo(id),more=state.cer.length-1;
+  const head=A.kind==='v'?TYPES[A.k].name+'　'+volName(A.v)+' クリア！':A.kind==='f'?TYPES[A.k].name+' 制覇！':A.kind==='r'?'称号「'+RANKS[A.r][1]+'」！':'全問 皆伝！';
+  return '<div class="cer">'+confettiHTML()+'<div class="cbox"><p class="ctop">'+head+'</p>'+
+    '<div class="cwrap"><canvas id="certc" data-id="'+id+'" data-cer="1" role="img" aria-label="賞状 '+esc(head)+'"></canvas><img class="hanko" id="hanko" alt=""></div>'+
+    '<div class="cbtns">'+(more?'<button class="sb fill" data-a="cernext">つぎの賞状（あと'+more+'枚）</button>':'<button class="sb fill" data-a="cerclose">やったね！</button>')+
+    '<button class="sb" data-a="shojo">賞状ファイルを見る</button></div></div></div>';
+}
+function paintCer(){
+  const cv=document.getElementById('certc');if(!cv)return;
+  const id=cv.getAttribute('data-id');
+  if(cv.getAttribute('data-cer')){
+    drawCert(cv,id,false);
+    hankoImg().then(img=>{
+      const h=document.getElementById('hanko');if(!h)return;
+      h.src=img.src;
+      h.style.left=((HX-HR)/CW*100)+'%';h.style.top=((HY-HR)/CH*100)+'%';h.style.width=(HR*2/CW*100)+'%';
+      if(reduce){h.classList.add('on');return;}
+      setTimeout(()=>{h.classList.add('on');setTimeout(ponSound,330);},900);
+    });
+    if(!reduce)setTimeout(fanfare,150);
+  }else drawCert(cv,id,true);
+}
+
+/* --- 賞状ファイル --- */
+function thumb(id){
+  const A=awardInfo(id),got=!!store.aw[id];
+  let sub='';
+  if(!got&&A.kind==='v'){const g=volGot(A.k,A.v),n=VOLS[A.k][A.v].length;sub='<span class="sjp"><i style="width:'+Math.round(g/n*100)+'%"></i></span><span class="sjn">'+g+'/'+n+'</span>';}
+  const cls='th '+(got?'got k-'+A.kind:'lock');
+  return '<button class="'+cls+'" style="--fc:'+A.frame+'" data-a="cview" data-id="'+id+'" aria-label="'+(got?'賞状 ':'まだの賞状 ')+esc(A.thumb)+'">'+
+    '<span class="sjl">'+esc(A.thumb)+'</span><span class="sjv">'+(got?'賞<br>状':'？')+'</span>'+sub+'</button>';
+}
+function viewShojo(){
+  const got=AWARD_IDS.filter(id=>store.aw[id]).length;
+  const rows=ORDER.map(k=>'<div class="srow"><div class="sh2" style="--c:'+ZC[k]+'">'+TYPES[k].name+'</div><div class="ths">'+
+    VOLS[k].map((_,v)=>thumb('v:'+k+':'+v)).join('')+'<span class="sep" aria-hidden="true"></span>'+thumb('f:'+k)+'</div></div>').join('')+
+    '<div class="srow"><div class="sh2" style="--c:#fde3a7">称号</div><div class="ths">'+AWARD_IDS.filter(id=>id[0]==='r').map(thumb).join('')+'<span class="sep" aria-hidden="true"></span>'+thumb('all')+'</div></div>';
+  let modal='';
+  if(state.cv){
+    const id=state.cv,A=awardInfo(id),has=!!store.aw[id];
+    if(has){
+      const words=A.kind==='v'&&state.cvWords?'<div class="cwords"><p>この巻で覚えたこと</p><div>'+VOLS[A.k][A.v].map(it=>'<span style="--c:'+ZC[A.k]+'">'+esc(wordLabel(it))+'</span>').join('')+'</div></div>':'';
+      modal='<div class="cer"><div class="cbox">'+(words||'<div class="cwrap"><canvas id="certc" data-id="'+id+'" role="img" aria-label="賞状"></canvas></div>')+
+        '<div class="cbtns">'+(A.kind==='v'?'<button class="sb" data-a="cwords">'+(state.cvWords?'賞状を見る':'覚えたこと')+'</button>':'')+
+        '<button class="sb" data-a="csave">画像で保存</button><button class="sb fill" data-a="cvclose">とじる</button></div></div></div>';
+    }else{
+      let msg,btn='';
+      if(A.kind==='v'){const g=volGot(A.k,A.v),n=VOLS[A.k][A.v].length;msg=TYPES[A.k].name+'　'+volName(A.v)+'<br><b>'+g+' / '+n+'</b> 問　あと'+(n-g)+'問で賞状！';btn='<button class="sb fill" data-a="start" data-t="v:'+A.k+':'+A.v+'">この巻に挑戦する</button>';}
+      else if(A.kind==='f')msg=TYPES[A.k].name+'の巻を<br>ぜんぶクリアすると もらえるよ';
+      else if(A.kind==='r')msg='称号「'+RANKS[A.r][1]+'」になると<br>もらえるよ';
+      else msg='全問 ぜんぶ覚えると<br>もらえる 特別な賞状';
+      modal='<div class="cer"><div class="cbox lockm"><p class="lmsg">'+msg+'</p><div class="cbtns">'+btn+'<button class="sb" data-a="cvclose">とじる</button></div></div></div>';
+    }
+  }
+  return '<div class="qbar"><button class="back" data-a="home">ホームへ</button></div>'+
+    '<header class="hero sm"><h1 class="title">賞状ファイル</h1></header>'+
+    '<section class="stage"><div class="stop"><div class="ztot"><b>'+got+'</b><span> / '+AWARD_IDS.length+' 枚　もらったよ！</span></div>'+
+    '<label class="nkrow">賞状のなまえ <input id="nick2" maxlength="8" value="'+esc(store.nick||'')+'" placeholder="ニックネーム"><button class="sb" data-a="nick2">変える</button></label></div>'+
+    '<p class="shint">各分野の10問ずつが「1巻」。巻の問題を全部覚える（図鑑に入る）と賞状がもらえるよ。</p>'+rows+'</section>'+modal;
+}
+const SJ_ICON='<svg class="fz" viewBox="0 0 80 88" aria-hidden="true"><rect x="12" y="6" width="56" height="76" rx="3" fill="#fffdf6" stroke="#c9a24a" stroke-width="4"/><rect x="19" y="13" width="42" height="62" fill="none" stroke="#ffbdbd" stroke-width="4"/><text x="50" y="34" text-anchor="middle" font-size="14" font-weight="900" fill="#4a3438">賞</text><text x="50" y="52" text-anchor="middle" font-size="14" font-weight="900" fill="#4a3438">状</text><path d="M28 30v30M34 30v22" stroke="#d8c7b4" stroke-width="2.5" stroke-linecap="round"/><circle cx="30" cy="66" r="7" fill="none" stroke="#d23a2a" stroke-width="2.5"/></svg>';
+function render(top){
+  app.innerHTML=state.screen==='home'?viewHome():state.screen==='quiz'?viewQuiz():state.screen==='result'?viewResult():state.screen==='zukan'?viewZukan():state.screen==='shojo'?viewShojo():viewNotebook();
+  if(state.cer&&state.cer.length&&state.screen!=='quiz')app.insertAdjacentHTML('beforeend',cerHTML());
+  paintCer();
+  if(top){window.scrollTo(0,0);}
+  else{const fb=document.getElementById('fb');if(fb)fb.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});}
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b||b.disabled)return;
+  const a=b.getAttribute('data-a');
+  if(a==='start')startRound(b.getAttribute('data-t'));
+  else if(a==='choose')choose(+b.getAttribute('data-i'));
+  else if(a==='next')next();
+  else if(a==='home'){state.screen='home';render(true);}
+  else if(a==='len'){store.len=+b.getAttribute('data-n');save();render(false);}
+  else if(a==='notebook'){state.screen='notebook';render(true);}
+  else if(a==='review')startRound('review');
+  else if(a==='zukan'){state.screen='zukan';state.zOpen=-1;const last=store.col.length?itemAt(store.col[store.col.length-1]):null;if(last)state.zTab=last.type;render(true);}
+  else if(a==='ztab'){state.zTab=b.getAttribute('data-t');state.zOpen=-1;render(false);}
+  else if(a==='zopen'){state.zOpen=+b.getAttribute('data-i');render(false);}
+  else if(a==='zclose'){state.zOpen=-1;render(false);}
+  else if(a==='shojo'){state.cer=[];state.screen='shojo';state.cv=null;render(true);}
+  else if(a==='cernext'){state.cer.shift();render(false);}
+  else if(a==='cerclose'){state.cer=[];render(false);}
+  else if(a==='nickset'||a==='nick2'){const el=document.getElementById(a==='nickset'?'nick':'nick2');const v=(el&&el.value||'').trim().slice(0,8);if(!v){if(el)el.focus();return;}store.nick=v;save();render(false);}
+  else if(a==='cview'){state.cv=b.getAttribute('data-id');state.cvWords=false;render(false);}
+  else if(a==='cvclose'){state.cv=null;render(false);}
+  else if(a==='cwords'){state.cvWords=!state.cvWords;render(false);}
+  else if(a==='csave'){saveCert(state.cv);}
+  else if(a==='reset'){
+    if(window.confirm('すべての記録（ポイント・覚えたカード・スパーク図鑑・復習ノート）を消して、はじめからにします。\nよろしいですか？')){store=blank();save();state.screen='home';state.zOpen=-1;render(true);}
+  }
+});
+
+checkAwards();
+render(true);
+})();
+</script>
+</body>
+</html>
