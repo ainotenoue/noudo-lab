@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>MATH★MASH</title>
+<title>The Math Girl</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -22,7 +22,7 @@ main{max-width:1080px;margin:0 auto;padding:22px 28px 40px;position:relative}
 .hero{text-align:center;margin:6px 0 24px}
 .logo{margin:0;font-family:'Fredoka','M PLUS Rounded 1c',sans-serif;font-weight:700;font-size:clamp(40px,7vw,72px);letter-spacing:.03em;line-height:1;display:inline-flex;align-items:center;gap:.04em;color:#2f3437}
 .logo .m2{color:#e8553f}
-.logo .st{width:.9em;height:.9em;animation:spin 6s linear infinite}
+.logo img{display:block;width:min(320px,62vw);height:auto;border-radius:18px;box-shadow:0 8px 22px rgba(200,120,160,.18)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .sub{margin:10px 0 0;font-size:clamp(14px,1.8vw,17px);color:var(--ink2);font-weight:800;letter-spacing:.12em}
 .total{display:inline-flex;gap:14px;margin-top:12px;font-size:13px;font-weight:800;color:var(--ink2)}
@@ -352,7 +352,7 @@ const sec=ms=>(ms/1000).toFixed(1);
 function viewLounge(){
   const tot=ROOMS.reduce((s,r)=>s+rec(r.id).s,0),full=ROOMS.filter(r=>rec(r.id).s===3).length;
   let h='<a class="plaza" href="https://ainotenoue.github.io/">← ひろばへ</a>'+
-    '<header class="hero"><h1 class="logo" aria-label="MATH★MASH">MATH'+STAR+'<span class="m2">MASH</span></h1>'+
+    '<header class="hero"><h1 class="logo"><img src="logo.webp" alt="The Math Girl" width="760" height="413"></h1>'+
     '<p class="sub">せまく、深く、速く。</p><div class="total"><span>★ <b>'+tot+'</b> / '+ROOMS.length*3+'</span><span>★★★の部屋 <b>'+full+'</b> / '+ROOMS.length+'</span></div></header>';
   FLOORS.forEach((f,fi)=>{
     const fs=f.rooms.reduce((s,r)=>s+rec(r.id).s,0);
