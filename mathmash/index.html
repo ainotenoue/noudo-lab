@@ -341,13 +341,14 @@ function tone(f,d,type,vol,delay){const c=audio();if(!c)return;type=type||'sine'
   o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.02);}
 /* 正解音は ok.mp3（読みこめないときは、これまでの音） */
 let okBuf=null,okLoading=false;
+const OK_VOL=0.3;  // 正解音の大きさ（1＝元の音のまま）
 function loadOk(){const c=audio();if(!c||okBuf||okLoading)return;okLoading=true;
   fetch('ok.mp3').then(r=>r.arrayBuffer()).then(b=>new Promise((res,rej)=>c.decodeAudioData(b,res,rej))).then(buf=>{okBuf=buf;}).catch(()=>{okLoading=false;});}
 const okSound=()=>{const c=audio();
-  if(c&&okBuf){const s=c.createBufferSource();s.buffer=okBuf;s.connect(c.destination);s.start();return;}
+  if(c&&okBuf){const s=c.createBufferSource(),g=c.createGain();g.gain.value=OK_VOL;s.buffer=okBuf;s.connect(g);g.connect(c.destination);s.start();return;}
   tone(590,.09);tone(790,.12,'sine',.035,.07);loadOk();};
 const mashSound=()=>{tone(784,.07,'square',.02);tone(1047,.07,'square',.02,.05);tone(1568,.14,'square',.018,.1);};
-const ngSound=()=>{tone(392,.13,'square',.045);tone(294,.2,'square',.045,.12);};
+const ngSound=()=>{tone(330,.12,'triangle',.04);tone(262,.16,'triangle',.035,.1);};
 const clearSound=n=>{[523,659,784,1047].slice(0,n+1).forEach((f,i)=>tone(f,.18,'triangle',.05,i*.12));};
 document.addEventListener('touchstart',function un(){audio();loadOk();document.removeEventListener('touchstart',un);},{passive:true});
 
