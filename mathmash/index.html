@@ -82,6 +82,8 @@ main{max-width:1080px;margin:0 auto;padding:22px 28px 40px;position:relative}
 .fb{margin-top:16px;display:flex;align-items:center;gap:14px;background:#fffaf0;border:2px solid #f1e3c5;border-radius:18px;padding:12px 16px}
 .fb p{margin:0;flex:1;font-size:16px;font-weight:700;line-height:1.6}
 .fb p b{color:var(--ng)}
+.fb p b.okb{color:var(--ok)}
+.fb.retry{background:var(--ng-s);border-color:#f3c4c2}
 .next{flex:none;height:52px;padding:0 26px;border-radius:16px;border:0;background:#2f3437;color:#fff;font-size:17px;font-weight:800}
 .maru{position:absolute;left:50%;top:38%;width:170px;height:170px;margin:-85px 0 0 -85px;border:16px solid var(--ok);border-radius:50%;opacity:0;pointer-events:none;animation:maru .45s ease-out}
 @keyframes maru{0%{opacity:.9;transform:scale(.5)}100%{opacity:0;transform:scale(1.25)}}
@@ -345,7 +347,7 @@ const okSound=()=>{const c=audio();
   if(c&&okBuf){const s=c.createBufferSource();s.buffer=okBuf;s.connect(c.destination);s.start();return;}
   tone(590,.09);tone(790,.12,'sine',.035,.07);loadOk();};
 const mashSound=()=>{tone(784,.07,'square',.02);tone(1047,.07,'square',.02,.05);tone(1568,.14,'square',.018,.1);};
-const ngSound=()=>{tone(330,.12,'triangle',.04);tone(262,.16,'triangle',.035,.1);};
+const ngSound=()=>{tone(392,.13,'square',.045);tone(294,.2,'square',.045,.12);};
 const clearSound=n=>{[523,659,784,1047].slice(0,n+1).forEach((f,i)=>tone(f,.18,'triangle',.05,i*.12));};
 document.addEventListener('touchstart',function un(){audio();loadOk();document.removeEventListener('touchstart',un);},{passive:true});
 
@@ -377,7 +379,7 @@ function newSet(room){
   const qs=[],seen=new Set();
   for(let i=0;i<N;i++){let q,t=0;do{q=room.g();t++;}while((seen.has(q.q+q.a)||(qs.length&&qs[qs.length-1].q===q.q&&q.q.indexOf('どれ')<0))&&t<30);
     seen.add(q.q+q.a);q.choices=shuffle([q.a].concat(q.d));qs.push(q);}
-  return {room,qs,i:0,score:0,combo:0,res:[],t0:0,t1:0,qt:0,done:false,lock:false,wrong:null};
+  return {room,qs,i:0,score:0,combo:0,res:[],t0:0,t1:0,qt:0,done:false,lock:false,ng:[],ex:false};
 }
 function startRoom(id){
   const r=byId(id);if(!r)return showLounge();
@@ -393,10 +395,13 @@ function drawRoom(fx){
   const long=Array.from(plain(q.q)).length>14;
   let ch=q.choices.map((c,j)=>{
     let cls='c';
-    if(s.wrong!==null){if(c===q.a)cls+=' ok';else if(j===s.wrong)cls+=' ng';else cls+=' dim';}
-    return '<button class="'+cls+'" data-a="pick" data-j="'+j+'"'+(s.wrong!==null?' disabled':'')+'><span class="k">'+(j+1)+'</span>'+fmt(c)+'</button>';
+    const bad=s.ng.indexOf(j)>=0;
+    if(s.ex){if(c===q.a)cls+=' ok';else if(bad)cls+=' ng';else cls+=' dim';}
+    else if(bad)cls+=' ng';
+    return '<button class="'+cls+'" data-a="pick" data-j="'+j+'"'+(s.ex||bad?' disabled':'')+'><span class="k">'+(j+1)+'</span>'+fmt(c)+'</button>';
   }).join('');
-  const fb=s.wrong!==null?'<div class="fb" role="status"><p><b>正解は '+fmt(q.a)+'</b>　'+fmt(q.e)+'</p><button class="next" data-a="next">次へ</button></div>':'';
+  const fb=s.ex?'<div class="fb" role="status"><p><b class="okb">正解は '+fmt(q.a)+'</b>　'+fmt(q.e)+'</p><button class="next" data-a="next">次へ</button></div>':
+    s.ng.length?'<div class="fb retry" role="status"><p><b>ちがうよ。</b>もう一度えらぼう！</p></div>':'';
   app.innerHTML='<div class="rbar"><button class="back" data-a="lounge">← ラウンジ</button><div class="rname"><small>FLOOR '+r.floor.no+' '+r.floor.name+' ・ ROOM '+String(r.no).padStart(2,'0')+'</small><b>'+r.name+'</b></div>'+
     '<span class="goal">★★★ '+r.goal+'秒以内</span><div class="timer" id="tm" aria-live="off">'+sec(s.done?s.t1-s.t0:(s.pz||performance.now())-(s.t0||performance.now()))+'<small>秒</small></div></div>'+
     '<div class="pips" aria-label="'+(s.i+1)+'問目 / '+N+'問">'+pips+'</div>'+
@@ -406,8 +411,12 @@ function drawRoom(fx){
   if(!s.done)tick();
 }
 function pickAns(j){
-  const s=S0;if(!s||s.done||s.lock||s.wrong!==null)return;
+  const s=S0;if(!s||s.done||s.lock||s.ex||s.ng.indexOf(j)>=0)return;
   const q=s.qs[s.i],ok=q.choices[j]===q.a,dt=performance.now()-s.qt;
+  if(ok&&s.ng.length){
+    // まちがえたあとに正解：解説を見てから次へ（解説の間はタイマーを止める）
+    okSound();s.ex=true;s.pz=performance.now();drawRoom('<div class="maru" aria-hidden="true"></div>');return;
+  }
   if(ok){
     s.score++;s.combo++;s.res.push(true);s.lock=true;
     const fast=dt<2500;
@@ -420,11 +429,11 @@ function pickAns(j){
     app.querySelector('.stage').insertAdjacentHTML('beforeend',fx);
     setTimeout(()=>{s.lock=false;advance();},fast?330:420);
   }else{
-    ngSound();s.combo=0;s.res.push(false);s.wrong=j;s.pz=performance.now();drawRoom();
+    ngSound();if(!s.ng.length){s.combo=0;s.res.push(false);}s.ng.push(j);drawRoom();
   }
 }
 function advance(){
-  const s=S0;s.wrong=null;if(s.pz){s.t0+=performance.now()-s.pz;s.pz=0;}
+  const s=S0;s.ng=[];s.ex=false;if(s.pz){s.t0+=performance.now()-s.pz;s.pz=0;}
   if(s.i+1>=N){finish();return;}
   s.i++;s.qt=performance.now();drawRoom();
 }
@@ -467,7 +476,7 @@ document.addEventListener('keydown',e=>{
   if(!S0)return;
   const k=KEYS.indexOf(e.key);
   if(k>=0&&!S0.done)pickAns(k);
-  else if(e.key==='Enter'&&S0.wrong!==null)advance();
+  else if(e.key==='Enter'&&S0.ex)advance();
 });
 window.addEventListener('hashchange',()=>{const m=location.hash.match(/r=(\w+)/);if(!m){if(S0)showLounge();}else if(byId(m[1])&&(!S0||S0.room.id!==m[1]))startRoom(m[1]);});
 const m0=location.hash.match(/r=(\w+)/);
