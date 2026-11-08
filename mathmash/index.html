@@ -337,11 +337,17 @@ function tone(f,d,type,vol,delay){const c=audio();if(!c)return;type=type||'sine'
   const t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);
   o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.02);}
-const okSound=()=>{tone(590,.09);tone(790,.12,'sine',.035,.07);};
+/* 正解音は ok.mp3（読みこめないときは、これまでの音） */
+let okBuf=null,okLoading=false;
+function loadOk(){const c=audio();if(!c||okBuf||okLoading)return;okLoading=true;
+  fetch('ok.mp3').then(r=>r.arrayBuffer()).then(b=>new Promise((res,rej)=>c.decodeAudioData(b,res,rej))).then(buf=>{okBuf=buf;}).catch(()=>{okLoading=false;});}
+const okSound=()=>{const c=audio();
+  if(c&&okBuf){const s=c.createBufferSource();s.buffer=okBuf;s.connect(c.destination);s.start();return;}
+  tone(590,.09);tone(790,.12,'sine',.035,.07);loadOk();};
 const mashSound=()=>{tone(784,.07,'square',.02);tone(1047,.07,'square',.02,.05);tone(1568,.14,'square',.018,.1);};
 const ngSound=()=>{tone(330,.12,'triangle',.04);tone(262,.16,'triangle',.035,.1);};
 const clearSound=n=>{[523,659,784,1047].slice(0,n+1).forEach((f,i)=>tone(f,.18,'triangle',.05,i*.12));};
-document.addEventListener('touchstart',function un(){audio();document.removeEventListener('touchstart',un);},{passive:true});
+document.addEventListener('touchstart',function un(){audio();loadOk();document.removeEventListener('touchstart',un);},{passive:true});
 
 const app=document.getElementById('app');
 let S0=null; // いまのセット
@@ -405,7 +411,7 @@ function pickAns(j){
   if(ok){
     s.score++;s.combo++;s.res.push(true);s.lock=true;
     const fast=dt<2500;
-    if(fast)mashSound();else okSound();
+    okSound();
     let fx='<div class="maru" aria-hidden="true"></div>';
     if(fast)fx+='<div class="pop mash" aria-hidden="true">MASH!</div>';
     else if(s.combo>=3)fx+='<div class="pop combo" aria-hidden="true">'+s.combo+'連続！</div>';
@@ -450,7 +456,7 @@ function resultHTML(){
 function showLounge(){S0=null;cancelAnimationFrame(raf);if(location.hash)history.replaceState(null,'',location.pathname);viewLounge();window.scrollTo(0,0);}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const a=b.dataset.a;
-  if(a==='room'){audio();startRoom(b.dataset.id);window.scrollTo(0,0);}
+  if(a==='room'){audio();loadOk();startRoom(b.dataset.id);window.scrollTo(0,0);}
   else if(a==='pick')pickAns(+b.dataset.j);
   else if(a==='next')advance();
   else if(a==='again'){startRoom(S0.room.id);}
