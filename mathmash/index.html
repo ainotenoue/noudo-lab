@@ -564,7 +564,7 @@ function drawRoom(fx){
     return '<button class="'+cls+'" data-a="pick" data-j="'+j+'"'+(s.ex||bad?' disabled':'')+'><span class="k">'+(j+1)+'</span>'+fmt(c)+'</button>';
   }).join('');
   const fb=s.ex?'<div class="fb" role="status"><p><b class="okb">正解は '+fmt(q.a)+'</b>　'+fmt(q.e)+'</p><button class="next" data-a="next">次へ</button></div>':
-    s.ng.length?'<div class="fb retry" role="status"><p><b>ちがうよ。</b>もう一度えらぼう！</p></div>':'';
+    s.ng.length?'<div class="fb retry" role="status"><p><b>おしい！</b></p></div>':'';
   app.innerHTML='<div class="rbar"><button class="back" data-a="lounge">← ラウンジ</button><div class="rname"><small>FLOOR '+r.floor.no+' '+r.floor.name+' ・ ROOM '+String(r.no).padStart(2,'0')+'</small><b>'+r.name+'</b></div>'+
     '<span class="goal">'+MEDAL(!!rec(r.id).m,16)+' 全問正解＆'+r.goal+'秒以内</span><div class="timer" id="tm" aria-live="off">'+sec(s.done?s.t1-s.t0:(s.pz||performance.now())-(s.t0||performance.now()))+'<small>秒</small></div></div>'+
     '<div class="pips" aria-label="'+(s.i+1)+'問目 / '+N+'問">'+pips+'</div>'+
