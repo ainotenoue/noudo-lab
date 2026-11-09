@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The Math Girl</title>
+<title>NUMBER BEATER</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -361,8 +361,8 @@ const sec=ms=>(ms/1000).toFixed(1);
 function viewLounge(){
   const tot=ROOMS.reduce((s,r)=>s+rec(r.id).s,0),full=ROOMS.filter(r=>rec(r.id).s===3).length;
   let h='<a class="plaza" href="https://ainotenoue.github.io/">← ひろばへ</a>'+
-    '<header class="hero"><h1 class="logo"><img src="logo.webp" alt="The Math Girl" width="760" height="413"></h1>'+
-    '<p class="sub">せまく、深く、速く。</p><div class="total"><span>★ <b>'+tot+'</b> / '+ROOMS.length*3+'</span><span>★★★の部屋 <b>'+full+'</b> / '+ROOMS.length+'</span></div></header>';
+    '<header class="hero"><h1 class="logo"><img src="number-beater.png" alt="NUMBER BEATER" width="320" height="203"></h1>'+
+    '<div class="total"><span>★ <b>'+tot+'</b> / '+ROOMS.length*3+'</span><span>★★★の部屋 <b>'+full+'</b> / '+ROOMS.length+'</span></div></header>';
   FLOORS.forEach((f,fi)=>{
     const fs=f.rooms.reduce((s,r)=>s+rec(r.id).s,0);
     h+='<section class="floor"><div class="fhead"><span class="fno">FLOOR '+f.no+'</span><h2 class="fname">'+f.name+'</h2><span class="fsub">'+f.sub+'</span><span class="fstar">★ '+fs+' / '+f.rooms.length*3+'</span></div><div class="rooms">';
