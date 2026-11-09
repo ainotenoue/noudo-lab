@@ -115,6 +115,26 @@ main{max-width:1080px;margin:0 auto;padding:22px 28px 40px;position:relative}
 .miss b{color:var(--ink)}
 @media(max-width:560px){.ch{grid-template-columns:minmax(0,1fr)}.c{min-height:72px}.stage{min-height:0;padding:18px}.timer{font-size:22px;min-width:80px}.goal{display:none}}
 @media (prefers-reduced-motion:reduce){.logo .st,.maru,.pop{animation:none}.res .big i{animation:none;opacity:1}}
+
+.goalbox{display:inline-flex;align-items:center;gap:12px;margin-top:12px;background:#fff;border:2px solid var(--edge);border-radius:18px;padding:8px 16px}
+.goalbox.done{border-color:#ffc83d;background:#fffaea}
+.gtx{display:flex;flex-direction:column;align-items:flex-start;font-size:13px;font-weight:800;color:var(--ink2);line-height:1.3}
+.gtx small{font-size:11px;letter-spacing:.04em}
+.gtx b{font-family:'Fredoka',sans-serif;font-size:22px;color:var(--star-d)}
+.gbar{display:block;width:150px;height:6px;border-radius:3px;background:#efe9dd;overflow:hidden;margin-top:3px}
+.gbar i{display:block;height:100%;background:linear-gradient(90deg,#ffc83d,#e8a020)}
+.gst{font-size:13px;font-weight:800;color:var(--star-d);padding-left:12px;border-left:2px solid var(--edge)}
+.champ{margin:10px 0 0;font-weight:800;color:#c77c00;font-size:16px}
+.fstar{display:inline-flex;align-items:center;gap:4px}
+.room .rm{flex:none;align-self:center;line-height:0}
+.room .rm .medal:not(.on){opacity:.55}
+.goal{display:inline-flex;align-items:center;gap:4px}
+.medalpop{display:flex;align-items:center;gap:10px;animation:mpop .6s cubic-bezier(.2,1.4,.4,1) .7s both}
+.medalpop span{font-family:'Fredoka','M PLUS Rounded 1c',sans-serif;font-size:26px;font-weight:700;color:#c77c00;text-align:left;line-height:1.25}
+@keyframes mpop{from{opacity:0;transform:scale(.3) rotate(-25deg)}to{opacity:1;transform:none}}
+.mnear{font-size:16px;font-weight:800;color:var(--ink2)}
+.mnear b{color:#c77c00;font-family:'Fredoka',sans-serif;font-size:22px}
+@media (prefers-reduced-motion:reduce){.medalpop{animation:none}}
 </style></head><body><main id="app"></main>
 <script>
 (function(){
@@ -465,7 +485,10 @@ const LS='mathmash-v1';
 let store={r:{}};
 try{const o=JSON.parse(localStorage.getItem(LS)||'null');if(o&&o.r)store=o;}catch(e){}
 /* 20問になったので、10問のときのベストタイムは消す（★は残す） */
-if(store.v!==2){Object.values(store.r).forEach(c=>{c.t=0;});store.v=2;try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}}
+if(store.v!==2&&store.v!==3){Object.values(store.r).forEach(c=>{c.t=0;});store.v=2;}
+/* ★のつけ方を変えたので移しかえ：前の★3（全問正解＋タイム）→★3＋メダル、★2（全問正解）→★3、★1（16問以上）→★2 */
+if(store.v===2){Object.values(store.r).forEach(c=>{if(c.s===3)c.m=1;if(c.s>=2)c.s=3;else if(c.s===1)c.s=2;});store.v=3;}
+try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}
 const save=()=>{try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}};
 const rec=id=>store.r[id]||{s:0,t:0,n:0};
 
@@ -486,29 +509,32 @@ const okSound=()=>{const c=audio();
   tone(590,.09);tone(790,.12,'sine',.035,.07);loadOk();};
 const mashSound=()=>{tone(784,.07,'square',.02);tone(1047,.07,'square',.02,.05);tone(1568,.14,'square',.018,.1);};
 const ngSound=()=>{tone(330,.12,'triangle',.04);tone(262,.16,'triangle',.035,.1);};
+const medalSound=()=>{[1047,1319,1568,2093].forEach((f,i)=>tone(f,.22,'triangle',.045,i*.09));tone(2637,.5,'sine',.02,.4);};
 const clearSound=n=>{[523,659,784,1047].slice(0,n+1).forEach((f,i)=>tone(f,.18,'triangle',.05,i*.12));};
 document.addEventListener('touchstart',function un(){audio();loadOk();document.removeEventListener('touchstart',un);},{passive:true});
 
 const app=document.getElementById('app');
 let S0=null; // いまのセット
+const MEDAL=(on,sz)=>'<svg class="medal'+(on?' on':'')+'" viewBox="0 0 40 48" width="'+(sz||22)+'" height="'+Math.round((sz||22)*1.2)+'" aria-hidden="true"><path d="M10 2h8l4 14h-8z" fill="'+(on?'#e8553f':'#ddd6c8')+'"/><path d="M30 2h-8l-4 14h8z" fill="'+(on?'#3f7fd8':'#d2cabb')+'"/><circle cx="20" cy="30" r="15" fill="'+(on?'#ffc83d':'#e6e0d4')+'" stroke="'+(on?'#c77c00':'#cfc7b8')+'" stroke-width="2.5"/><circle cx="20" cy="30" r="10" fill="none" stroke="'+(on?'#fff0b8':'#f2eee6')+'" stroke-width="2"/><path d="M20 23.5l2 4.2 4.6.5-3.4 3.1 1 4.5-4.2-2.4-4.2 2.4 1-4.5-3.4-3.1 4.6-.5z" fill="'+(on?'#fff6d6':'#f7f4ee')+'"/></svg>';
 const starsHTML=(n,cls)=>'<span class="stars'+(cls?' '+cls:'')+'" aria-label="星'+n+'つ">'+[0,1,2].map(i=>'<i class="'+(i<n?'on':'')+'">★</i>').join('')+'</span>';
 const sec=ms=>(ms/1000).toFixed(1);
 
 /* ===== ラウンジ ===== */
 function viewLounge(){
-  const tot=ROOMS.reduce((s,r)=>s+rec(r.id).s,0),full=ROOMS.filter(r=>rec(r.id).s===3).length;
+  const tot=ROOMS.reduce((s,r)=>s+rec(r.id).s,0),med=ROOMS.filter(r=>rec(r.id).m).length,allM=med===ROOMS.length;
   let h='<a class="plaza" href="https://ainotenoue.github.io/">← ひろばへ</a>'+
     '<header class="hero"><h1 class="logo"><img src="number-beater.png" alt="NUMBER BEATER" width="559" height="366"></h1>'+
-    '<div class="total"><span>★ <b>'+tot+'</b> / '+ROOMS.length*3+'</span><span>★★★の部屋 <b>'+full+'</b> / '+ROOMS.length+'</span></div></header>';
+    '<div class="goalbox'+(allM?' done':'')+'">'+MEDAL(true,30)+'<div class="gtx"><small>最終ゴール：全部屋でメダル</small><span><b>'+med+'</b> / '+ROOMS.length+'</span><span class="gbar"><i style="width:'+Math.round(med/ROOMS.length*100)+'%"></i></span></div><span class="gst">★ '+tot+' / '+ROOMS.length*3+'</span></div>'+
+    (allM?'<p class="champ">全部屋メダル獲得！ NUMBER BEATER 完全制覇！</p>':'')+'</header>';
   FLOORS.forEach((f,fi)=>{
-    const fs=f.rooms.reduce((s,r)=>s+rec(r.id).s,0);
-    h+='<section class="floor"><div class="fhead"><span class="fno">FLOOR '+f.no+'</span><h2 class="fname">'+f.name+'</h2><span class="fsub">'+f.sub+'</span><span class="fstar">★ '+fs+' / '+f.rooms.length*3+'</span></div><div class="rooms">';
+    const fs=f.rooms.reduce((s,r)=>s+rec(r.id).s,0),fm=f.rooms.filter(r=>rec(r.id).m).length;
+    h+='<section class="floor"><div class="fhead"><span class="fno">FLOOR '+f.no+'</span><h2 class="fname">'+f.name+'</h2><span class="fsub">'+f.sub+'</span><span class="fstar">'+MEDAL(fm>0,16)+' '+fm+' / '+f.rooms.length+'　★ '+fs+' / '+f.rooms.length*3+'</span></div><div class="rooms">';
     f.rooms.forEach(r=>{const c=rec(r.id);
       h+='<button class="room" data-a="room" data-id="'+r.id+'" style="--fb:var(--f'+(fi+1)+');--fd:var(--f'+(fi+1)+'d)"><span class="ic" aria-hidden="true">'+r.ic+'</span><span class="tx"><span class="no">ROOM '+String(r.no).padStart(2,'0')+'</span><h3>'+r.name+'</h3>'+
-        '<span class="bt">'+starsHTML(c.s)+(c.t?'　ベスト '+sec(c.t)+'秒':c.n?'　'+c.n+'回':'')+'</span></span></button>';});
+        '<span class="bt">'+starsHTML(c.s)+(c.t?'　ベスト '+sec(c.t)+'秒':c.n?'　'+c.n+'回':'')+'</span></span><span class="rm" aria-label="'+(c.m?'メダル獲得':'メダルまだ')+'">'+MEDAL(!!c.m,30)+'</span></button>';});
     h+='</div></section>';
   });
-  h+='<p class="foot">1つの部屋は20問。1〜10問目は基本の基本、11〜20問目で少しずつ難しくなります。16問以上で★、全問正解で★★、目標タイム以内なら★★★。まちがえて解説を読んでいる間は、タイマーが止まります。<br>記録はこのiPadのブラウザに保存されます。　<button data-a="reset">記録をリセット</button></p>';
+  h+='<p class="foot">1つの部屋は20問。1〜10問目は基本の基本、11〜20問目で少しずつ難しくなります。10問以上で★、16問以上で★★、全問正解で★★★。全問正解を目標タイム以内で達成すると、メダルがもらえます。まちがえて解説を読んでいる間は、タイマーが止まります。<br>記録はこのiPadのブラウザに保存されます。　<button data-a="reset">記録をリセット</button></p>';
   app.innerHTML=h;
 }
 
@@ -540,7 +566,7 @@ function drawRoom(fx){
   const fb=s.ex?'<div class="fb" role="status"><p><b class="okb">正解は '+fmt(q.a)+'</b>　'+fmt(q.e)+'</p><button class="next" data-a="next">次へ</button></div>':
     s.ng.length?'<div class="fb retry" role="status"><p><b>ちがうよ。</b>もう一度えらぼう！</p></div>':'';
   app.innerHTML='<div class="rbar"><button class="back" data-a="lounge">← ラウンジ</button><div class="rname"><small>FLOOR '+r.floor.no+' '+r.floor.name+' ・ ROOM '+String(r.no).padStart(2,'0')+'</small><b>'+r.name+'</b></div>'+
-    '<span class="goal">★★★ '+r.goal+'秒以内</span><div class="timer" id="tm" aria-live="off">'+sec(s.done?s.t1-s.t0:(s.pz||performance.now())-(s.t0||performance.now()))+'<small>秒</small></div></div>'+
+    '<span class="goal">'+MEDAL(!!rec(r.id).m,16)+' 全問正解＆'+r.goal+'秒以内</span><div class="timer" id="tm" aria-live="off">'+sec(s.done?s.t1-s.t0:(s.pz||performance.now())-(s.t0||performance.now()))+'<small>秒</small></div></div>'+
     '<div class="pips" aria-label="'+(s.i+1)+'問目 / '+N+'問">'+pips+'</div>'+
     '<section class="stage"><div class="qno"><span class="lv'+(s.i<10?'':' up')+'">'+(s.i<10?'基本':'ステップアップ')+'</span>'+(s.i+1)+' / '+N+(s.combo>=2?'　<b style="color:var(--star-d)">'+s.combo+'連続</b>':'')+'</div>'+
     '<div class="q"><div class="qq'+(long?' long':'')+'">'+fmt(q.q)+'</div>'+(q.p?'<div class="qp">'+esc(q.p)+'</div>':'')+'</div>'+
@@ -576,24 +602,30 @@ function advance(){
 }
 function finish(){
   const s=S0;s.done=true;s.t1=performance.now();const t=s.t1-s.t0,r=s.room;
-  const st=s.score===N?(t<=r.goal*1000?3:2):s.score>=16?1:0;
+  const st=s.score===N?3:s.score>=16?2:s.score>=10?1:0;
+  const medal=s.score===N&&t<=r.goal*1000;
   const c=rec(r.id);s.prev=Object.assign({},c);
   c.n=(c.n||0)+1;if(st>c.s)c.s=st;
+  s.medal=medal;s.newMedal=medal&&!c.m;if(medal)c.m=1;
   const had=c.t;s.newBest=false;if(s.score===N&&(!had||t<had)){s.newBest=!!had;c.t=Math.round(t);}
   store.r[r.id]=c;save();
   s.stars=st;s.time=t;
-  if(st)clearSound(st);
+  if(st)clearSound(st);if(medal)setTimeout(medalSound,900);
   drawRoom();
 }
 function resultHTML(){
   const s=S0,r=s.room,c=rec(r.id);
-  const title=s.stars===3?'PERFECT!':s.stars===2?'ALL CLEAR!':s.stars===1?'CLEAR!':'もう一回！';
+  const title=s.medal?'MEDAL GET!':s.stars===3?'PERFECT!':s.stars===2?'GREAT!':s.stars===1?'CLEAR!':'もう一回！';
+  const gap=s.score===N&&!s.medal?(s.time-r.goal*1000)/1000:0;
+  const allM=ROOMS.every(x=>rec(x.id).m);
   const miss=s.qs.filter((_,i)=>!s.res[i]);
   const nx=ROOMS[r.no]||null;
   return '<div class="res" role="dialog" aria-label="結果"><h2>'+title+'</h2>'+
     '<div class="big" aria-label="星'+s.stars+'つ">'+[0,1,2].map(i=>'<i class="'+(i<s.stars?'on':'')+'" style="animation-delay:'+(0.15+i*0.18)+'s">★</i>').join('')+'</div>'+
+    (s.medal?'<div class="medalpop">'+MEDAL(true,64)+'<span>'+(s.newMedal?'メダル獲得！':'メダル！')+(s.newMedal&&allM?'<br>全部屋メダル達成！':'')+'</span></div>':
+      gap>0?'<div class="mnear">あと <b>'+gap.toFixed(1)+'</b> 秒でメダル！</div>':'')+
     '<div class="line">正解 <b>'+s.score+'</b> / '+N+'　タイム <b>'+sec(s.time)+'</b> 秒'+(s.newBest&&s.score===N?'　<span class="nb">ベスト更新！</span>':'')+'</div>'+
-    '<div class="rule">★ 16問以上　★★ 全問正解　★★★ 全問正解で'+r.goal+'秒以内'+(c.t?'　｜　ベスト '+sec(c.t)+'秒':'')+'</div>'+
+    '<div class="rule">★ 10問以上　★★ 16問以上　★★★ 全問正解　｜　メダル 全問正解＆'+r.goal+'秒以内'+(c.t?'　｜　ベスト '+sec(c.t)+'秒':'')+'</div>'+
     (miss.length?'<ul class="miss">'+miss.map(q=>'<li>'+fmt(q.q)+(q.p&&q.p!=='＝ ？'&&q.p!=='□は？'?' '+esc(q.p):'')+' → <b>'+fmt(q.a)+'</b></li>').join('')+'</ul>':'')+
     '<div class="rbtns"><button class="again" data-a="again">もう一度</button>'+(nx?'<button data-a="room" data-id="'+nx.id+'">次の部屋 →</button>':'')+'<button data-a="lounge">ラウンジへ</button></div></div>';
 }
