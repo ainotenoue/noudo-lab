@@ -19,7 +19,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #8cbfd0;outline-offset:3p
 main{max-width:1080px;margin:0 auto;padding:22px 28px 40px;position:relative}
 .plaza{position:absolute;left:28px;top:22px;display:inline-flex;align-items:center;height:36px;padding:0 16px;border-radius:999px;background:#fff;border:2px solid var(--edge);color:#6b6760;font-size:14px;font-weight:800;text-decoration:none}
 /* ロゴ */
-.hero{text-align:center;margin:6px 0 24px}
+.hero{text-align:center;margin:6px 0 24px;display:flex;flex-direction:column;align-items:center}
 .logo{margin:0;font-family:'Fredoka','M PLUS Rounded 1c',sans-serif;font-weight:700;font-size:clamp(40px,7vw,72px);letter-spacing:.03em;line-height:1;display:inline-flex;align-items:center;gap:.04em;color:#2f3437}
 .logo .m2{color:#e8553f}
 .logo img{display:block;width:min(320px,62vw);height:auto;border-radius:18px;box-shadow:0 8px 22px rgba(200,120,160,.18)}
@@ -361,7 +361,7 @@ const sec=ms=>(ms/1000).toFixed(1);
 function viewLounge(){
   const tot=ROOMS.reduce((s,r)=>s+rec(r.id).s,0),full=ROOMS.filter(r=>rec(r.id).s===3).length;
   let h='<a class="plaza" href="https://ainotenoue.github.io/">← ひろばへ</a>'+
-    '<header class="hero"><h1 class="logo"><img src="number-beater.png" alt="NUMBER BEATER" width="320" height="203"></h1>'+
+    '<header class="hero"><h1 class="logo"><img src="number-beater.png" alt="NUMBER BEATER" width="559" height="366"></h1>'+
     '<div class="total"><span>★ <b>'+tot+'</b> / '+ROOMS.length*3+'</span><span>★★★の部屋 <b>'+full+'</b> / '+ROOMS.length+'</span></div></header>';
   FLOORS.forEach((f,fi)=>{
     const fs=f.rooms.reduce((s,r)=>s+rec(r.id).s,0);
