@@ -135,6 +135,21 @@ main{max-width:1080px;margin:0 auto;padding:22px 28px 40px;position:relative}
 .mnear{font-size:16px;font-weight:800;color:var(--ink2)}
 .mnear b{color:#c77c00;font-family:'Fredoka',sans-serif;font-size:22px}
 @media (prefers-reduced-motion:reduce){.medalpop{animation:none}}
+
+.fw{position:fixed;inset:0;z-index:80;background:radial-gradient(circle at 50% 45%,#2c204e,#0e0a22);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:fade .3s ease-out}
+.fwsky{position:absolute;inset:0;pointer-events:none}
+.burst{position:absolute;width:0;height:0}
+.burst::before{content:'';position:absolute;left:-110px;top:-110px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,240,200,.9),rgba(255,200,80,0) 70%);opacity:0;animation:flash .5s ease-out var(--d) both}
+.burst i{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:50%;opacity:0;box-shadow:0 0 8px currentColor;animation:spark 1.5s cubic-bezier(.15,.7,.3,1) var(--d) both}
+@keyframes spark{0%{opacity:1;transform:translate(0,0) scale(1.2)}70%{opacity:1}100%{opacity:0;transform:translate(var(--x),calc(var(--y) + 60px)) scale(.4)}}
+@keyframes flash{0%{opacity:0;transform:scale(.2)}30%{opacity:1}100%{opacity:0;transform:scale(1.6)}}
+.fwmain{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.fwmain .medal{filter:drop-shadow(0 0 30px rgba(255,200,60,.8));animation:mbig .9s cubic-bezier(.2,1.5,.4,1) .15s both}
+@keyframes mbig{0%{opacity:0;transform:scale(.1) rotate(-200deg)}100%{opacity:1;transform:none}}
+.fwt{font-family:'Fredoka','M PLUS Rounded 1c',sans-serif;font-weight:700;font-size:clamp(48px,9vw,96px);color:#ffd84d;letter-spacing:.04em;text-shadow:0 4px 0 #c77c00,0 0 30px rgba(255,200,60,.6);animation:mpop .6s cubic-bezier(.2,1.4,.4,1) .6s both}
+.fws{font-size:20px;font-weight:800;color:#fff;opacity:.9;animation:fade .4s ease-out 1s both}
+.fwok{margin-top:14px;height:58px;padding:0 48px;border-radius:18px;border:0;background:#ffd84d;color:#2f3437;font-size:22px;font-weight:800;box-shadow:0 5px 0 #c77c00;animation:fade .4s ease-out 1.4s both}
+@media (prefers-reduced-motion:reduce){.fw,.fwmain .medal,.fwt,.fws,.fwok{animation:none}}
 </style></head><body><main id="app"></main>
 <script>
 (function(){
@@ -509,6 +524,7 @@ const okSound=()=>{const c=audio();
   tone(590,.09);tone(790,.12,'sine',.035,.07);loadOk();};
 const mashSound=()=>{tone(784,.07,'square',.02);tone(1047,.07,'square',.02,.05);tone(1568,.14,'square',.018,.1);};
 const ngSound=()=>{tone(330,.12,'triangle',.04);tone(262,.16,'triangle',.035,.1);};
+const boom=d=>{tone(90,.35,'sine',.12,d);tone(60,.5,'sine',.1,d+.02);};
 const medalSound=()=>{[1047,1319,1568,2093].forEach((f,i)=>tone(f,.22,'triangle',.045,i*.09));tone(2637,.5,'sine',.02,.4);};
 const clearSound=n=>{[523,659,784,1047].slice(0,n+1).forEach((f,i)=>tone(f,.18,'triangle',.05,i*.12));};
 document.addEventListener('touchstart',function un(){audio();loadOk();document.removeEventListener('touchstart',un);},{passive:true});
@@ -563,7 +579,7 @@ function drawRoom(fx){
     else if(bad)cls+=' ng';
     return '<button class="'+cls+'" data-a="pick" data-j="'+j+'"'+(s.ex||bad?' disabled':'')+'><span class="k">'+(j+1)+'</span>'+fmt(c)+'</button>';
   }).join('');
-  const fb=s.ex?'<div class="fb" role="status"><p><b class="okb">正解は '+fmt(q.a)+'</b>　'+fmt(q.e)+'</p><button class="next" data-a="next">次へ</button></div>':
+  const fb=s.ex?'<div class="fb" role="status"><p><b class="okb">OK！答えは '+fmt(q.a)+'</b>　'+fmt(q.e)+'</p><button class="next" data-a="next">次へ</button></div>':
     s.ng.length?'<div class="fb retry" role="status"><p><b>おしい！</b></p></div>':'';
   app.innerHTML='<div class="rbar"><button class="back" data-a="lounge">← ラウンジ</button><div class="rname"><small>FLOOR '+r.floor.no+' '+r.floor.name+' ・ ROOM '+String(r.no).padStart(2,'0')+'</small><b>'+r.name+'</b></div>'+
     '<span class="goal">'+MEDAL(!!rec(r.id).m,16)+' 全問正解＆'+r.goal+'秒以内</span><div class="timer" id="tm" aria-live="off">'+sec(s.done?s.t1-s.t0:(s.pz||performance.now())-(s.t0||performance.now()))+'<small>秒</small></div></div>'+
@@ -610,12 +626,12 @@ function finish(){
   const had=c.t;s.newBest=false;if(s.score===N&&(!had||t<had)){s.newBest=!!had;c.t=Math.round(t);}
   store.r[r.id]=c;save();
   s.stars=st;s.time=t;
-  if(st)clearSound(st);if(medal)setTimeout(medalSound,900);
+  if(st)clearSound(st);if(medal)setTimeout(fireworks,700);
   drawRoom();
 }
 function resultHTML(){
   const s=S0,r=s.room,c=rec(r.id);
-  const title=s.medal?'MEDAL GET!':s.stars===3?'PERFECT!':s.stars===2?'GREAT!':s.stars===1?'CLEAR!':'もう一回！';
+  const title=s.medal?'MEDAL GET!':s.stars===3?'PERFECT!':s.stars===2?'GREAT!':s.stars===1?'CLEAR!':'ナイスチャレンジ！';
   const gap=s.score===N&&!s.medal?(s.time-r.goal*1000)/1000:0;
   const allM=ROOMS.every(x=>rec(x.id).m);
   const miss=s.qs.filter((_,i)=>!s.res[i]);
@@ -623,17 +639,40 @@ function resultHTML(){
   return '<div class="res" role="dialog" aria-label="結果"><h2>'+title+'</h2>'+
     '<div class="big" aria-label="星'+s.stars+'つ">'+[0,1,2].map(i=>'<i class="'+(i<s.stars?'on':'')+'" style="animation-delay:'+(0.15+i*0.18)+'s">★</i>').join('')+'</div>'+
     (s.medal?'<div class="medalpop">'+MEDAL(true,64)+'<span>'+(s.newMedal?'メダル獲得！':'メダル！')+(s.newMedal&&allM?'<br>全部屋メダル達成！':'')+'</span></div>':
-      gap>0?'<div class="mnear">あと <b>'+gap.toFixed(1)+'</b> 秒でメダル！</div>':'')+
+      gap>0?'<div class="mnear">あと <b>'+gap.toFixed(1)+'</b> 秒でメダル！</div>':
+      s.score<10?'<div class="mnear">あと <b>'+(10-s.score)+'</b> 問で★！</div>':'')+
     '<div class="line">正解 <b>'+s.score+'</b> / '+N+'　タイム <b>'+sec(s.time)+'</b> 秒'+(s.newBest&&s.score===N?'　<span class="nb">ベスト更新！</span>':'')+'</div>'+
     '<div class="rule">★ 10問以上　★★ 16問以上　★★★ 全問正解　｜　メダル 全問正解＆'+r.goal+'秒以内'+(c.t?'　｜　ベスト '+sec(c.t)+'秒':'')+'</div>'+
     (miss.length?'<ul class="miss">'+miss.map(q=>'<li>'+fmt(q.q)+(q.p&&q.p!=='＝ ？'&&q.p!=='□は？'?' '+esc(q.p):'')+' → <b>'+fmt(q.a)+'</b></li>').join('')+'</ul>':'')+
     '<div class="rbtns"><button class="again" data-a="again">もう一度</button>'+(nx?'<button data-a="room" data-id="'+nx.id+'">次の部屋 →</button>':'')+'<button data-a="lounge">ラウンジへ</button></div></div>';
 }
 
+
+/* ===== メダルの花火：画面いっぱいに、ドーンと ===== */
+function fireworks(){
+  const old=document.getElementById('fw');if(old)old.remove();
+  const cols=['#ffc83d','#e8553f','#3f7fd8','#5cbf5c','#ff8fc7','#ffffff','#b48cff'];
+  let h='<div class="fw" id="fw" role="dialog" aria-label="メダル獲得"><div class="fwsky" aria-hidden="true">';
+  const bursts=reduce?[]:[[22,30,0],[78,26,.35],[50,18,.7],[30,62,1.05],[72,60,1.35],[50,40,1.7]];
+  bursts.forEach(([x,y,d],bi)=>{
+    h+='<div class="burst" style="left:'+x+'%;top:'+y+'%;--d:'+d+'s">';
+    const n=32,c1=cols[bi%cols.length],c2=cols[(bi+3)%cols.length];
+    for(let i=0;i<n;i++){const a=i/n*Math.PI*2,r=170+Math.random()*110;
+      h+='<i style="--x:'+Math.round(Math.cos(a)*r)+'px;--y:'+Math.round(Math.sin(a)*r)+'px;background:'+(i%2?c1:c2)+'"></i>';}
+    h+='</div>';
+  });
+  h+='</div><div class="fwmain">'+MEDAL(true,200)+'<div class="fwt">MEDAL GET!</div><div class="fws">'+esc(S0?S0.room.name:'')+'</div><button class="fwok" data-a="fwclose">OK！</button></div></div>';
+  document.body.insertAdjacentHTML('beforeend',h);
+  medalSound();
+  if(!reduce)bursts.forEach(b=>setTimeout(()=>boom(0),b[2]*1000));
+}
+const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /* ===== 画面の切りかえ ===== */
 function showLounge(){S0=null;cancelAnimationFrame(raf);if(location.hash)history.replaceState(null,'',location.pathname);viewLounge();window.scrollTo(0,0);}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const a=b.dataset.a;
+  if(a==='fwclose'){const f=document.getElementById('fw');if(f)f.remove();return;}
   if(a==='room'){audio();loadOk();startRoom(b.dataset.id);window.scrollTo(0,0);}
   else if(a==='pick')pickAns(+b.dataset.j);
   else if(a==='next')advance();
