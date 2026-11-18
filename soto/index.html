@@ -132,14 +132,27 @@ const PROBLEMS=[
    hint:'切り取った分を、全体（1）から引くよ',text:'テープ全体の3/5を切り取ったところ、のこりは24cmでした。テープははじめ何cmでしたか？'},
   {tag:'○以外',base:'全体',cmp:'女子',known:120,n:3,d:7,rs:'3/7',cells:7,unitName:'1/7',u:'人',st:1,tk:20,
    q1:'女子は、全体の何分のいくつ？',f:['1＋4/7＝11/7','1－4/7＝3/7'],right:2,rtok:[['1','全体'],['－'],['4/7','男子'],['＝'],['3/7']],
-   hint:'全体（1）から男子の分を引くと、女子になるよ',text:'ある学校の生徒のうち、男子は全体の4/7で、女子は120人です。生徒は全部で何人ですか？'}
+   hint:'全体（1）から男子の分を引くと、女子になるよ',text:'ある学校の生徒のうち、男子は全体の4/7で、女子は120人です。生徒は全部で何人ですか？'},
+  /* ○より△多く／少なく：stages … [n,d,off]（前の量の n/d より off 多く使う。off<0 は少なく）。のこりが known */
+  {kind:'off',tag:'○より△多く',base:'全体',cmp:'のこり',known:84,stages:[[2,5,12]],verb:'読んだ',u:'ページ',st:5,tk:40,
+   q1:'のこり84ページに12ページを足すと、全体の何分のいくつ？',f:['84＋12＝96 → 全体の3/5','84－12＝72 → 全体の3/5'],right:1,rtok:[['84','のこり'],['＋'],['12','多く読んだ分'],['＝'],['96（3/5）']],
+   hint:'12ページ「多く」読んだから、のこりは3/5より12少ない。もどすには足そう',cl:[['96','3/5の量'],['÷'],['3/5','割合'],['＝'],['160ページ']],
+   text:'ある本を、1日目に全体の2/5より12ページ多く読んだところ、のこりは84ページでした。この本は全部で何ページですか？'},
+  {kind:'off',tag:'○より△多く',base:'はじめ',cmp:'のこり',known:350,stages:[[1,3,100],[1,2,-50]],verb:'使った',u:'円',st:30,tk:150,
+   q1:'うしろからたどろう。350円は「1回目ののこり」の1/2より50円多い。1回目ののこりの1/2は？',f:['350＋50＝400円','350－50＝300円'],right:2,rtok:[['350','最後ののこり'],['－'],['50','少なく使った分'],['＝'],['300（1回目ののこりの1/2）']],
+   hint:'50円「少なく」使ったから、のこりは50円多くなっている。引いてもどそう',cl:[['600','1回目ののこり'],['＋'],['100','多く使った分'],['＝'],['700（2/3）'],['÷'],['2/3'],['＝'],['1050円']],
+   text:'持っていたお金の1/3より100円多く本に使い、次にのこりの1/2より50円少なくノートに使ったところ、350円のこりました。はじめに何円持っていましたか？'}
 ];
+const OFF=()=>P.kind==='off';
+PROBLEMS.forEach(p=>{if(p.kind!=='off')return;let x=p.known;for(let i=p.stages.length-1;i>=0;i--){const [n,d,o]=p.stages[i];x=(x+o)*d/(d-n);}p.X=x;});
+/* stage を通したときの [前の量, 使った量, のこり] の列 */
+const run=v=>P.stages.map(([n,d,o])=>{const u=v*n/d+o,r=[v,u,v-u];v=v-u;return r;});
 
 /* 問題の項目
    base … もとにする量の名前（つまみで動かす）　cmp … くらべる量の名前　known … くらべる量（わかっている）
    n/d … 割合（くらべる量 ＝ もと × n/d）　rs … 割合の書き方　cells … もとの帯を何こに区切るか
    q1 … 初動の問い　f … 選択肢 [①,②]　right … 正しいのが① なら 1　rtok … 割合の式 */
-const ans=()=>P.known*P.d/P.n;
+const ans=()=>OFF()?P.X:P.known*P.d/P.n;
 const tmin=()=>0, tmax=()=>Math.ceil(ans()*1.5/P.tk)*P.tk, t0=()=>snap(ans()*0.4);
 const snap=v=>Math.round(v/P.st)*P.st, tickStep=()=>P.tk, keyStep=()=>P.st;
 const sliderName=()=>P.base;
@@ -151,7 +164,7 @@ const pickedQ=()=>fxRow(P.cmp+'は','#3f9b4a',P.rtok);
 const pickedMsg=()=>'つまみで'+P.base+'を動かして、'+P.cmp+'を'+P.known+P.u+'に';
 const wrongMsg=()=>P.hint;
 const checkHead=()=>'できた！ 答え '+P.base+' '+ans()+P.u;
-const checkLine=()=>fx([[P.known,P.cmp],['÷'],[P.rs,'割合'],['＝'],[ans()+P.u]]);
+const checkLine=()=>OFF()?fx(P.cl):fx([[P.known,P.cmp],['÷'],[P.rs,'割合'],['＝'],[ans()+P.u]]);
 const r1=v=>Math.round(v*10)/10;
 
 /* 右の計算の1行（数字の下に、その数字が何か） */
@@ -174,7 +187,35 @@ const seg=(x,w,y,c,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-BH/2)+'" wid
 const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;};
 
 const X0=120,XW=480,Y1=110,Y2=196;
+function drawOff(){
+  const ok=solved(),k=XW/tmax(),rows=run(t),n=rows.length,gap=n>1?92:110,y0=n>1?80:100;let h='',x0=X0;
+  rows.forEach(([v,u,r],i)=>{const [nn,dd,o]=P.stages[i],y=y0+i*gap,cw=v*k/dd,fu=v*nn/dd;
+    h+=txt(X0-14,y,i?'のこり':P.base,{a:'end',fs:15,c:CB[1]});
+    // 前の量（dd こに区切る）
+    for(let j=0;j<dd;j++)h+='<rect x="'+(x0+j*cw)+'" y="'+(y-BH/2)+'" width="'+cw+'" height="'+BH+'" fill="'+(j<nn?CO[0]:CB[0])+'" stroke="#fff" stroke-width="2"/>';
+    if(v>0)h+='<rect x="'+x0+'" y="'+(y-BH/2)+'" width="'+(v*k)+'" height="'+BH+'" rx="6" fill="none" stroke="'+CB[1]+'" stroke-width="2.5"/>';
+    h+=txt(x0+fu*k/2,y-BH/2-12,nn+'/'+dd,{fs:14,c:'#9a5a12'});
+    // ±の部分
+    const xa=x0+Math.min(fu,u)*k,xb=x0+Math.max(fu,u)*k;
+    if(o>0)h+='<rect x="'+xa+'" y="'+(y-BH/2)+'" width="'+(xb-xa)+'" height="'+BH+'" fill="#f6c27a" stroke="#e8a24f" stroke-width="2"/>'+txt((xa+xb)/2,y-BH/2-12,'＋'+o,{fs:14,c:'#9a5a12'});
+    else h+='<rect x="'+xa+'" y="'+(y-BH/2)+'" width="'+(xb-xa)+'" height="'+BH+'" fill="#fff" stroke="#e8a24f" stroke-width="2" stroke-dasharray="5 4"/>'+txt((xa+xb)/2,y-BH/2-12,'－'+(-o),{fs:14,c:'#9a5a12'});
+    const L1=P.verb+' '+r1(u),L2='のこり '+r1(r);
+    if(u*k>tw(L1,13)+6)h+=txt(x0+u*k/2,y+BH/2+14,L1,{fs:13,c:'#9a5a12'});
+    // のこり（次の段へ）
+    if((v-u)*k>tw(L2,13)+6)h+=txt(x0+u*k+(v-u)*k/2,y+BH/2+14,L2,{fs:13,c:'#2f6f37'});
+    x0=x0+u*k;
+  });
+  // めあて
+  const last=rows[n-1],gx=x0+P.known*k,yl=y0+(n-1)*gap;
+  h+='<line x1="'+gx+'" y1="'+(yl-BH/2-6)+'" x2="'+gx+'" y2="'+(yl+BH/2+30)+'" stroke="#9a5a12" stroke-width="3" stroke-dasharray="6 5"/>'+txt(gx+6,yl+BH/2+38,P.cmp+' '+P.known+P.u,{a:'start',fs:14,c:'#9a5a12'});
+  if(ok)h+=pill(880,40,'ぴったり！');
+  rows.forEach(([v,u,r],i)=>{const [nn,dd,o]=P.stages[i];
+    h+=step(92+i*72,n>1?(i+1)+'回目のこり':'のこり','#3f9b4a',[[r1(v),i?'1回目のこり':P.base],['－'],[r1(u),nn+'/'+dd+(o>0?'＋':'－')+Math.abs(o)],['＝'],[r1(r)+P.u]],n>1?100:74);});
+  h+=step(92+n*72,'ずれ','#9a5a12',[[P.known,P.cmp],['－'],[r1(last[2]),'いま'],['＝'],[r1(P.known-last[2])+P.u]],n>1?100:74);
+  return h;
+}
 function draw(){
+  if(OFF())return drawOff();
   const ok=solved(),R=P.n/P.d,k=XW/(tmax()*Math.max(1,R)),cur=t*R;let h='';
   h+=txt(X0-14,Y1,P.base,{a:'end',fs:16,c:CB[1]})+txt(X0-14,Y2,P.cmp,{a:'end',fs:16,c:'#2f6f37'});
   // もと（1）を cells こに区切る

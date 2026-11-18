@@ -112,26 +112,34 @@ const PROBLEMS=[
   {kind:'bridge',tag:'鉄橋',L:140,B:360,v:25,text:'長さ140mの列車が、秒速25mで長さ360mの鉄橋をわたります。わたり始めてから、わたり終わるまでに何秒かかりますか？'},
   {kind:'tunnel',tag:'トンネル',L:150,B:900,v:30,text:'長さ150mの列車が、秒速30mで長さ900mのトンネルを通ります。列車がトンネルに完全にかくれているのは何秒間ですか？'},
   {kind:'pass',tag:'すれちがい',LA:160,va:18,LB:140,vb:12,text:'長さ160m、秒速18mの列車Aと、長さ140m、秒速12mの列車Bが、向かい合って走っています。出会ってから、すれちがい終わるまでに何秒かかりますか？'},
-  {kind:'over',tag:'追いこし',LA:180,va:25,LB:120,vb:15,text:'長さ180m、秒速25mの列車Aが、前を同じ向きに走る長さ120m、秒速15mの列車Bに追いつきました。追いついてから、追いこし終わるまでに何秒かかりますか？'}
+  {kind:'over',tag:'追いこし',LA:180,va:25,LB:120,vb:15,text:'長さ180m、秒速25mの列車Aが、前を同じ向きに走る長さ120m、秒速15mの列車Bに追いつきました。追いついてから、追いこし終わるまでに何秒かかりますか？'},
+  /* 逆算型：2つの通過をくらべて、速さ→列車の長さ。c:[[名前, 長さD, 秒T],…]（先頭が進む道のり＝D＋列車の長さ） */
+  {kind:'rev',tag:'長さを求める',c:[['電柱',0,10],['鉄橋',300,25]],ca:true,text:'ある列車が、電柱の前を通過するのに10秒、長さ300mの鉄橋をわたり始めてからわたり終わるまでに25秒かかりました。この列車の長さは何mですか？'},
+  {kind:'rev',tag:'長さを求める',c:[['鉄橋',240,18],['トンネル',600,36]],ca:false,text:'ある列車が、長さ240mの鉄橋をわたり始めてからわたり終わるまでに18秒、長さ600mのトンネルに入り始めてから出終わるまでに36秒かかりました。この列車の長さは何mですか？'}
 ];
+const RV=()=>P.kind==='rev';
+PROBLEMS.forEach(p=>{if(p.kind!=='rev')return;const [[,d1,t1],[,d2,t2]]=p.c;p.dD=d2-d1;p.dT=t2-t1;p.v=p.dD/p.dT;p.L=p.v*t1-d1;});
+const cname=i=>P.c[i][0]+(P.c[i][1]?P.c[i][1]+'m':'');
 const two=()=>P.kind==='pass'||P.kind==='over';
 const dist=()=>P.kind==='bridge'?P.B+P.L:P.kind==='tunnel'?P.B-P.L:P.LA+P.LB;
 const rate=()=>P.kind==='pass'?P.va+P.vb:P.kind==='over'?P.va-P.vb:P.v;
-const ans=()=>dist()/rate();
-const tmax=()=>Math.ceil(ans()*1.5);
-const snap=v=>Math.round(v), tickStep=()=>tmax()>40?5:1, keyStep=()=>1;
-const tlabel=()=>t+'秒後';
-const rightIsAdd=()=>P.kind==='bridge'||P.kind==='pass';
-const firstQ=()=>two()?'のこりは、1秒間に何mちぢまる？':'先頭が進む道のりは？';
-const firstOpts=()=>two()?[P.va+'＋'+P.vb+'＝'+(P.va+P.vb)+'m',P.va+'－'+P.vb+'＝'+(P.va-P.vb)+'m']:[P.B+'＋'+P.L+'＝'+(P.B+P.L)+'m',P.B+'－'+P.L+'＝'+(P.B-P.L)+'m'];
-const pickedQ=()=>two()?fxRow('1秒で近づく','#3f9b4a',[[P.va,'A（m）'],[P.kind==='pass'?'＋':'－'],[P.vb,'B（m）'],['＝'],[rate()+'m']])
+const ans=()=>RV()?P.L:dist()/rate();
+const tmax=()=>RV()?Math.ceil(ans()*1.8/50)*50:Math.ceil(ans()*1.5);
+const tmin=()=>0, t0=()=>RV()?20:0;
+const sliderName=()=>RV()?'列車の長さ':'時間';
+const snap=v=>RV()?Math.round(v/10)*10:Math.round(v), tickStep=()=>RV()?50:tmax()>40?5:1, keyStep=()=>RV()?10:1;
+const tlabel=()=>RV()?t+'m':t+'秒後';
+const rightIsAdd=()=>RV()?P.ca:P.kind==='bridge'||P.kind==='pass';
+const firstQ=()=>RV()?'2つをくらべよう。列車の速さは？':two()?'のこりは、1秒間に何mちぢまる？':'先頭が進む道のりは？';
+const firstOpts=()=>RV()?(o=>P.ca?o:[o[1],o[0]])([P.dD+'÷'+P.dT+'＝秒速'+P.v+'m',P.dD+'÷'+P.c[1][2]+'＝秒速'+(P.dD/P.c[1][2])+'m']):two()?[P.va+'＋'+P.vb+'＝'+(P.va+P.vb)+'m',P.va+'－'+P.vb+'＝'+(P.va-P.vb)+'m']:[P.B+'＋'+P.L+'＝'+(P.B+P.L)+'m',P.B+'－'+P.L+'＝'+(P.B-P.L)+'m'];
+const pickedQ=()=>RV()?fxRow('列車の速さ','#3f9b4a',[[P.dD,'長さのちがい（m）'],['÷'],[P.dT,'時間のちがい（秒）'],['＝'],['秒速'+P.v+'m']]):two()?fxRow('1秒で近づく','#3f9b4a',[[P.va,'A（m）'],[P.kind==='pass'?'＋':'－'],[P.vb,'B（m）'],['＝'],[rate()+'m']])
   :fxRow('先頭が進む道のり','#3f9b4a',[[P.B,(P.kind==='bridge'?'鉄橋':'トンネル')+'（m）'],[P.kind==='bridge'?'＋':'－'],[P.L,'列車（m）'],['＝'],[dist()+'m']]);
-const pickedMsg=()=>two()?'道のりは2本の長さの和 '+P.LA+'＋'+P.LB+'＝'+dist()+'m':'時間を進めて、のこりが0mになるところをさがそう';
-const wrongMsg=()=>({bridge:'わたり終わるのは、最後尾が鉄橋を出たとき。先頭は列車の長さ分、先まで進むよ',
+const pickedMsg=()=>RV()?'つまみで列車の長さを動かして、2つの道のりをぴったりに':two()?'道のりは2本の長さの和 '+P.LA+'＋'+P.LB+'＝'+dist()+'m':'時間を進めて、のこりが0mになるところをさがそう';
+const wrongMsg=()=>RV()?'時間のちがい'+P.dT+'秒は、長さのちがい'+P.dD+'mを進んだ時間。ちがいどうしで割ろう':({bridge:'わたり終わるのは、最後尾が鉄橋を出たとき。先頭は列車の長さ分、先まで進むよ',
   tunnel:'かくれているのは、最後尾が入ってから先頭が出るまで。列車の長さ分、短くなるよ',
   pass:'向かい合って走るね。2本とも近づくよ',over:'同じ向きに走るね。速い分だけ近づくよ'})[P.kind];
-const checkHead=()=>'できた！ 答え '+ans()+'秒';
-const checkLine=()=>two()?fx([[dist(),'2本の長さ（m）'],['÷'],[rate(),'1秒で近づく（m）'],['＝'],[ans()+'秒']])
+const checkHead=()=>'できた！ 答え '+ans()+(RV()?'m':'秒');
+const checkLine=()=>RV()?fx(P.c[0][1]?[[P.v,'秒速（m）'],['×'],[P.c[0][2],'秒'],['－'],[P.c[0][1],P.c[0][0]+'（m）'],['＝'],[P.L+'m']]:[[P.v,'秒速（m）'],['×'],[P.c[0][2],'秒'],['＝'],[P.L+'m']]):two()?fx([[dist(),'2本の長さ（m）'],['÷'],[rate(),'1秒で近づく（m）'],['＝'],[ans()+'秒']])
   :fx([[dist(),'先頭が進む道のり（m）'],['÷'],[P.v,'秒速（m）'],['＝'],[ans()+'秒']]);
 
 const X0=80,X1=1020;
@@ -147,7 +155,28 @@ function train(xt,xh,y,c,met,ghost){
   return g;
 }
 function draw(){
-  return two()?drawTwo():drawOne();
+  return RV()?drawRev():two()?drawTwo():drawOne();
+}
+function drawRev(){
+  const XL=210,XR=900,mx=Math.max(P.c[1][1]+tmax(),P.v*P.c[1][2]),k=(XR-XL)/mx,X=m=>XL+m*k,ok=solved();
+  let h='',allOk=true;
+  [0,1].forEach(i=>{
+    const [nm,D,T]=P.c[i],y=i?205:95,goal=P.v*T,cur=D+t,bh=30;allOk=allOk&&cur===goal;
+    h+=txt(XL-16,y,nm+(D?' '+D+'m':''),{a:'end',fs:17,c:'#7a5f3c'});
+    h+=txt(XL-16,y+24,T+'秒',{a:'end',fs:15,c:'#7b766d'});
+    // 目標：T秒で進む道のり（点線のわく）
+    h+='<rect x="'+X(0)+'" y="'+(y-bh/2-6)+'" width="'+(X(goal)-X(0))+'" height="'+(bh+12)+'" rx="8" fill="none" stroke="#3f9b4a" stroke-width="2.5" stroke-dasharray="6 5"/>';
+    h+=txt((X(0)+X(goal))/2,y-bh/2-18,T+'秒で進む道のり　'+(picked?P.v+'×'+T+'＝'+goal+'m':'？m'),{fs:14,c:'#2f6f37'});
+    // いまの道のり：D（鉄橋など）＋ 列車
+    if(D)h+='<rect x="'+X(0)+'" y="'+(y-bh/2)+'" width="'+(X(D)-X(0))+'" height="'+bh+'" rx="6" fill="#f3e8da" stroke="#9a7b55" stroke-width="2"/>'+txt((X(0)+X(D))/2,y+1,nm+' '+D,{fs:14,c:'#7a5f3c'});
+    h+=train(X(D),X(D+t),y+bh/2,CA,ok);
+    if(picked&&t*k>60)h+=txt((X(D)+X(D+t))/2,y+bh/2+16,'列車 '+t,{fs:13,c:'#24617a'});
+    if(!D)h+='<line x1="'+X(0)+'" y1="'+(y-bh/2-4)+'" x2="'+X(0)+'" y2="'+(y+bh/2+18)+'" stroke="#7a5f3c" stroke-width="5"/>';
+    if(picked){const r=goal-cur;h+=txt(XR+14,y,r===0?'ぴったり':r>0?'あと '+r+'m':r*-1+'m 多い',{a:'start',fs:16,c:r===0?'#2f6f37':'#9a5a12'});}
+  });
+  h+=txt(XL,268,'先頭が進む道のり ＝ '+P.c[1][0]+'の長さ ＋ 列車の長さ',{a:'start',fs:14,c:'#7b766d',fw:700});
+  if(ok)h+=pill(700,34,'列車の長さがわかった！');
+  return h;
 }
 function drawOne(){
   const T=tmax(),L=P.L,B=P.B,v=P.v,br=P.kind==='bridge';

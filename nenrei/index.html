@@ -125,28 +125,36 @@ const PROBLEMS=[
   {kind:'times',tag:'○倍だった',na:'父',nb:'子',F:45,C:15,m:4,text:'いま、父は45歳、子は15歳です。父の年齢が子の年齢の4倍だったのは何年前ですか？'},
   {kind:'times',tag:'○倍になる',na:'母',nb:'子',F:42,C:12,m:2,text:'いま、母は42歳、子は12歳です。母の年齢が子の年齢の2倍になるのは何年後ですか？'},
   {kind:'sum',tag:'和がふえる',na:'父',nb:'子',F:38,C:8,S:60,text:'いま、父は38歳、子は8歳です。2人の年齢の和が60歳になるのは何年後ですか？'},
-  {kind:'catch',tag:'和に追いつく',na:'父',nb:'子2人',F:35,C1:7,C2:4,text:'いま、父は35歳、兄は7歳、弟は4歳です。父の年齢と、兄と弟の年齢の和が等しくなるのは何年後ですか？'}
+  {kind:'catch',tag:'和に追いつく',na:'父',nb:'子2人',F:35,C1:7,C2:4,text:'いま、父は35歳、兄は7歳、弟は4歳です。父の年齢と、兄と弟の年齢の和が等しくなるのは何年後ですか？'},
+  /* いまの年齢を求める：いま m1 倍、n 年後に m2 倍（差は変わらない）。つまみは「いまの子」 */
+  {kind:'now',tag:'いまの年齢',na:'母',nb:'子',m1:5,n:8,m2:3,ask:'nb',text:'いま、母の年齢は子の年齢の5倍です。8年後には、母の年齢は子の年齢の3倍になります。子はいま何歳ですか？'},
+  {kind:'now',tag:'いまの年齢',na:'父',nb:'子',m1:3,n:12,m2:2,ask:'na',text:'いま、父の年齢は子の年齢の3倍です。12年後には、父の年齢は子の年齢の2倍になります。父はいま何歳ですか？'}
 ];
+const NOW=()=>P.kind==='now';
+/* 子(m1-1)＝(子+n)(m2-1) → 子 */
+const nc=()=>P.n*(P.m2-1)/((P.m1-1)-(P.m2-1));
 const D=()=>P.F-P.C;
 const ct=()=>D()/(P.m-1);                         // そのときの子
 const K=()=>P.C1+P.C2;
-const ans=()=>({times:ct()-P.C,sum:(P.S-P.F-P.C)/2,catch:P.F-K()})[P.kind];
-const tmin=()=>P.kind==='times'&&ans()<0?-(P.C-1):0;
-const tmax=()=>P.kind==='times'&&ans()<0?0:Math.ceil(ans()*1.5)+2;
+const ans=()=>NOW()?nc():({times:ct()-P.C,sum:(P.S-P.F-P.C)/2,catch:P.F-K()})[P.kind];
+const tmin=()=>NOW()?1:P.kind==='times'&&ans()<0?-(P.C-1):0;
+const tmax=()=>NOW()?Math.ceil(nc()*1.8):P.kind==='times'&&ans()<0?0:Math.ceil(ans()*1.5)+2;
 const snap=v=>Math.round(v), tickStep=()=>1, keyStep=()=>1;
-const sliderName=()=>'年';
+const sliderName=()=>NOW()?'いまの'+P.nb:'年';
 const yl=x=>x>=0?x+'年後':(-x)+'年前';
-const tlabel=()=>t===0?'いま':yl(t);
-const rightIsAdd=()=>P.kind==='sum';
-const firstQ=()=>({times:P.na+'＝'+P.nb+'の'+P.m+'倍のとき、年齢の差は'+P.nb+'の何つ分？',sum:'1年で、2人の年齢の和は何歳ふえる？',catch:'1年で、父と子2人の和の差は何歳ちぢまる？'})[P.kind];
-const firstOpts=()=>({times:[P.m+'＋1＝'+(P.m+1)+'つ分',P.m+'－1＝'+(P.m-1)+'つ分'],sum:['1＋1＝2歳','1－1＝0歳'],catch:['2＋1＝3歳','2－1＝1歳']})[P.kind];
-const pickedQ=()=>({times:fxRow('そのときの'+P.nb,'#3f9b4a',[[D(),'差（歳）'],['÷'],[P.m-1,P.nb+'の'+(P.m-1)+'つ分'],['＝'],[ct()+'歳']]),
+const tlabel=()=>NOW()?t+'歳':t===0?'いま':yl(t);
+const rightIsAdd=()=>P.kind==='sum'||(NOW()&&P.ask==='na');
+const firstQ=()=>NOW()?'年齢の差はずっと同じ。いまの差は、いまの'+P.nb+'の何つ分？':({times:P.na+'＝'+P.nb+'の'+P.m+'倍のとき、年齢の差は'+P.nb+'の何つ分？',sum:'1年で、2人の年齢の和は何歳ふえる？',catch:'1年で、父と子2人の和の差は何歳ちぢまる？'})[P.kind];
+const firstOpts=()=>NOW()?(o=>P.ask==='na'?o:[o[1],o[0]])([P.m1+'－1＝'+(P.m1-1)+'つ分',P.m1+'＋1＝'+(P.m1+1)+'つ分']):({times:[P.m+'＋1＝'+(P.m+1)+'つ分',P.m+'－1＝'+(P.m-1)+'つ分'],sum:['1＋1＝2歳','1－1＝0歳'],catch:['2＋1＝3歳','2－1＝1歳']})[P.kind];
+const pickedQ=()=>NOW()?fxRow('差','#3f9b4a',[['いま',P.nb+'の'+(P.m1-1)+'つ分'],['＝'],[P.n+'年後','（'+P.nb+'＋'+P.n+'）の'+(P.m2-1)+'つ分']]):({times:fxRow('そのときの'+P.nb,'#3f9b4a',[[D(),'差（歳）'],['÷'],[P.m-1,P.nb+'の'+(P.m-1)+'つ分'],['＝'],[ct()+'歳']]),
   sum:fxRow('ふやす和','#3f9b4a',[[P.S,'めあての和'],['－'],[P.F+P.C,'いまの和'],['＝'],[(P.S-P.F-P.C)+'歳']]),
   catch:fxRow('いまの差','#3f9b4a',[[P.F,'父'],['－'],[K(),'子2人の和'],['＝'],[(P.F-K())+'歳']])})[P.kind];
-const pickedMsg=()=>({times:P.nb+'が'+ct()+'歳になるのは？ つまみで年を動かそう',sum:'1年で2歳ずつふえる。つまみで年を動かそう',catch:'1年で1歳ずつちぢまる。つまみで年を動かそう'})[P.kind];
-const wrongMsg=()=>({times:P.na+'は'+P.nb+'の'+P.m+'つ分。差は '+P.m+'つ分－1つ分 だよ',sum:'2人とも、1年に1歳ずつ年をとるよ',catch:'子2人の和は1年に2歳、父は1歳ふえる。その差だけちぢまるよ'})[P.kind];
-const checkHead=()=>'できた！ 答え '+yl(ans());
+const pickedMsg=()=>NOW()?'つまみでいまの'+P.nb+'を動かして、'+P.n+'年後に'+P.m2+'倍になるところをさがそう':({times:P.nb+'が'+ct()+'歳になるのは？ つまみで年を動かそう',sum:'1年で2歳ずつふえる。つまみで年を動かそう',catch:'1年で1歳ずつちぢまる。つまみで年を動かそう'})[P.kind];
+const wrongMsg=()=>NOW()?P.na+'は'+P.nb+'の'+P.m1+'つ分。差は '+P.m1+'つ分－1つ分 だよ':({times:P.na+'は'+P.nb+'の'+P.m+'つ分。差は '+P.m+'つ分－1つ分 だよ',sum:'2人とも、1年に1歳ずつ年をとるよ',catch:'子2人の和は1年に2歳、父は1歳ふえる。その差だけちぢまるよ'})[P.kind];
+const checkHead=()=>NOW()?'できた！ 答え '+(P.ask==='na'?P.na+' '+nc()*P.m1:P.nb+' '+nc())+'歳':'できた！ 答え '+yl(ans());
 const checkLine=()=>{
+  if(NOW()){const d1=P.m1-1,d2=P.m2-1,c=nc(),l=fx([[P.n*d2,P.n+'×'+d2],['÷'],[(d1-d2),d1+'つ分－'+d2+'つ分'],['＝'],[c+'歳']]);
+    return P.ask==='na'?'<div class="fxpair">'+l+'<div class="op">→</div>'+fx([[c,'いまの'+P.nb],['×'],[P.m1,'倍'],['＝'],[c*P.m1+'歳']])+'</div>':l;}
   if(P.kind==='sum')return fx([[P.S-P.F-P.C,'ふやす和'],['÷'],['2','1年でふえる'],['＝'],[yl(ans())]]);
   if(P.kind==='catch')return fx([[P.F-K(),'いまの差'],['÷'],['1','1年でちぢまる'],['＝'],[yl(ans())]]);
   const a=ans();
@@ -174,7 +182,27 @@ const seg=(x,w,y,c,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-BH/2)+'" wid
 const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;};
 
 const X0=120,XW=490,Y1=100,Y2=176,Y3=244;
+function drawNow(){
+  const ok=solved(),c=t,f=c*P.m1,c2=c+P.n,f2=f+P.n,k=XW/(P.m1*tmax()+P.n),r=Math.round(f2/c2*100)/100;let h='';
+  const rows=[['いま',f,c,64,104],[P.n+'年後',f2,c2,178,218]];
+  rows.forEach(([lab,F,C,ya,yb],i)=>{
+    h+=txt(X0-80,ya-30,lab,{a:'start',fs:15,c:'#7b766d'});
+    h+=txt(X0-14,ya,P.na,{a:'end',fs:15,c:CB[1]})+txt(X0-14,yb,P.nb,{a:'end',fs:15,c:CP[1]});
+    h+=seg(X0,C*k,ya,CB,'')+seg(X0+C*k,(F-C)*k,ya,CO,'差 '+(F-C),'#9a5a12');
+    h+=txt(X0+F*k+10,ya,F+'歳',{a:'start',fs:17,c:CB[1]});
+    h+=seg(X0,C*k,yb,CP,'')+txt(X0+C*k+10,yb,C+'歳',{a:'start',fs:17,c:CP[1]});
+    const m=i?P.m2:P.m1;
+    for(let j=1;j<=m;j++){const xx=X0+C*j*k;if(xx>X0+XW+20)break;
+      h+='<line x1="'+xx+'" y1="'+(ya-BH/2-4)+'" x2="'+xx+'" y2="'+(yb+BH/2)+'" stroke="#9a9184" stroke-width="2" stroke-dasharray="3 5"/>';}
+  });
+  if(ok)h+=pill(880,40,P.n+'年後に'+P.m2+'倍！');
+  h+=step(92,'いまの'+P.na,'#3d9cc2',[[c,'いまの'+P.nb],['×'],[P.m1,'倍'],['＝'],[f+'歳']]);
+  h+=step(164,P.n+'年後','#d9849b',[[f2,P.na],['÷'],[c2,P.nb],['＝'],[r+'倍']]);
+  h+=step(236,'差は同じ','#e8a24f',[[f2,P.na],['－'],[c2,P.nb],['＝'],[(f2-c2)+'歳']]);
+  return h;
+}
 function draw(){
+  if(NOW())return drawNow();
   const ok=solved(),x=t;let h='';
   h+=txt(X0-80,36,tlabel()==='いま'?'いま':tlabel()+'の年齢',{a:'start',fs:17,c:'#7b766d'});
   if(P.kind==='times'){

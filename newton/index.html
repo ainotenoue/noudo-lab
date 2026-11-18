@@ -124,21 +124,28 @@ const PROBLEMS=[
   {Q0:600,g:20,n:1,s1:50,it:'水',iu:'L',u:'分',who:'ポンプ',tag:'水そう',text:'600Lの水が入った水そうに、毎分20Lずつ水が入り続けています。ポンプで毎分50Lずつくみ出すと、何分で水そうは空になりますか？'},
   {Q0:300,g:10,n:4,s1:15,it:'草',iu:'kg',u:'日',who:'牛',tag:'牧場',text:'牧場に300kgの草がはえていて、草は毎日10kgずつのびます。牛1頭は1日に15kgの草を食べます。牛4頭を放すと、何日で草はなくなりますか？'},
   {Q0:240,g:8,n:1,s1:20,it:'行列',iu:'人',u:'分',who:'改札',tag:'行列',text:'改札口に240人が並んでいて、毎分8人ずつ加わります。改札を1つ開けて、毎分20人ずつ通すと、何分で行列がなくなりますか？'},
-  {Q0:450,g:15,n:3,s1:20,it:'水',iu:'L',u:'分',who:'ポンプ',tag:'水そう',text:'450Lの水が入った水そうに、毎分15Lずつ水が入り続けています。毎分20Lくみ出せるポンプ3台でくみ出すと、何分で空になりますか？'}
+  {Q0:450,g:15,n:3,s1:20,it:'水',iu:'L',u:'分',who:'ポンプ',tag:'水そう',text:'450Lの水が入った水そうに、毎分15Lずつ水が入り続けています。毎分20Lくみ出せるポンプ3台でくみ出すと、何分で空になりますか？'},
+  /* くらべる型：2つの場合（n1つでt1、n2つでt2）をくらべて、ふえる量とはじめの量を見つける */
+  {cmp:[[4,30],[6,15]],n:8,s1:10,ca:false,it:'行列',iu:'人',u:'分',who:'窓口',tag:'くらべる型',text:'行列に、毎分同じ人数ずつ人が加わります。窓口1つは毎分10人受け付けます。窓口を4つ開けると30分で、6つ開けると15分で行列がなくなります。窓口を8つ開けると、何分で行列がなくなりますか？'},
+  {cmp:[[10,20],[12,15]],n:16,s1:1,ca:true,it:'草',iu:'',u:'日',who:'牛',tag:'くらべる型',text:'牧場に草がはえていて、毎日同じ量ずつのびます。牛1頭が1日に食べる草の量を1とします。牛10頭を放すと20日で、12頭を放すと15日で草はなくなります。牛16頭を放すと、何日で草はなくなりますか？'}
 ];
+/* くらべる型：ふえる量 g と、はじめの量 Q0 を計算しておく */
+PROBLEMS.forEach(p=>{if(!p.cmp)return;const [[a,x],[b,y]]=p.cmp;p.A=a*p.s1*x;p.B=b*p.s1*y;p.D=p.A-p.B;p.dt=x-y;p.g=p.D/p.dt;p.Q0=p.A-p.g*x;});
+const C=()=>!!P.cmp;
+const CN=()=>({'牛':'頭','ポンプ':'台'})[P.who]||'つ';
 const S=()=>P.n*P.s1, R=()=>S()-P.g;
 const ans=()=>P.Q0/R();
 const tmin=()=>0, tmax=()=>Math.ceil(ans()*1.4);
 const snap=v=>Math.round(v), tickStep=()=>tmax()>40?5:1, keyStep=()=>1;
 const sliderName=()=>P.u==='日'?'日数':'時間';
 const tlabel=()=>t+P.u;
-const rightIsAdd=()=>false;
-const pre=()=>P.n>1?P.who+P.n+'つで 1'+P.u+'に '+P.s1+'×'+P.n+'＝'+S()+P.iu+'へらす。':'';
-const firstQ=()=>pre()+'1'+P.u+'で'+P.it+'はいくつへる？';
-const firstOpts=()=>[S()+'＋'+P.g+'＝'+(S()+P.g)+P.iu,S()+'－'+P.g+'＝'+R()+P.iu];
-const pickedQ=()=>fxRow('1'+P.u+'でへる','#3f9b4a',[[S(),'へらす（'+P.who+'）'],['－'],[P.g,'ふえる'],['＝'],[R()+P.iu]]);
-const pickedMsg=()=>'つまみで'+sliderName()+'を動かして、のこりを0に';
-const wrongMsg=()=>'へらしている間も、'+P.it+'はふえ続けるよ。ふえる分を引こう';
+const rightIsAdd=()=>C()?P.ca:false;
+const pre=()=>P.n>1?P.who+P.n+CN()+'で 1'+P.u+'に '+P.s1+'×'+P.n+'＝'+S()+P.iu+'へらす。':'';
+const firstQ=()=>C()?'2つをくらべよう。1'+P.u+'にふえる'+P.it+'は？':pre()+'1'+P.u+'で'+P.it+'はいくつへる？';
+const firstOpts=()=>C()?(o=>P.ca?o:[o[1],o[0]])([P.D+'÷'+P.dt+'＝'+P.g+P.iu,P.D+'÷'+P.cmp[0][1]+'＝'+(P.D/P.cmp[0][1])+P.iu]):[S()+'＋'+P.g+'＝'+(S()+P.g)+P.iu,S()+'－'+P.g+'＝'+R()+P.iu];
+const pickedQ=()=>C()?fxRow('1'+P.u+'でふえる','#3f9b4a',[[P.D,'へらした量のちがい'],['÷'],[P.dt,P.u+'のちがい'],['＝'],[P.g+P.iu]]):fxRow('1'+P.u+'でへる','#3f9b4a',[[S(),'へらす（'+P.who+'）'],['－'],[P.g,'ふえる'],['＝'],[R()+P.iu]]);
+const pickedMsg=()=>C()?P.who+P.n+CN()+'のとき、つまみで'+sliderName()+'を動かして、のこりを0に':'つまみで'+sliderName()+'を動かして、のこりを0に';
+const wrongMsg=()=>C()?'へらした量のちがいは、'+P.u+'のちがいの間にふえた分。'+P.u+'のちがいで割ろう':'へらしている間も、'+P.it+'はふえ続けるよ。ふえる分を引こう';
 const checkHead=()=>'できた！ 答え '+ans()+P.u;
 const checkLine=()=>fx([[P.Q0,'はじめの'+P.it],['÷'],[R(),'1'+P.u+'でへる'],['＝'],[ans()+P.u]]);
 
@@ -162,7 +169,36 @@ const seg=(x,w,y,c,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-BH/2)+'" wid
 const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;};
 
 const X0=130,XW=470,Y1=100,Y2=176;
+function drawCmp(){
+  const [[a,x],[b,y]]=P.cmp,k=XW/P.A;let h='';
+  h+=txt(X0-14,Y1,P.who+a+CN()+'×'+x+P.u,{a:'end',fs:15,c:CB[1]})+txt(X0-14,Y2,P.who+b+CN()+'×'+y+P.u,{a:'end',fs:15,c:CB[1]});
+  h+=seg(X0,P.Q0*k,Y1,CB,'はじめ','#24617a')+seg(X0+P.Q0*k,P.g*x*k,Y1,CO,x+P.u+'でふえた','#9a5a12');
+  h+=seg(X0,P.Q0*k,Y2,CB,'はじめ','#24617a')+seg(X0+P.Q0*k,P.g*y*k,Y2,CO,y+P.u+'でふえた','#9a5a12');
+  h+=seg(X0+P.B*k,P.D*k,Y2,CO,'ちがい','#9a5a12',true);
+  h+='<line x1="'+(X0+P.Q0*k)+'" y1="'+(Y1-BH/2-8)+'" x2="'+(X0+P.Q0*k)+'" y2="'+(Y2+BH/2+8)+'" stroke="#9a9184" stroke-width="2" stroke-dasharray="3 5"/>';
+  h+=txt(X0,Y2+BH/2+30,'ちがいの部分は、'+(x-y)+P.u+'のあいだにふえた分',{a:'start',fs:14,c:'#7b766d',fw:700});
+  h+=step(92,a+CN()+'','#3d9cc2',[[P.s1*a,'1'+P.u+'にへらす'],['×'],[x,P.u],['＝'],[P.A+P.iu]],74);
+  h+=step(164,b+CN()+'','#3d9cc2',[[P.s1*b,'1'+P.u+'にへらす'],['×'],[y,P.u],['＝'],[P.B+P.iu]],74);
+  h+=step(236,'ちがい','#e8a24f',[[P.A,a+CN()+''],['－'],[P.B,b+CN()+''],['＝'],[P.D+P.iu]],74);
+  return h;
+}
 function draw(){
+  if(C()&&!picked)return drawCmp();
+  if(C()){const ok=solved(),T=tmax(),k=XW/(P.Q0+P.g*T),add=P.g*t,out=Math.min(S()*t,P.Q0+add),rem=P.Q0+add-S()*t;let h='';
+    h+=txt(X0-14,Y1,'来た・ある',{a:'end',fs:15,c:CB[1]})+txt(X0-14,Y2,'へらした',{a:'end',fs:15,c:'#2f6f37'});
+    h+=seg(X0,P.Q0*k,Y1,CB,'はじめ '+P.Q0,'#24617a')+seg(X0+P.Q0*k,add*k,Y1,CO,add?'＋'+add:'','#9a5a12');
+    h+=seg(X0,S()*t*k,Y2,CG,S()*t?S()*t+'':'','#2f6f37');
+    const xr0=X0+out*k,xr1=X0+(P.Q0+add)*k;
+    if(rem>0)h+='<rect x="'+xr0+'" y="'+(Y2-BH/2)+'" width="'+(xr1-xr0)+'" height="'+BH+'" rx="6" fill="#fff" stroke="#9a5a12" stroke-width="2.5" stroke-dasharray="6 5"/>'+(xr1-xr0>70?txt((xr0+xr1)/2,Y2+1,'のこり '+rem,{fs:15,c:'#9a5a12'}):'');
+    h+='<line x1="'+xr1+'" y1="'+(Y1-BH/2-8)+'" x2="'+xr1+'" y2="'+(Y2+BH/2+8)+'" stroke="#9a9184" stroke-width="2" stroke-dasharray="3 5"/>';
+    h+=txt(X0,Y2+BH/2+30,P.who+P.n+CN()+'：ふえる '+P.g+P.iu+'／'+P.u+'　へらす '+S()+P.iu+'／'+P.u,{a:'start',fs:14,c:'#7b766d',fw:700});
+    if(ok)h+=pill(390,40,'なくなった！');
+    const x1=P.cmp[0][1];
+    h+=step(64,'はじめ','#3d9cc2',[[P.A,P.cmp[0][0]+CN()+'×'+x1+P.u],['－'],[P.g*x1,x1+P.u+'でふえた'],['＝'],[P.Q0+P.iu]],74);
+    h+=step(122,'1'+P.u+'でへる','#3f9b4a',[[S(),P.n+CN()+'でへらす'],['－'],[P.g,'ふえる'],['＝'],[R()+P.iu]],74);
+    h+=step(180,'へった','#e8a24f',[[R(),'1'+P.u+'でへる'],['×'],[t,P.u],['＝'],[R()*t+P.iu]],74);
+    h+=step(238,'のこり','#9a5a12',[[P.Q0,'はじめ'],['－'],[R()*t,'へった'],['＝'],[(P.Q0-R()*t)+P.iu]],74);
+    return h;}
   const ok=solved(),T=tmax(),k=XW/(P.Q0+P.g*T),add=P.g*t,out=Math.min(S()*t,P.Q0+add),rem=P.Q0+add-S()*t;
   let h='';
   h+=txt(X0-14,Y1,'来た・ある',{a:'end',fs:15,c:CB[1]})+txt(X0-14,Y2,'へらした',{a:'end',fs:15,c:'#2f6f37'});
