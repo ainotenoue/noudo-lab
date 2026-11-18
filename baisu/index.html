@@ -125,28 +125,39 @@ const PROBLEMS=[
   {mode:'spend',na:'姉',nb:'妹',A0:1500,B0:900,ta:2,tb:1,u:'円',st:10,tk:50,text:'姉は1500円、妹は900円持っています。2人とも同じ金額を使ったところ、姉と妹の金額の比は2：1になりました。2人は何円ずつ使いましたか？'},
   {mode:'give',na:'赤',nb:'白',A0:70,B0:50,ta:2,tb:3,u:'個',st:1,tk:5,v:'ぬりかえる',fq:'赤玉を白くぬりかえても',text:'赤玉が70個、白玉が50個あります。赤玉の何個かを白くぬりかえたところ、赤玉と白玉の個数の比は2：3になりました。赤玉を何個ぬりかえましたか？'},
   {mode:'recv',na:'A',nb:'B',A0:2000,B0:1200,ta:3,tb:2,u:'円',st:10,tk:100,text:'Aさんは2000円、Bさんは1200円持っています。2人とも同じ金額をもらったところ、AさんとBさんの金額の比は3：2になりました。2人は何円ずつもらいましたか？'},
-  {mode:'give',na:'兄',nb:'弟',A0:1800,B0:1200,ta:2,tb:3,u:'円',st:10,tk:100,text:'兄は1800円、弟は1200円持っています。兄が弟にいくらかあげたところ、兄と弟の金額の比は2：3になりました。兄は弟に何円あげましたか？'}
+  {mode:'give',na:'兄',nb:'弟',A0:1800,B0:1200,ta:2,tb:3,u:'円',st:10,tk:100,text:'兄は1800円、弟は1200円持っています。兄が弟にいくらかあげたところ、兄と弟の金額の比は2：3になりました。兄は弟に何円あげましたか？'},
+  /* 入口：片方だけ変わる（ch … 変わる方 'a'/'b'、sg … ふえる＋1／へる－1） */
+  {mode:'one',ch:'a',sg:-1,na:'兄',nb:'弟',A0:1000,B0:600,ta:4,tb:3,u:'円',st:10,tk:50,v:'使う',fq:'兄だけが使っても',text:'兄は1000円、弟は600円持っています。兄だけがいくらか使ったところ、兄と弟の金額の比は4：3になりました。兄は何円使いましたか？'},
+  {mode:'one',ch:'b',sg:1,na:'赤',nb:'白',A0:60,B0:40,ta:2,tb:3,u:'個',st:1,tk:5,v:'加える',fq:'白玉だけを加えても',text:'赤玉が60個、白玉が40個あります。白玉だけを何個か加えたところ、赤玉と白玉の個数の比は2：3になりました。白玉を何個加えましたか？'}
 ];
-PROBLEMS.forEach(p=>p.tag=p.mode==='give'?'和が変わらない':'差が変わらない');
+PROBLEMS.forEach(p=>p.tag=p.mode==='one'?'片方だけ変わる':p.mode==='give'?'和が変わらない':'差が変わらない');
+/* 難しさの順に並べかえ（数字は上の並びの番号） */
+const ORDER=[6, 7, 0, 5, 3, 1, 4, 2];
+(a=>{PROBLEMS.length=0;PROBLEMS.push(...a);})(ORDER.map(i=>PROBLEMS[i]));
+const ONE=()=>P.mode==='one';
+const cN=()=>P.ch==='a'?P.nb:P.na, cV=()=>P.ch==='a'?P.B0:P.A0, cT=()=>P.ch==='a'?P.tb:P.ta;   // 変わらない方
+const vN=()=>P.ch==='a'?P.na:P.nb, vV=()=>P.ch==='a'?P.A0:P.B0, vT=()=>P.ch==='a'?P.ta:P.tb;   // 変わる方
 const give=()=>P.mode==='give';
 const S0=()=>P.A0+P.B0, D0=()=>P.A0-P.B0;
-const U1=()=>give()?S0()/(P.ta+P.tb):D0()/(P.ta-P.tb);   // 1つ分
-const AB=x=>P.mode==='give'?[P.A0-x,P.B0+x]:P.mode==='recv'?[P.A0+x,P.B0+x]:[P.A0-x,P.B0-x];
-const ans=()=>P.mode==='give'?P.A0-U1()*P.ta:P.mode==='recv'?U1()*P.tb-P.B0:P.B0-U1()*P.tb;
-const tmax=()=>P.mode==='give'?P.A0:P.mode==='spend'?P.B0:Math.ceil(ans()*1.6/P.tk)*P.tk;
+const U1=()=>ONE()?cV()/cT():give()?S0()/(P.ta+P.tb):D0()/(P.ta-P.tb);   // 1つ分
+const AB=x=>ONE()?(P.ch==='a'?[P.A0+P.sg*x,P.B0]:[P.A0,P.B0+P.sg*x]):P.mode==='give'?[P.A0-x,P.B0+x]:P.mode==='recv'?[P.A0+x,P.B0+x]:[P.A0-x,P.B0-x];
+const ans=()=>ONE()?Math.abs(U1()*vT()-vV()):P.mode==='give'?P.A0-U1()*P.ta:P.mode==='recv'?U1()*P.tb-P.B0:P.B0-U1()*P.tb;
+const tmax=()=>ONE()?(P.sg<0?vV():Math.ceil(ans()*1.6/P.tk)*P.tk):P.mode==='give'?P.A0:P.mode==='spend'?P.B0:Math.ceil(ans()*1.6/P.tk)*P.tk;
 const snap=v=>Math.round(v/P.st)*P.st, tickStep=()=>P.tk, keyStep=()=>P.st;
 const verb=()=>P.v||({give:'あげる',recv:'もらう',spend:'使う'})[P.mode];
 const sliderName=()=>verb();
 const tlabel=()=>t+P.u;
-const rightIsAdd=()=>give();
+const rightIsAdd=()=>ONE()||give();
 const firstQ=()=>P.fq?P.fq+'、変わらないのは？':({give:P.na+'が'+P.nb+'にあげても',recv:'2人とも同じだけもらっても',spend:'2人とも同じだけ使っても'})[P.mode]+'、変わらないのは？';
-const firstOpts=()=>['2人の和 '+P.A0+'＋'+P.B0+'＝'+S0()+P.u,'2人の差 '+P.A0+'－'+P.B0+'＝'+D0()+P.u];
-const pickedQ=()=>give()?fxRow('1つ分','#3f9b4a',[[S0(),'和（変わらない）'],['÷'],[P.ta+P.tb,'比の和 '+P.ta+'＋'+P.tb],['＝'],[U1()+P.u]])
+const firstOpts=()=>ONE()?[cN()+'の'+(P.u==='円'?'金額 ':'数 ')+cV()+P.u,(P.u==='個'?'2つの和 ':'2人の和 ')+P.A0+'＋'+P.B0+'＝'+S0()+P.u]:['2人の和 '+P.A0+'＋'+P.B0+'＝'+S0()+P.u,'2人の差 '+P.A0+'－'+P.B0+'＝'+D0()+P.u];
+const pickedQ=()=>ONE()?fxRow('1つ分','#3f9b4a',[[cV(),cN()+'（変わらない）'],['÷'],[cT(),'比の'+cT()],['＝'],[U1()+P.u]]):give()?fxRow('1つ分','#3f9b4a',[[S0(),'和（変わらない）'],['÷'],[P.ta+P.tb,'比の和 '+P.ta+'＋'+P.tb],['＝'],[U1()+P.u]])
                         :fxRow('1つ分','#3f9b4a',[[D0(),'差（変わらない）'],['÷'],[P.ta-P.tb,'比の差 '+P.ta+'－'+P.tb],['＝'],[U1()+P.u]]);
 const pickedMsg=()=>'つまみで'+verb()+(P.u==='円'?'金額':'個数')+'を動かして、比を '+P.ta+'：'+P.tb+' に';
-const wrongMsg=()=>give()?P.na+'がへった分だけ'+P.nb+'がふえる。合わせた数は同じだよ':'2人とも同じだけふえる（へる）と、差は同じだよ';
+const wrongMsg=()=>ONE()?'変わるのは'+vN()+'だけ。'+cN()+'はそのままだよ':give()?P.na+'がへった分だけ'+P.nb+'がふえる。合わせた数は同じだよ':'2人とも同じだけふえる（へる）と、差は同じだよ';
 const checkHead=()=>'できた！ 答え '+ans()+P.u;
 const checkLine=()=>{
+  if(ONE()){const u1=U1(),v1=u1*vT();
+    return '<div class="fxpair">'+fx([[cV(),cN()],['÷'],[cT(),'比の'+cT()],['＝'],[u1+P.u]])+'<div class="op">→</div>'+fx(P.sg<0?[[vV(),'はじめの'+vN()],['－'],[v1,'あとの'+vN()+'（'+vT()+'つ分）'],['＝'],[ans()+P.u]]:[[v1,'あとの'+vN()+'（'+vT()+'つ分）'],['－'],[vV(),'はじめの'+vN()],['＝'],[ans()+P.u]])+'</div>';}
   const u1=U1(),a1=u1*P.ta,b1=u1*P.tb;
   const left=give()?fx([[S0(),'和'],['÷'],[P.ta+P.tb,'比の和'],['＝'],[u1+P.u]]):fx([[D0(),'差'],['÷'],[P.ta-P.tb,'比の差'],['＝'],[u1+P.u]]);
   const right=P.mode==='give'?fx([[P.A0,'はじめの'+P.na],['－'],[a1,'あとの'+P.na+'（'+P.ta+'つ分）'],['＝'],[ans()+P.u]])
@@ -175,7 +186,25 @@ const seg=(x,w,y,c,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-BH/2)+'" wid
 const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;};
 
 const X0=110,XW=450,Y1=92,Y2=158,Y3=222;
+function drawOne(){
+  const ok=solved(),[a,b]=AB(t),k=XW/Math.max(P.A0,P.B0,...AB(tmax()));let h='';
+  h+=txt(X0-14,Y1,P.na,{a:'end',fs:16,c:CB[1]})+txt(X0-14,Y2,P.nb,{a:'end',fs:16,c:CP[1]});
+  h+=seg(X0,a*k,Y1,CB,a,'#24617a')+seg(X0,b*k,Y2,CP,b,'#8a3d55');
+  const v0=vV(),yv=P.ch==='a'?Y1:Y2,cur=P.ch==='a'?a:b;
+  if(cur<v0)h+=seg(X0+cur*k,(v0-cur)*k,yv,CO,P.sg<0?'－'+(v0-cur):'','#9a5a12',true);
+  else if(cur>v0)h+='<line x1="'+(X0+v0*k)+'" y1="'+(yv-BH/2-6)+'" x2="'+(X0+v0*k)+'" y2="'+(yv+BH/2+6)+'" stroke="#9a5a12" stroke-width="2.5" stroke-dasharray="4 4"/>'+txt(X0+(v0+(cur-v0)/2)*k,yv-BH/2-12,'＋'+(cur-v0),{fs:14,c:'#9a5a12'});
+  h+=txt(X0-14,(P.ch==='a'?Y2:Y1)+22,'変わらない',{a:'end',fs:12,c:'#3f9b4a',fw:700});
+  if(picked){const yc=P.ch==='a'?Y2:Y1,n=Math.max(P.ta,P.tb);for(let i=1;i<=n;i++){const xx=X0+U1()*i*k;if(xx>X0+XW+30)break;h+='<line x1="'+xx+'" y1="'+(Y1-BH/2-6)+'" x2="'+xx+'" y2="'+(Y2+BH/2+6)+'" stroke="#3f9b4a" stroke-width="2.5" stroke-dasharray="4 4"/>';}
+    h+=txt(X0+U1()*k/2,Y2+BH/2+18,'1つ分 '+U1()+P.u,{fs:13,c:'#3f9b4a',fw:700});}
+  const g=gcd(a,b),ra=a/g,rb=b/g;
+  if(ok)h+=pill(880,40,P.ta+'：'+P.tb+'！');
+  h+=step(92,cN()+'は同じ','#e8a24f',[[cV()+P.u,cN()]]);
+  h+=step(164,'いまの比','#9a5a12',[[a,P.na],['：'],[b,P.nb],['＝'],[(a>0&&b>0)?ra+'：'+rb:'－']]);
+  h+=step(236,'めあて','#3f9b4a',[[P.ta+'：'+P.tb,'あとの比']]);
+  return h;
+}
 function draw(){
+  if(ONE())return drawOne();
   const ok=solved(),[a,b]=AB(t);let h='';
   const mx=give()?S0():Math.max(P.A0+(P.mode==='recv'?tmax():0),1),k=XW/mx;
   h+=txt(X0-14,Y1,P.na,{a:'end',fs:16,c:CB[1]})+txt(X0-14,Y2,P.nb,{a:'end',fs:16,c:CP[1]});
@@ -202,6 +231,8 @@ function draw(){
 
 let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){done={};}
 const saveDone=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
+/* 並べかえ前の記録（✓）を、新しい順番に移す */
+try{if(localStorage.getItem(KEY+'-order')!=='v2'){const nd={};for(const k in done){const j=ORDER.indexOf(+k);if(j>=0&&done[k])nd[j]=1;}done=nd;saveDone();localStorage.setItem(KEY+'-order','v2');}}catch(e){}
 const solved=()=>picked&&Math.abs(t-ans())<1e-9;
 /* ===== 効果音（Web Audio） ===== */
 let actx=null;

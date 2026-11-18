@@ -132,26 +132,40 @@ const PROBLEMS=[
    hint:'1割引きは「定価の」1割。原価の割合に0.9をかけるよ',text:'原価に2割の利益をのせて定価をつけ、定価の1割引きで売ったところ、売値は1080円になりました。原価は何円ですか？'},
   {tag:'○割引き',base:'定価',cmp:'売値',known:2400,n:8,d:10,rs:'0.8',cells:10,unitName:'1割',u:'円',st:10,tk:100,
    q1:'2割引きの売値は、定価の何倍？',f:['1＋0.2＝1.2倍','1－0.2＝0.8倍'],right:2,rtok:[['1','定価'],['－'],['0.2','2割'],['＝'],['0.8倍']],
-   hint:'2割「引き」だから、定価（1）から0.2を引くよ',text:'セールで、くつを定価の2割引きで買ったら2400円でした。くつの定価は何円ですか？'}
+   hint:'2割「引き」だから、定価（1）から0.2を引くよ',text:'セールで、くつを定価の2割引きで買ったら2400円でした。くつの定価は何円ですか？'},
+  /* 入口：もとがわかっていて、くらべる量を求める（kind:'fwd'、つまみは くらべる量） */
+  {kind:'fwd',tag:'定価を求める',base:'原価',cmp:'定価',known:1000,n:13,d:10,rs:'1.3',cells:10,unitName:'1割',u:'円',st:10,tk:100,
+   q1:'3割の利益を見こんだ定価は、原価の何倍？',f:['1＋0.3＝1.3倍','1－0.3＝0.7倍'],right:1,rtok:[['1','原価'],['＋'],['0.3','3割'],['＝'],['1.3倍']],
+   hint:'利益を「見こむ」と、原価（1）より0.3ふえるよ',text:'原価1000円の品物に、3割の利益を見こんで定価をつけました。定価は何円ですか？'},
+  {kind:'fwd',tag:'売値を求める',base:'定価',cmp:'売値',known:2000,n:8,d:10,rs:'0.8',cells:10,unitName:'1割',u:'円',st:10,tk:100,
+   q1:'2割引きの売値は、定価の何倍？',f:['1＋0.2＝1.2倍','1－0.2＝0.8倍'],right:2,rtok:[['1','定価'],['－'],['0.2','2割'],['＝'],['0.8倍']],
+   hint:'2割「引き」だから、定価（1）から0.2を引くよ',text:'定価2000円の品物を、定価の2割引きで売りました。売値は何円ですか？'},
+  {kind:'fwd',tag:'利益を求める',base:'原価',cmp:'利益',known:1500,n:2,d:10,rs:'0.2',cells:10,unitName:'1割',u:'円',st:10,tk:50,
+   q1:'2割の利益は、原価の何倍？',f:['0.2倍','1＋0.2＝1.2倍'],right:1,rtok:[['0.2','2割'],['＝'],['0.2倍']],
+   hint:'1.2倍は「売値」。利益は、ふえた分の0.2だけだよ',text:'原価1500円の品物を、原価の2割の利益をのせて売りました。利益は何円ですか？'}
 ];
+const FWD=()=>P.kind==='fwd';
+/* 難しさの順に並べかえ（数字は上の並びの番号） */
+const ORDER=[6,7,8,0,5,1,3,2,4];
+(a=>{PROBLEMS.length=0;PROBLEMS.push(...a);})(ORDER.map(i=>PROBLEMS[i]));
 
 /* 問題の項目
    base … もとにする量の名前（つまみで動かす）　cmp … くらべる量の名前　known … くらべる量（わかっている）
    n/d … 割合（くらべる量 ＝ もと × n/d）　rs … 割合の書き方　cells … もとの帯を何こに区切るか
    q1 … 初動の問い　f … 選択肢 [①,②]　right … 正しいのが① なら 1　rtok … 割合の式 */
-const ans=()=>P.known*P.d/P.n;
+const ans=()=>FWD()?P.known*P.n/P.d:P.known*P.d/P.n;
 const tmin=()=>0, tmax=()=>Math.ceil(ans()*1.5/P.tk)*P.tk, t0=()=>snap(ans()*0.4);
 const snap=v=>Math.round(v/P.st)*P.st, tickStep=()=>P.tk, keyStep=()=>P.st;
-const sliderName=()=>P.base;
+const sliderName=()=>FWD()?P.cmp:P.base;
 const tlabel=()=>t+P.u;
 const rightIsAdd=()=>P.right===1;
 const firstQ=()=>P.q1;
 const firstOpts=()=>P.f;
 const pickedQ=()=>fxRow(P.cmp+'は','#3f9b4a',P.rtok);
-const pickedMsg=()=>'つまみで'+P.base+'を動かして、'+P.cmp+'を'+P.known+P.u+'に';
+const pickedMsg=()=>FWD()?'つまみで'+P.cmp+'を動かして、'+P.base+'の'+P.rs+'倍に':'つまみで'+P.base+'を動かして、'+P.cmp+'を'+P.known+P.u+'に';
 const wrongMsg=()=>P.hint;
-const checkHead=()=>'できた！ 答え '+P.base+' '+ans()+P.u;
-const checkLine=()=>fx([[P.known,P.cmp],['÷'],[P.rs,'割合'],['＝'],[ans()+P.u]]);
+const checkHead=()=>'できた！ 答え '+(FWD()?P.cmp:P.base)+' '+ans()+P.u;
+const checkLine=()=>FWD()?fx([[P.known,P.base],['×'],[P.rs,'割合'],['＝'],[ans()+P.u]]):fx([[P.known,P.cmp],['÷'],[P.rs,'割合'],['＝'],[ans()+P.u]]);
 const r1=v=>Math.round(v*10)/10;
 
 /* 右の計算の1行（数字の下に、その数字が何か） */
@@ -174,7 +188,25 @@ const seg=(x,w,y,c,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-BH/2)+'" wid
 const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;};
 
 const X0=120,XW=480,Y1=110,Y2=196;
+function drawFwd(){
+  const ok=solved(),R=P.n/P.d,k=(XW-100)/Math.max(P.known,tmax()),cw=P.known*k/P.cells;let h='';
+  h+=txt(X0-14,Y1,P.base,{a:'end',fs:16,c:CB[1]})+txt(X0-14,Y2,P.cmp,{a:'end',fs:16,c:'#2f6f37'});
+  for(let i=0;i<P.cells;i++)h+='<rect x="'+(X0+i*cw)+'" y="'+(Y1-BH/2)+'" width="'+cw+'" height="'+BH+'" fill="'+CB[0]+'" stroke="#fff" stroke-width="2"/>';
+  h+='<rect x="'+X0+'" y="'+(Y1-BH/2)+'" width="'+(P.known*k)+'" height="'+BH+'" rx="6" fill="none" stroke="'+CB[1]+'" stroke-width="2.5"/>'+txt(X0+P.known*k+10,Y1,P.known+P.u+'（1）',{a:'start',fs:16,c:CB[1]});
+  // 1割ずつの目もり（下の段にも）
+  const mx=Math.ceil(Math.max(t,ans())*1.05/(P.known/P.cells));
+  for(let i=1;i<=mx;i++){const x=X0+i*cw;if(x>X0+XW+20)break;h+='<line x1="'+x+'" y1="'+(Y1+BH/2+4)+'" x2="'+x+'" y2="'+(Y2+BH/2+4)+'" stroke="#d6cfc2" stroke-width="2" stroke-dasharray="2 5"/>';}
+  h+=seg(X0,t*k,Y2,CG,t?t+P.u:'','#2f6f37');
+  h+=txt(X0,52,P.base+'を 1 として、'+P.cells+'こに分けると 1こ＝'+P.unitName+'（'+P.known/P.cells+P.u+'）',{a:'start',fs:15,c:'#7b766d',fw:700});
+  if(ok)h+=pill(880,40,'ぴったり！');
+  const r=Math.round(t/P.known*1000)/1000;
+  h+=step(92,P.cmp+'は','#3f9b4a',P.rtok);
+  h+=step(164,'いま','#e8a24f',[[t,P.cmp],['÷'],[P.known,P.base],['＝'],[r+'倍']]);
+  h+=step(236,'めあて','#9a5a12',[[P.rs+'倍',P.base+'の']]);
+  return h;
+}
 function draw(){
+  if(FWD())return drawFwd();
   const ok=solved(),R=P.n/P.d,k=XW/(tmax()*Math.max(1,R)),cur=t*R;let h='';
   h+=txt(X0-14,Y1,P.base,{a:'end',fs:16,c:CB[1]})+txt(X0-14,Y2,P.cmp,{a:'end',fs:16,c:'#2f6f37'});
   // もと（1）を cells こに区切る
@@ -199,6 +231,8 @@ function draw(){
 
 let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){done={};}
 const saveDone=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
+/* 並べかえ前の記録（✓）を、新しい順番に移す */
+try{if(localStorage.getItem(KEY+'-order')!=='v2'){const nd={};for(const k in done){const j=ORDER.indexOf(+k);if(j>=0&&done[k])nd[j]=1;}done=nd;saveDone();localStorage.setItem(KEY+'-order','v2');}}catch(e){}
 const solved=()=>picked&&Math.abs(t-ans())<1e-9;
 /* ===== 効果音（Web Audio） ===== */
 let actx=null;
