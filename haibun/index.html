@@ -124,27 +124,41 @@ const PROBLEMS=[
   {nb:'姉',ns:'妹',m:3,e:-400,S:2000,u:'円',st:10,tk:50,text:'姉と妹の貯金は、合わせて2000円です。姉の貯金は妹の3倍より400円少ないです。妹の貯金は何円ですか？'},
   {nb:'A',ns:'B',m:4,e:-5,S:100,u:'',st:1,tk:5,text:'2つの数A、Bがあります。AとBの和は100で、AはBの4倍より5小さいです。Bはいくつですか？'},
   {nb:'男子',ns:'女子',m:2,e:-30,S:150,u:'人',st:1,tk:5,text:'ある学校の男子と女子は、合わせて150人です。男子は女子の2倍より30人少ないです。女子は何人ですか？'},
-  {nb:'A',ns:'B',m:3,e:2,S:58,u:'個',st:1,tk:2,text:'みかん58個を、AとBの2人で分けます。AはBの3倍より2個多くもらいます。Bは何個もらいますか？'}
+  {nb:'A',ns:'B',m:3,e:2,S:58,u:'個',st:1,tk:2,text:'みかん58個を、AとBの2人で分けます。AはBの3倍より2個多くもらいます。Bは何個もらいますか？'},
+  /* 3人バージョン：r … [名前, もとにする人の何倍, ＋いくつ]（もとにする人は [名前,1,0]）、b … もとにする人の番号 */
+  {r:[['A',2,0],['B',1,0],['C',1,300]],b:1,S:1500,u:'円',st:10,tk:50,text:'1500円を、A、B、Cの3人で分けます。AはBの2倍、CはBより300円多くなるようにします。Bは何円ですか？'},
+  {r:[['A',3,0],['B',2,20],['C',1,0]],b:2,S:200,u:'',st:1,tk:5,text:'3つの数A、B、Cの和は200です。AはCの3倍、BはCの2倍より20大きいです。Cはいくつですか？'},
+  {r:[['みかん',2,-10],['なし',1,20],['りんご',1,0]],b:2,S:130,u:'個',st:1,tk:5,text:'りんご、みかん、なしが合わせて130個あります。みかんはりんごの2倍より10個少なく、なしはりんごより20個多いです。りんごは何個ですか？'},
+  {r:[['姉',3,0],['兄',2,-400],['弟',1,0]],b:2,S:4400,u:'円',st:10,tk:100,text:'姉、兄、弟の3人のおこづかいは、合わせて4400円です。姉は弟の3倍、兄は弟の2倍より400円少ないです。弟のおこづかいは何円ですか？'}
 ];
-PROBLEMS.forEach(p=>p.tag=p.e>0?'多い分をのぞく':'たりない分をたす');
-const plus=()=>P.e>0, E=()=>Math.abs(P.e);
-const SD=()=>P.S-P.e;                           // そろえた合計（Bの m＋1 つ分）
-const N=()=>P.m+1;
+PROBLEMS.forEach(p=>p.tag=p.r?'3人：'+p.r[p.b][0]+'の何つ分？':p.e>0?'多い分をのぞく':'たりない分をたす');
+/* ===== 3人バージョン ===== */
+const T3=()=>!!P.r;
+const bn=()=>P.r[P.b][0];
+const eSum=()=>P.r.reduce((a,x)=>a+x[2],0);
+const mSum=()=>P.r.reduce((a,x)=>a+x[1],0);
+const withE=()=>P.r.filter(x=>x[2]!==0);
+const expr3=flip=>{let s=String(P.S),v=P.S;withE().forEach(x=>{const e=x[2]*(flip?-1:1);s+=(e>0?'－':'＋')+Math.abs(e);v-=e;});return s+'＝'+v+P.u;};
+const toks3=()=>{const a=[[P.S,'合計']];withE().forEach(x=>{a.push([x[2]>0?'－':'＋']);a.push([Math.abs(x[2]),x[0]+(x[2]>0?'の多い分':'の不足')]);});return a;};
+const rel3=x=>x[0]+'＝'+bn()+(x[1]>1?'×'+x[1]:'')+(x[2]>0?'＋'+x[2]:x[2]<0?'－'+(-x[2]):'');
+const plus=()=>T3()?eSum()>0:P.e>0, E=()=>T3()?Math.abs(eSum()):Math.abs(P.e);
+const SD=()=>T3()?P.S-eSum():P.S-P.e;                           // そろえた合計（Bの m＋1 つ分）
+const N=()=>T3()?mSum():P.m+1;
 const ans=()=>SD()/N();
-const tmin=()=>plus()?0:Math.ceil(E()/P.m/P.st)*P.st;   // Aがマイナスにならないところから
+const tmin=()=>T3()?Math.ceil(Math.max(0,...P.r.map(x=>-x[2]/x[1]))/P.st)*P.st:plus()?0:Math.ceil(E()/P.m/P.st)*P.st;   // Aがマイナスにならないところから
 const tmax=()=>Math.ceil(ans()*1.3/P.st)*P.st;
 const snap=v=>Math.round(v/P.st)*P.st, tickStep=()=>P.tk, keyStep=()=>P.st;
-const sliderName=()=>P.ns;
+const sliderName=()=>T3()?bn():P.ns;
 const tlabel=()=>t+P.u;
 const rightIsAdd=()=>!plus();
-const firstQ=()=>P.nb+'を「'+P.ns+'の'+P.m+'倍」ちょうどにそろえると、合計は？';
-const firstOpts=()=>[P.S+'＋'+E()+'＝'+(P.S+E())+P.u,P.S+'－'+E()+'＝'+(P.S-E())+P.u];
-const pickedQ=()=>fxRow('そろえた合計','#3f9b4a',[[P.S,'合計'],[plus()?'－':'＋'],[E(),plus()?'多い分':'たりない分'],['＝'],[SD()+P.u]]);
-const pickedMsg=()=>'それは'+P.ns+'の'+N()+'つ分。つまみで'+P.ns+'を動かそう';
-const wrongMsg=()=>plus()?P.nb+'は'+P.m+'倍より'+E()+P.u+'多い。その分をのぞくと、ちょうど'+P.m+'倍になるよ'
+const firstQ=()=>T3()?'みんなを「'+bn()+'の何つ分」ちょうどにそろえると、合計は？':P.nb+'を「'+P.ns+'の'+P.m+'倍」ちょうどにそろえると、合計は？';
+const firstOpts=()=>T3()?(rightIsAdd()?[expr3(false),expr3(true)]:[expr3(true),expr3(false)]):[P.S+'＋'+E()+'＝'+(P.S+E())+P.u,P.S+'－'+E()+'＝'+(P.S-E())+P.u];
+const pickedQ=()=>T3()?fxRow('そろえた合計','#3f9b4a',toks3().concat([['＝'],[SD()+P.u]])):fxRow('そろえた合計','#3f9b4a',[[P.S,'合計'],[plus()?'－':'＋'],[E(),plus()?'多い分':'たりない分'],['＝'],[SD()+P.u]]);
+const pickedMsg=()=>'それは'+sliderName()+'の'+N()+'つ分。つまみで'+sliderName()+'を動かそう';
+const wrongMsg=()=>T3()?'多い分は引いて、たりない分は足すと、みんなちょうど'+bn()+'の何つ分かになるよ':plus()?P.nb+'は'+P.m+'倍より'+E()+P.u+'多い。その分をのぞくと、ちょうど'+P.m+'倍になるよ'
                          :P.nb+'は'+P.m+'倍より'+E()+P.u+'少ない。その分をたすと、ちょうど'+P.m+'倍になるよ';
-const checkHead=()=>'できた！ 答え '+P.ns+' '+ans()+P.u;
-const checkLine=()=>fx([[SD(),'そろえた合計'],['÷'],[N(),P.ns+'の'+N()+'つ分'],['＝'],[ans()+P.u]]);
+const checkHead=()=>'できた！ 答え '+sliderName()+' '+ans()+P.u;
+const checkLine=()=>fx([[SD(),'そろえた合計'],['÷'],[N(),sliderName()+'の'+N()+'つ分'],['＝'],[ans()+P.u]]);
 
 /* ===== 図（線分図） ===== */
 const X0=130,XW=480,Y1=112,Y2=196,BH=34;
@@ -164,6 +178,7 @@ function step(y,tag,col,toks,bw){
 }
 const seg=(x,w,y,c,lab,lc,dash)=>w<=0.5?'':'<rect x="'+x+'" y="'+(y-BH/2)+'" width="'+w+'" height="'+BH+'" rx="6" fill="'+(dash?'#fff':c[0])+'" stroke="'+c[1]+'" stroke-width="2.5"'+(dash?' stroke-dasharray="6 5"':'')+'/>'+(lab!==''&&lab!=null&&w>34?txt(x+w/2,y+1,lab,{fs:15,c:lc||c[1]}):'');
 function draw(){
+  if(T3())return draw3();
   const T=tmax(),k=XW/(P.m*T+Math.max(P.e,0)),ok=solved();
   let h='';
   h+=txt(X0-80,40,'合計',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(X0-36,40,P.S+P.u,{a:'start',fs:20});
@@ -187,6 +202,29 @@ function draw(){
   if(ok)h+=pill(880,40,'ぴったり！');
   h+=step(92,'そろえた合計','#3f9b4a',[[P.S,'合計'],[plus()?'－':'＋'],[E(),plus()?'多い分':'たりない分'],['＝'],[SD()+P.u]]);
   h+=step(164,'いま','#e8a24f',[[t,P.ns],['×'],[N(),P.ns+'の'+N()+'つ分'],['＝'],[cur+P.u]]);
+  h+=step(236,'ずれ','#9a5a12',[[SD(),'そろえた合計'],['－'],[cur,'いま'],['＝'],[d+P.u]]);
+  return h;
+}
+
+/* 3人の線分図：もとにする人の「1つ分」を、みんなの段にならべる */
+function draw3(){
+  const T=tmax(),mm=Math.max(...P.r.map(x=>x[1])),k=XW/(mm*T+Math.max(0,...P.r.map(x=>x[2]))),ok=solved(),YS=[86,150,214];
+  const C3=[CB,['#c9f0c3','#3f9b4a'],CP];let h='';
+  h+=txt(X0-80,36,'合計',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(X0-36,36,P.S+P.u,{a:'start',fs:20});
+  h+=txt(X0+90,36,P.r.filter((x,i)=>i!==P.b).map(rel3).join('　'),{a:'start',fs:16,c:'#2f3437'});
+  const u=t*k;
+  P.r.forEach((x,i)=>{const y=YS[i],c=C3[i],e=x[2];
+    h+=txt(X0-14,y,x[0],{a:'end',fs:16,c:c[1]});
+    for(let j=0;j<x[1];j++)h+=seg(X0+j*u,u,y,c,t);
+    if(e>0){h+=seg(X0+x[1]*u,e*k,y,DC,e*k>50?'＋'+e:'','#9a5a12',true);if(e*k<=50)h+=txt(X0+x[1]*u+e*k/2,y-BH/2-10,'＋'+e,{fs:14,c:'#9a5a12'});}
+    else if(e<0){const xe=X0+x[1]*u+e*k;if(xe>X0)h+='<rect x="'+xe+'" y="'+(y-BH/2)+'" width="'+(-e*k)+'" height="'+BH+'" rx="6" fill="#fff" stroke="'+DIF+'" stroke-width="2.5" stroke-dasharray="6 5"/>'+txt(xe-e*k/2,-e*k>50?y+1:y-BH/2-10,'－'+(-e),{fs:14,c:'#9a5a12'});}
+  });
+  for(let j=1;j<=mm;j++)h+='<line x1="'+(X0+j*u)+'" y1="'+(YS[0]+BH/2+2)+'" x2="'+(X0+j*u)+'" y2="'+(YS[2]-BH/2-2)+'" stroke="#d6cfc2" stroke-width="2" stroke-dasharray="2 5"/>';
+  h+=txt(X0+u/2,YS[2]+BH/2+20,'1つ分',{fs:13,c:'#9a9184',fw:700});
+  const cur=t*N(),d=SD()-cur;
+  if(ok)h+=pill(880,40,'ぴったり！');
+  h+=step(92,'そろえた','#3f9b4a',toks3().concat([['＝'],[SD()+P.u]]),74);
+  h+=step(164,'いま','#e8a24f',[[t,bn()],['×'],[N(),bn()+'の'+N()+'つ分'],['＝'],[cur+P.u]]);
   h+=step(236,'ずれ','#9a5a12',[[SD(),'そろえた合計'],['－'],[cur,'いま'],['＝'],[d+P.u]]);
   return h;
 }
