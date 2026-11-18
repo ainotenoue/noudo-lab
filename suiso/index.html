@@ -124,35 +124,47 @@ const PROBLEMS=[
   {seg:[[40,300]],h0:36,ins:[],outs:[1200],goal:0,tag:'出す',text:'底面積300cm²の水そうに、深さ36cmまで水が入っています。毎分1.2L（1200cm³）ずつ水を出すと、何分で空になりますか？'},
   {seg:[[40,500]],h0:0,ins:[2000,1000],outs:[],goal:30,tag:'2本で入れる',text:'底面積500cm²の水そうに、A管から毎分2L、B管から毎分1Lの水を同時に入れます。水の深さが30cmになるのは何分後ですか？'},
   {seg:[[10,600],[20,1000]],h0:0,ins:[3000],outs:[],goal:25,tag:'段のある水そう',text:'下の段が底面積600cm²・高さ10cm、上の段が底面積1000cm²の水そうに、毎分3Lずつ水を入れます。深さが25cmになるのは何分後ですか？'},
-  {seg:[[40,400]],h0:40,ins:[2000],outs:[4000],goal:0,tag:'入れながら出す',text:'底面積400cm²、深さ40cmの水そうが満水です。毎分2Lずつ水を入れながら、毎分4Lずつ水を出すと、何分で空になりますか？'}
+  {seg:[[40,400]],h0:40,ins:[2000],outs:[4000],goal:0,tag:'入れながら出す',text:'底面積400cm²、深さ40cmの水そうが満水です。毎分2Lずつ水を入れながら、毎分4Lずつ水を出すと、何分で空になりますか？'},
+  /* グラフを読む：rd … 'rate'（毎分の水量を求める）／'base2'（上の段の底面積を求める）。pts … 示されたグラフの点 [分, cm] */
+  {rd:'rate',seg:[[30,600]],h0:0,ins:[0],outs:[],goal:25,pts:[[0,0],[10,25]],A:1500,T:14,lo:500,hi:3000,
+   tag:'グラフを読む',q1:'グラフから、1分で上がる高さは？',f:['25÷10＝2.5cm','10÷25＝0.4cm'],right:1,pk:[[25,'上がった高さ'],['÷'],[10,'分'],['＝'],['2.5cm']],
+   hint:'高さ ÷ 時間 で、1分あたりの高さになるよ',cl:[[600,'底面積'],['×'],[2.5,'1分で上がる'],['＝'],['1500cm³']],ansText:'毎分1.5L',
+   text:'底面積600cm²の水そうに、一定の割合で水を入れます。グラフは時間と水の深さを表したもので、10分で深さが25cmになりました。毎分何Lの水を入れていますか？'},
+  {rd:'base2',seg:[[10,1200],[18,2000]],h0:0,ins:[3000],outs:[],goal:28,pts:[[0,0],[4,10],[16,28]],A:2000,T:20,lo:500,hi:4000,
+   tag:'グラフの折れ目',q1:'グラフの折れ目から、上の段に水が入ったのは？',f:['16－4＝12分で、28－10＝18cm上がった','16分で28cm上がった'],right:1,pk:[[3000,'1分の水'],['×'],[12,'分'],['＝'],['36000cm³（上の段）']],
+   hint:'折れ目（4分・10cm）までは下の段。上の段は折れ目から先だよ',cl:[[36000,'上の段の水'],['÷'],[18,'上がった高さ'],['＝'],['2000cm²']],ansText:'2000cm²',
+   text:'下の段と上の段がある水そうに、毎分3Lずつ水を入れます。グラフは時間と深さを表したもので、4分で深さ10cm（下の段がいっぱい）、16分で深さ28cm（満水）になりました。上の段の底面積は何cm²ですか？'}
 ];
+const RD=()=>!!P.rd;
 const IN=()=>P.ins.reduce((s,x)=>s+x,0), OUT=()=>P.outs.reduce((s,x)=>s+x,0), NET=()=>IN()-OUT();
 const HMAX=()=>P.seg.reduce((s,x)=>s+x[0],0);
 const volAt=h=>{let v=0,b=0;for(const [sh,ba] of P.seg){const d=Math.min(Math.max(h-b,0),sh);v+=d*ba;b+=sh;}return v;};
 const hAt=v=>{let b=0;for(const [sh,ba] of P.seg){if(v<=sh*ba)return b+v/ba;v-=sh*ba;b+=sh;}return HMAX();};
 const level=tt=>hAt(Math.max(0,Math.min(volAt(HMAX()),volAt(P.h0)+NET()*tt)));
-const ans=()=>(volAt(P.goal)-volAt(P.h0))/NET();
-const tmin=()=>0, tmax=()=>Math.ceil(ans()*1.4)+1;
-const snap=v=>Math.round(v), tickStep=()=>1, keyStep=()=>1;
-const sliderName=()=>'時間';
-const tlabel=()=>t+'分';
+const ans=()=>RD()?P.A:(volAt(P.goal)-volAt(P.h0))/NET();
+const tmin=()=>RD()?P.lo:0, tmax=()=>RD()?P.hi:Math.ceil(ans()*1.4)+1, t0=()=>RD()?P.lo:0;
+const snap=v=>RD()?Math.round(v/100)*100:Math.round(v), tickStep=()=>RD()?500:1, keyStep=()=>RD()?100:1;
+const sliderName=()=>RD()?(P.rd==='rate'?'毎分の水':'上の段'):'時間';
+const tlabel=()=>RD()?(P.rd==='rate'?'毎分'+t/1000+'L':t+'cm²'):t+'分';
 const segOf=h=>{let b=0;for(let i=0;i<P.seg.length;i++){if(h<b+P.seg[i][0]||i===P.seg.length-1)return i;b+=P.seg[i][0];}return 0;};
 const two=()=>P.ins.length+P.outs.length>1;
 const top=()=>P.seg.length>1;
-const rightIsAdd=()=>top()||!two()||OUT()===0;
+const rightIsAdd=()=>RD()?P.right===1:top()||!two()||OUT()===0;
 const L=v=>v/1000+'L';
-const firstQ=()=>top()?'上の段では、1分で上がる高さは？':two()?'1分でふえる（へる）水は？':'1分で'+(NET()>0?'上がる':'下がる')+'高さは？';
+const firstQ=()=>RD()?P.q1:top()?'上の段では、1分で上がる高さは？':two()?'1分でふえる（へる）水は？':'1分で'+(NET()>0?'上がる':'下がる')+'高さは？';
 const firstOpts=()=>{
+  if(RD())return P.f;
   if(top()){const s=P.seg[1][1],b=P.seg[0][1];return [IN()+'÷'+s+'＝'+IN()/s+'cm',IN()+'÷'+b+'＝'+IN()/b+'cm'];}
   if(two()){const a=Math.max(IN(),OUT())===IN()?P.ins.concat(P.outs):P.outs.concat(P.ins);const x=a.map(L);return OUT()===0?[x.join('＋')+'＝'+L(IN()),x[0]+'－'+x[1]+'＝'+L(Math.abs(P.ins[0]-P.ins[1]))]:[x.join('＋')+'＝'+L(IN()+OUT()),x[0]+'－'+x[1]+'＝'+L(Math.abs(NET()))];}
   const v=Math.abs(NET()),b=P.seg[0][1];return [v+'÷'+b+'＝'+v/b+'cm',v+'×'+b+'＝'+v*b+'cm'];
 };
 const netTok=()=>{const t=[];P.ins.forEach((x,i)=>{if(i)t.push(['＋']);t.push([x,'入れる']);});P.outs.forEach((x,i)=>{t.push([P.ins.length?'－':(i?'＋':'')]);t.push([x,'出す']);});return t.filter(x=>x[0]!=='');};
-const pickedQ=()=>{const s=P.seg[top()?1:0][1];return fxRow('1分で','#3f9b4a',[[Math.abs(NET()),'1分の水（cm³）'],['÷'],[s,'底面積'],['＝'],[Math.abs(NET())/s+'cm '+(NET()>0?'上がる':'下がる')]]);};
-const pickedMsg=()=>P.goal?'つまみで時間を動かして、深さを'+P.goal+'cmに':'つまみで時間を動かして、空になるところをさがそう';
-const wrongMsg=()=>top()?'上の段は、底面積が'+P.seg[1][1]+'cm²。広いほどゆっくり上がるよ':two()?(OUT()?'入れる水から、出ていく水を引くよ':'2本とも入れるから、足すよ'):'高さ ＝ 水の量 ÷ 底面積 だよ';
-const checkHead=()=>'できた！ 答え '+ans()+'分';
+const pickedQ=()=>{if(RD())return fxRow(P.rd==='rate'?'1分で':'上の段の水','#3f9b4a',P.pk);const s=P.seg[top()?1:0][1];return fxRow('1分で','#3f9b4a',[[Math.abs(NET()),'1分の水（cm³）'],['÷'],[s,'底面積'],['＝'],[Math.abs(NET())/s+'cm '+(NET()>0?'上がる':'下がる')]]);};
+const pickedMsg=()=>RD()?(P.rd==='rate'?'つまみで毎分の水を動かして、グラフをぴったり重ねよう':'つまみで上の段の底面積を動かして、グラフを重ねよう'):P.goal?'つまみで時間を動かして、深さを'+P.goal+'cmに':'つまみで時間を動かして、空になるところをさがそう';
+const wrongMsg=()=>RD()?P.hint:top()?'上の段は、底面積が'+P.seg[1][1]+'cm²。広いほどゆっくり上がるよ':two()?(OUT()?'入れる水から、出ていく水を引くよ':'2本とも入れるから、足すよ'):'高さ ＝ 水の量 ÷ 底面積 だよ';
+const checkHead=()=>'できた！ 答え '+(RD()?P.ansText:ans()+'分');
 const checkLine=()=>{
+  if(RD())return fx(P.cl);
   if(top()){const b=P.seg[0],u=P.seg[1],t1=b[0]*b[1]/IN(),t2=(P.goal-b[0])*u[1]/IN();
     return '<div class="fxpair">'+fx([[b[0],'下の段（cm）'],['÷'],[IN()/b[1],'1分で（cm）'],['＝'],[t1+'分']])+'<div class="op">＋</div>'+fx([[P.goal-b[0],'上の段（cm）'],['÷'],[IN()/u[1],'1分で（cm）'],['＝'],[t2+'分']])+'</div>';}
   const r=Math.abs(NET())/P.seg[0][1];
@@ -192,7 +204,38 @@ function graph(gx,gy,gw,gh,T,Y,f,t,yl,xl,goal,ok){
   return h;
 }
 
+/* グラフを読む問題：示されたグラフ（点線）に、つまみで決めた水そうのグラフ（青）を重ねる */
+function simD(tt){
+  if(P.rd==='rate')return Math.min(P.seg[0][0],t*tt/P.seg[0][1]);
+  const [h1,b1]=P.seg[0],t1=h1*b1/P.ins[0];
+  return tt<=t1?P.ins[0]*tt/b1:Math.min(h1+P.seg[1][0],h1+P.ins[0]*(tt-t1)/t);
+}
+function givD(tt){const p=P.pts;for(let i=1;i<p.length;i++)if(tt<=p[i][0])return p[i-1][1]+(p[i][1]-p[i-1][1])*(tt-p[i-1][0])/(p[i][0]-p[i-1][0]);return p[p.length-1][1];}
+function drawRead(){
+  const ok=solved(),H=HMAX(),T=P.T,gx=330,gy=262,gw=270,gh=210,X=v=>gx+v/T*gw,Y=v=>gy-v/H*gh;let h='';
+  // 水そう（上の段の幅は つまみ で変わる）
+  const BY=262,hk=200/H,cx=150,wk=170/Math.max(P.hi,...P.seg.map(x=>x[1]));let b=0;
+  P.seg.forEach(([sh,ba],i)=>{const bb=(P.rd==='base2'&&i===1)?t:ba,w=bb*wk*(P.rd==='rate'?1.6:1),x=cx-w/2,y=BY-(b+sh)*hk;
+    h+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(sh*hk)+'" fill="#e8f5fa" stroke="#7b766d" stroke-width="3"/>';
+    h+=txt(cx,y+sh*hk/2,(P.rd==='base2'&&i===1?'？ → ':'')+bb+'cm²',{fs:12,c:'#24617a'});b+=sh;});
+  // グラフ
+  h+='<line x1="'+gx+'" y1="'+gy+'" x2="'+(gx+gw+8)+'" y2="'+gy+'" stroke="#7b766d" stroke-width="2"/><line x1="'+gx+'" y1="'+gy+'" x2="'+gx+'" y2="'+(gy-gh-8)+'" stroke="#7b766d" stroke-width="2"/>';
+  h+=txt(gx-6,gy-gh-16,'深さ(cm)',{a:'start',fs:12,c:'#7b766d',fw:700})+txt(gx+gw+10,gy+16,'時間(分)',{a:'end',fs:12,c:'#7b766d',fw:700});
+  P.pts.slice(1).forEach(([a,d])=>{h+='<line x1="'+X(a)+'" y1="'+gy+'" x2="'+X(a)+'" y2="'+Y(d)+'" stroke="#d6cfc2" stroke-width="1.5" stroke-dasharray="3 4"/><line x1="'+gx+'" y1="'+Y(d)+'" x2="'+X(a)+'" y2="'+Y(d)+'" stroke="#d6cfc2" stroke-width="1.5" stroke-dasharray="3 4"/>'+txt(X(a),gy+14,a,{fs:12,c:'#9a5a12'})+txt(gx-8,Y(d),d,{a:'end',fs:12,c:'#9a5a12'});});
+  h+='<path d="M'+P.pts.map(p=>X(p[0])+' '+Y(p[1])).join(' L')+'" fill="none" stroke="#e8a24f" stroke-width="6" stroke-linejoin="round" opacity=".55"/>';
+  if(picked){let p='';for(let i=0;i<=80;i++){const tt=T*i/80;p+=(i?' L':'M')+X(tt).toFixed(1)+' '+Y(simD(tt)).toFixed(1);}h+='<path d="'+p+'" fill="none" stroke="'+(ok?'#3f9b4a':'#3d9cc2')+'" stroke-width="3" stroke-linejoin="round"/>';}
+  h+=txt(gx+gw+8,gy-gh-16,'オレンジ＝問題　青＝つまみ',{a:'end',fs:12,c:'#7b766d',fw:700});
+  if(ok)h+=pill(880,40,'グラフがぴったり！');
+  const tl=P.pts[P.pts.length-1][0],sd=Math.round(simD(tl)*10)/10;
+  if(P.rd==='rate'){h+=step(92,'1分の水','#3d9cc2',[[t,'cm³']]);
+    h+=step(164,'1分で','#3f9b4a',[[t,'1分の水'],['÷'],[600,'底面積'],['＝'],[Math.round(t/600*100)/100+'cm']]);}
+  else{h+=step(92,'上の段の水','#3d9cc2',[[36000,'cm³']]);
+    h+=step(164,'上がる','#3f9b4a',[[36000,'上の段の水'],['÷'],[t,'底面積'],['＝'],[Math.round(36000/t*10)/10+'cm']]);}
+  h+=step(236,tl+'分で','#9a5a12',[[sd+'cm','つまみの水そう'],['→'],[P.pts[P.pts.length-1][1]+'cm','グラフ']]);
+  return h;
+}
 function draw(){
+  if(RD())return drawRead();
   const ok=solved(),H=HMAX(),hk=200/H,mb=Math.max(...P.seg.map(x=>x[1])),wk=170/mb,BY=250,cx=150;let h='';
   // 水そう（横から見た図）: 底面積が広いほど横に広く
   let b=0;const lv=level(t);

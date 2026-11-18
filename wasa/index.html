@@ -130,10 +130,17 @@ const PROBLEMS=[
   {n3:['A','B','C'],o:[500,200,0],k:2,S:2500,u:'円',st:10,tk:100,text:'A、B、Cの3人の所持金は、合わせて2500円です。AはBより300円多く、BはCより200円多いです。Cの所持金は何円ですか？'},
   {n3:['A','B','C'],o:[21,9,0],k:0,S:150,u:'',st:1,tk:5,text:'3つの数A、B、Cの和は150です。AはBより12大きく、BはCより9大きいです。Aはいくつですか？'},
   {n3:['みかん','りんご','なし'],o:[13,5,0],k:1,S:105,u:'個',st:1,tk:5,text:'りんご、みかん、なしが合わせて105個あります。みかんはりんごより8個多く、なしはりんごより5個少ないです。りんごは何個ですか？'},
-  {n3:['A','B','C'],o:[30,10,0],k:2,S:250,u:'cm',st:1,tk:10,text:'3本のテープA、B、Cの長さの合計は250cmです。AはBより20cm長く、CはBより10cm短いです。Cのテープは何cmですか？'}
+  {n3:['A','B','C'],o:[30,10,0],k:2,S:250,u:'cm',st:1,tk:10,text:'3本のテープA、B、Cの長さの合計は250cmです。AはBより20cm長く、CはBより10cm短いです。Cのテープは何cmですか？'},
+  /* やりとり：g をあげると同じになる → 差は g×2 */
+  {ask:'b',g:200,nb:'兄',ns:'弟',S:2000,D:400,u:'円',st:10,tk:100,text:'兄と弟の所持金は、合わせて2000円です。兄が弟に200円あげると、2人の所持金は同じになります。兄ははじめ何円持っていましたか？'},
+  {ask:'s',g:6,nb:'A',ns:'B',S:90,D:12,u:'枚',st:1,tk:5,text:'AとBのカードは、合わせて90枚です。AがBに6枚わたすと、2人の枚数は同じになります。Bははじめ何枚持っていましたか？'}
 ];
-PROBLEMS.forEach(p=>p.tag=p.n3?'3人：'+p.n3[p.k]+'にそろえる':p.ask==='s'?'少ない方を求める':'多い方を求める');
+PROBLEMS.forEach(p=>p.tag=p.g?'やりとりで同じ':p.n3?'3人：'+p.n3[p.k]+'にそろえる':p.ask==='s'?'少ない方を求める':'多い方を求める');
 /* ===== 3人バージョン ===== */
+/* 難しさの順に並べかえ（数字は上の並びの番号） */
+const ORDER=[0,1,2,3,4,5,10,11,6,7,8,9];
+(a=>{PROBLEMS.length=0;PROBLEMS.push(...a);})(ORDER.map(i=>PROBLEMS[i]));
+const GV=()=>!!P.g;
 const T3=()=>!!P.n3;
 const ex=i=>P.o[i]-P.o[P.k];                         // そろえる人より何多いか（マイナスはたりない）
 const others=()=>[0,1,2].filter(i=>i!==P.k);
@@ -151,12 +158,12 @@ const snap=v=>Math.round(v/P.st)*P.st, tickStep=()=>P.tk, keyStep=()=>P.st;
 const nm=()=>T3()?nm3():sm()?P.ns:P.nb;
 const sliderName=()=>nm().replace('のテープ','');
 const tlabel=()=>t+P.u;
-const rightIsAdd=()=>T3()?exSum()<0:!sm();
-const firstQ=()=>T3()?nm3()+'にそろえると、3つ分は？':(sm()?P.ns+'（少ない方）':P.nb+'（多い方）')+'にそろえると、2つ分は？';
-const firstOpts=()=>T3()?(rightIsAdd()?[expr3(false),expr3(true)]:[expr3(true),expr3(false)]):[P.S+'＋'+P.D+'＝'+(P.S+P.D)+P.u,P.S+'－'+P.D+'＝'+(P.S-P.D)+P.u];
-const pickedQ=()=>T3()?fxRow('そろえた3つ分','#3f9b4a',toks3().concat([['＝'],[SD()+P.u]])):fxRow('そろえた2つ分','#3f9b4a',[[P.S,'和'],[sm()?'－':'＋'],[P.D,'差'],['＝'],[SD()+P.u]]);
-const pickedMsg=()=>'つまみで'+sliderName()+'を動かして、'+(T3()?'3':'2')+'つ分をぴったり合わせよう';
-const wrongMsg=()=>T3()?'多い人からは多い分を引き、少ない人にはたりない分を足して、みんな'+nm3()+'と同じにするよ':sm()?'多い方から差の分をのぞくと、2つとも少ない方と同じになるよ':'少ない方に差の分をたすと、2つとも多い方と同じになるよ';
+const rightIsAdd=()=>GV()?true:T3()?exSum()<0:!sm();
+const firstQ=()=>GV()?P.nb+'が'+P.ns+'に'+P.g+P.u+'あげると同じ。はじめの2人の差は？':T3()?nm3()+'にそろえると、3つ分は？':(sm()?P.ns+'（少ない方）':P.nb+'（多い方）')+'にそろえると、2つ分は？';
+const firstOpts=()=>GV()?[P.g+'×2＝'+P.D+P.u,P.g+P.u]:T3()?(rightIsAdd()?[expr3(false),expr3(true)]:[expr3(true),expr3(false)]):[P.S+'＋'+P.D+'＝'+(P.S+P.D)+P.u,P.S+'－'+P.D+'＝'+(P.S-P.D)+P.u];
+const pickedQ=()=>GV()?fxRow('差','#3f9b4a',[[P.g,'あげた分'],['×'],['2'],['＝'],[P.D+P.u]]):T3()?fxRow('そろえた3つ分','#3f9b4a',toks3().concat([['＝'],[SD()+P.u]])):fxRow('そろえた2つ分','#3f9b4a',[[P.S,'和'],[sm()?'－':'＋'],[P.D,'差'],['＝'],[SD()+P.u]]);
+const pickedMsg=()=>GV()?'差は'+P.D+P.u+'。'+nm()+'にそろえた2つ分は '+P.S+(sm()?'－':'＋')+P.D+'＝'+SD()+P.u+'。つまみで動かそう':'つまみで'+sliderName()+'を動かして、'+(T3()?'3':'2')+'つ分をぴったり合わせよう';
+const wrongMsg=()=>GV()?P.nb+'は'+P.g+P.u+'へり、'+P.ns+'は'+P.g+P.u+'ふえて同じになる。差はその2つ分だよ':T3()?'多い人からは多い分を引き、少ない人にはたりない分を足して、みんな'+nm3()+'と同じにするよ':sm()?'多い方から差の分をのぞくと、2つとも少ない方と同じになるよ':'少ない方に差の分をたすと、2つとも多い方と同じになるよ';
 const checkHead=()=>'できた！ 答え '+nm()+' '+ans()+P.u;
 const checkLine=()=>T3()?fx([[SD(),'そろえた3つ分'],['÷'],['3','3つ分'],['＝'],[ans()+P.u]]):fx([[SD(),'そろえた2つ分'],['÷'],['2','2つ分'],['＝'],[ans()+P.u]]);
 
@@ -184,18 +191,18 @@ function draw(){
   let h='';
   // 上: 和と差
   h+=txt(X0-90,40,'和（合わせて）',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(X0+46,40,P.S+P.u,{a:'start',fs:20,c:'#2f3437'});
-  h+=txt(X0+190,40,'差',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(X0+214,40,P.D+P.u,{a:'start',fs:20,c:DIF});
+  h+=txt(X0+190,40,'差',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(X0+214,40,(GV()&&!picked?'？':P.D+P.u),{a:'start',fs:20,c:DIF});
   // 名前
   h+=txt(X0-14,Y1,P.nb,{a:'end',fs:16,c:CB[1]})+txt(X0-14,Y2,P.ns,{a:'end',fs:16,c:CP[1]});
   const DC=['#fff1dc',DIF];
   if(sm()){
     // 少ない方にそろえる: 多い方の「差」を点線でのぞく
-    h+=seg(X0,small*k,Y1,CB,small)+seg(X0+small*k,P.D*k,Y1,DC,'差 '+P.D,'#9a5a12',true);
+    h+=seg(X0,small*k,Y1,CB,small)+seg(X0+small*k,P.D*k,Y1,DC,(GV()&&!picked?'差 ？':'差 '+P.D),'#9a5a12',true);
     h+=seg(X0,small*k,Y2,CP,small);
   }else{
     // 多い方にそろえる: 少ない方に「差」を点線でたす
     h+=seg(X0,big*k,Y1,CB,big);
-    h+=seg(X0,Math.max(0,small)*k,Y2,CP,small>0?small:'')+seg(X0+Math.max(0,small)*k,P.D*k,Y2,DC,'差 '+P.D,'#9a5a12',true);
+    h+=seg(X0,Math.max(0,small)*k,Y2,CP,small>0?small:'')+seg(X0+Math.max(0,small)*k,P.D*k,Y2,DC,(GV()&&!picked?'差 ？':'差 '+P.D),'#9a5a12',true);
   }
   // 差の位置を縦の点線でそろえて見せる
   const xe=X0+(sm()?small:big)*k;
@@ -204,9 +211,9 @@ function draw(){
   // 右: 計算
   const two=t*2,d=Math.abs(SD()-two);
   if(ok)h+=pill(880,40,'ぴったり！');
-  h+=step(92,'そろえた2つ分','#3f9b4a',[[P.S,'和'],[sm()?'－':'＋'],[P.D,'差'],['＝'],[SD()+P.u]]);
+  h+=step(92,'そろえた2つ分','#3f9b4a',[[P.S,'和'],[sm()?'－':'＋'],[GV()&&!picked?'？':P.D,'差'],['＝'],[GV()&&!picked?'？':SD()+P.u]]);
   h+=step(164,'いま','#e8a24f',[[t,sliderName()],['×'],['2','2つ分'],['＝'],[two+P.u]]);
-  h+=step(236,'ずれ','#9a5a12',[[SD(),'そろえた2つ分'],['－'],[two,'いま'],['＝'],[(SD()-two)+P.u]]);
+  const hide=GV()&&!picked;h+=step(236,'ずれ','#9a5a12',[[hide?'？':SD(),'そろえた2つ分'],['－'],[two,'いま'],['＝'],[hide?'？':(SD()-two)+P.u]]);
   return h;
 }
 
@@ -234,6 +241,8 @@ function draw3(){
 
 let done={};try{done=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){done={};}
 const saveDone=()=>{try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}};
+/* 並べかえ前の記録（✓）を、新しい順番に移す */
+try{if(localStorage.getItem(KEY+'-order')!=='v2'){const nd={};for(const k in done){const j=ORDER.indexOf(+k);if(j>=0&&done[k])nd[j]=1;}done=nd;saveDone();localStorage.setItem(KEY+'-order','v2');}}catch(e){}
 const solved=()=>picked&&Math.abs(t-ans())<1e-9;
 /* ===== 効果音（Web Audio） ===== */
 let actx=null;

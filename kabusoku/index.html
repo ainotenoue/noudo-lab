@@ -124,31 +124,36 @@ const PROBLEMS=[
   {it:'あめ',u:'個',a:3,ra:20,b:5,rb:4,ask:'n',text:'あめを配ります。1人3個ずつ配ると20個余り、1人5個ずつ配ると4個余ります。何人に配りましたか？'},
   {it:'色紙',u:'枚',a:6,ra:-7,b:8,rb:-23,ask:'n',text:'色紙を配ります。1人6枚ずつ配ると7枚足りず、1人8枚ずつ配ると23枚足りません。何人に配りましたか？'},
   {it:'あめ',u:'個',a:7,ra:15,b:9,rb:-9,ask:'total',text:'あめを配ります。1人7個ずつ配ると15個余り、1人9個ずつ配ると9個足りません。あめは全部で何個ありますか？'},
-  {it:'カード',u:'枚',a:4,ra:26,b:6,rb:2,ask:'n',text:'カードを配ります。1人4枚ずつ配ると26枚余り、1人6枚ずつ配ると2枚余ります。何人に配りましたか？'}
+  {it:'カード',u:'枚',a:4,ra:26,b:6,rb:2,ask:'n',text:'カードを配ります。1人4枚ずつ配ると26枚余り、1人6枚ずつ配ると2枚余ります。何人に配りましたか？'},
+  /* ちょうど配れる（rb:0） */
+  {it:'えんぴつ',u:'本',a:5,ra:12,b:7,rb:0,ask:'n',text:'えんぴつを配ります。1人5本ずつ配ると12本余り、1人7本ずつ配るとちょうど配りきれます。何人に配りましたか？'},
+  /* 長いす：最後の1きゃくに last 人 → 不足は b－last */
+  {it:'生徒',u:'人',cu:'きゃく',cn:'長いす',a:5,ra:8,b:6,last:2,rb:-4,ask:'total',text:'長いすに生徒がすわります。1きゃくに5人ずつすわると8人がすわれません。6人ずつすわると、最後の1きゃくには2人だけがすわり、使わない長いすはありません。生徒は全部で何人ですか？'}
 ];
-PROBLEMS.forEach(p=>p.tag=(p.ra>0)!==(p.rb>0)?'余りと不足':(p.ra>0?'両方とも余り':'両方とも不足'));
+PROBLEMS.forEach(p=>p.tag=p.last?'長いす':p.rb===0?'ちょうど配れる':(p.ra>0)!==(p.rb>0)?'余りと不足':(p.ra>0?'両方とも余り':'両方とも不足'));
+const CU=()=>P.cu||'人', ZR=()=>P.rb===0, LS=()=>!!P.last;
 const mixed=()=>(P.ra>0)!==(P.rb>0);
 const DD=()=>P.ra-P.rb, d1=()=>P.b-P.a;
 const ans=()=>DD()/d1();
 const tmin=()=>1, tmax=()=>Math.ceil(ans()*1.5);
 const snap=v=>Math.round(v), tickStep=()=>1, keyStep=()=>1;
-const sliderName=()=>'人数';
-const tlabel=()=>t+'人';
+const sliderName=()=>P.cn?P.cn+'の数':'人数';
+const tlabel=()=>t+CU();
 const rightIsAdd=()=>mixed();
 const rl=r=>r>0?'余り '+r:'不足 '+(-r);
-const firstQ=()=>'2つの配り方で、全体の差は？';
-const firstOpts=()=>{const x=Math.abs(P.ra),y=Math.abs(P.rb),bg=Math.max(x,y),sm=Math.min(x,y);return [x+'＋'+y+'＝'+(x+y)+P.u,bg+'－'+sm+'＝'+(bg-sm)+P.u];};
-const dTok=()=>mixed()?[[Math.abs(P.ra),P.ra>0?'余り':'不足'],['＋'],[Math.abs(P.rb),P.rb>0?'余り':'不足'],['＝'],[DD()+P.u]]
+const firstQ=()=>LS()?P.b+'人ずつのとき、最後の1きゃくは'+P.last+'人。'+P.b+'人ずつにするには、何人たりない？':'2つの配り方で、全体の差は？';
+const firstOpts=()=>{if(ZR())return [P.ra+'＋0＝'+P.ra+P.u,P.ra+'＋'+P.b+'＝'+(P.ra+P.b)+P.u];if(LS())return [P.b+'－'+P.last+'＝'+(P.b-P.last)+'人たりない',P.last+'人あまる'];const x=Math.abs(P.ra),y=Math.abs(P.rb),bg=Math.max(x,y),sm=Math.min(x,y);return [x+'＋'+y+'＝'+(x+y)+P.u,bg+'－'+sm+'＝'+(bg-sm)+P.u];};
+const dTok=()=>ZR()?[[P.ra,'余り'],['＋'],[0,'ちょうど'],['＝'],[DD()+P.u]]:mixed()?[[Math.abs(P.ra),P.ra>0?'余り':'不足'],['＋'],[Math.abs(P.rb),P.rb>0?'余り':'不足'],['＝'],[DD()+P.u]]
   :[[Math.max(Math.abs(P.ra),Math.abs(P.rb)),P.ra>0?'多い余り':'多い不足'],['－'],[Math.min(Math.abs(P.ra),Math.abs(P.rb)),P.ra>0?'少ない余り':'少ない不足'],['＝'],[DD()+P.u]];
-const pickedQ=()=>fxRow('全体の差','#3f9b4a',dTok());
-const pickedMsg=()=>'1人の差は '+P.b+'－'+P.a+'＝'+d1()+P.u+'。つまみで人数を動かそう';
-const wrongMsg=()=>mixed()?'余りと不足は反対向き。合わせた分が、全体の差だよ':'両方とも'+(P.ra>0?'余り':'不足')+'。その差が、全体の差だよ';
+const pickedQ=()=>LS()?fxRow('不足','#3f9b4a',[[P.b,'1きゃくに'],['－'],[P.last,'最後の1きゃく'],['＝'],[(P.b-P.last)+'人']]):fxRow('全体の差','#3f9b4a',dTok());
+const pickedMsg=()=>LS()?'全体の差は '+P.ra+'＋'+(-P.rb)+'＝'+DD()+'人、1きゃくの差は '+d1()+'人。つまみで長いすの数を動かそう':'1'+CU()+'の差は '+P.b+'－'+P.a+'＝'+d1()+P.u+'。つまみで'+sliderName()+'を動かそう';
+const wrongMsg=()=>ZR()?'ちょうど配れるのは、余りも不足も0。全体の差は、余りの分だけだよ':LS()?'最後の1きゃくに'+P.last+'人しかいないから、'+P.b+'人にするにはまだたりないよ':mixed()?'余りと不足は反対向き。合わせた分が、全体の差だよ':'両方とも'+(P.ra>0?'余り':'不足')+'。その差が、全体の差だよ';
 const total=()=>P.a*ans()+P.ra;
-const checkHead=()=>'できた！ 答え '+(P.ask==='n'?ans()+'人':total()+P.u);
+const checkHead=()=>'できた！ 答え '+(P.ask==='n'?ans()+CU():total()+P.u);
 const checkLine=()=>{
-  const f=fx([[DD(),'全体の差'],['÷'],[d1(),'1人の差'],['＝'],[ans()+'人']]);
+  const f=fx([[DD(),'全体の差'],['÷'],[d1(),'1'+CU()+'の差'],['＝'],[ans()+CU()]]);
   if(P.ask==='n')return f;
-  return '<div class="fxpair">'+f+'<div class="op">→</div>'+fx([[P.a,'1人分'],['×'],[ans(),'人'],[P.ra>0?'＋':'－'],[Math.abs(P.ra),P.ra>0?'余り':'不足'],['＝'],[total()+P.u]])+'</div>';
+  return '<div class="fxpair">'+f+'<div class="op">→</div>'+fx([[P.a,'1'+CU()+'分'],['×'],[ans(),CU()],[P.ra>0?'＋':'－'],[Math.abs(P.ra),P.ra>0?'余り':'不足'],['＝'],[total()+P.u]])+'</div>';
 };
 
 /* 右の計算の1行（数字の下に、その数字が何か） */
@@ -185,15 +190,15 @@ function draw(){
   for(let i=0;i<n;i++){const x=X0+i*P.b*k;h+=seg(x,P.a*k,Y2,CP,'')+seg(x+P.a*k,d1()*k,Y2,CO,'');}
   const eb=X0+n*P.b*k;
   if(P.rb>0)h+=seg(eb,P.rb*k,Y2,CG,'余り'+P.rb,'#2f6f37');
-  else h+='<rect x="'+(eb+P.rb*k)+'" y="'+(Y2-BH/2)+'" width="'+(-P.rb*k)+'" height="'+BH+'" rx="6" fill="#fff" stroke="#d9534f" stroke-width="2.5" stroke-dasharray="6 5"/>'+txt(eb+P.rb*k/2,Y2+BH/2+14,'不足'+(-P.rb),{fs:13,c:'#d9534f'});
+  else if(P.rb<0)h+='<rect x="'+(eb+P.rb*k)+'" y="'+(Y2-BH/2)+'" width="'+(-P.rb*k)+'" height="'+BH+'" rx="6" fill="#fff" stroke="#d9534f" stroke-width="2.5" stroke-dasharray="6 5"/>'+txt(eb+P.rb*k/2,Y2+BH/2+14,'不足'+(-P.rb),{fs:13,c:'#d9534f'});
   // 全体の位置
   const ta=P.a*n+P.ra,tb=P.b*n+P.rb;
   h+='<line x1="'+(X0+ta*k)+'" y1="'+(Y1-BH/2-22)+'" x2="'+(X0+ta*k)+'" y2="'+(Y1+BH/2+4)+'" stroke="#3d9cc2" stroke-width="2.5"/>'+txt(X0+ta*k,Y1-BH/2-32,'全体 '+ta,{fs:13,c:'#24617a'});
   h+='<line x1="'+(X0+tb*k)+'" y1="'+(Y2-BH/2-4)+'" x2="'+(X0+tb*k)+'" y2="'+(Y2+BH/2+22)+'" stroke="#d9849b" stroke-width="2.5"/>'+txt(X0+tb*k,Y2+BH/2+34,'全体 '+tb,{fs:13,c:'#8a3d55'});
-  h+=txt(X0+P.a*k+d1()*k/2,Y2-BH/2-10,'1人の差',{fs:12,c:'#9a5a12',fw:700});
+  h+=txt(X0+P.a*k+d1()*k/2,Y2-BH/2-10,'1'+CU()+'の差',{fs:12,c:'#9a5a12',fw:700});
   if(ok)h+=pill(880,40,'全体が同じ！');
   h+=step(92,'全体の差','#3f9b4a',dTok());
-  h+=step(164,'いま','#e8a24f',[[d1(),'1人の差'],['×'],[n,'人'],['＝'],[d1()*n+P.u]]);
+  h+=step(164,'いま','#e8a24f',[[d1(),'1'+CU()+'の差'],['×'],[n,CU()],['＝'],[d1()*n+P.u]]);
   h+=step(236,'ずれ','#9a5a12',[[DD(),'全体の差'],['－'],[d1()*n,'いま'],['＝'],[(DD()-d1()*n)+P.u]]);
   return h;
 }

@@ -132,7 +132,13 @@ const PROBLEMS=[
   {kind:'which',N:49,seq:['木','金','土','日','月','火','水'],nl:'日後',tag:'曜日',q:'4月1日は水曜日です。5月20日は何曜日ですか？（4月1日から49日後です）',
    f:['7まとまり目の最後と同じ','8まとまり目の1番目と同じ'],right:1,ansText:'水曜日'},
   {kind:'count',N:50,seq:['赤','青','黄','緑'],col:['#f08080','#7fb3e0','#f2d46b','#8fd18f'],tag:'何こ',q:'赤、青、黄、緑の順に、玉を50こならべます。赤い玉は何こありますか？',
-   f:['12＋1＝13こ','12こ'],right:1,ansText:'13こ'}
+   f:['12＋1＝13こ','12こ'],right:1,ansText:'13こ'},
+  {kind:'which',N:50,seq:[1,4,2,8,5,7],nl:'位',tag:'小数第○位',q:'1/7を小数で表すと、0.142857142857…となります。小数第50位の数字は何ですか？',
+   f:['9まとまり目の2番目','8まとまり目の2番目'],right:1,ansText:'4'},
+  {kind:'which',N:104,seq:['水','木','金','土','日','月','火'],nl:'日後',tag:'曜日（日数を数える）',q:'ある年の5月3日は火曜日です。この年の8月15日は何曜日ですか？',
+   q1:'5月3日から8月15日までは、何日後？',f:['28＋30＋31＋15＝104日後','31＋30＋31＋15＝107日後'],right:1,ansText:'月曜日',
+   pk:[['28','5月（31－3）'],['＋'],['30','6月'],['＋'],['31','7月'],['＋'],['15','8月'],['＝'],['104日後']],
+   hint:'5月は3日から31日まで、31－3＝28日進むよ。そのあと6月30日、7月31日、8月15日'}
 ];
 PROBLEMS.forEach(p=>p.text=p.q);
 const C=()=>P.seq.length, Q=()=>Math.floor(P.N/C()), Rm=()=>P.N%C();
@@ -142,11 +148,11 @@ const snap=v=>Math.round(v), tickStep=()=>tmax()>30?5:1, keyStep=()=>1;
 const sliderName=()=>'まとまり';
 const tlabel=()=>t+'まとまり';
 const rightIsAdd=()=>P.right===1;
-const firstQ=()=>P.N+'÷'+C()+'＝'+Q()+'あまり'+Rm()+'。'+({which:P.N+'番目は？',sum:'和は？',count:P.seq[0]+'は？'})[P.kind];
+const firstQ=()=>P.q1?P.q1:P.N+'÷'+C()+'＝'+Q()+'あまり'+Rm()+'。'+({which:(P.nl==='位'?'小数第'+P.N+'位は？':P.N+'番目は？'),sum:'和は？',count:P.seq[0]+'は？'})[P.kind];
 const firstOpts=()=>P.f;
-const pickedQ=()=>fxRow('1まとまり','#3f9b4a',[[C(),'こ'],['：'],[P.seq.join(''),'']]);
-const pickedMsg=()=>'つまみで、まとまりをいくつとれるか動かそう';
-const wrongMsg=()=>({which:Rm()?'まとまりを'+Q()+'こ取ったあとの、'+Rm()+'番目だよ':'あまりが0なら、ちょうどまとまりの最後だよ',sum:'あまりの2こは「1と2」。その和を足すよ',count:'あまりの2こ（赤・青）の中にも赤が1こあるよ'})[P.kind];
+const pickedQ=()=>P.pk?fxRow('日数','#3f9b4a',P.pk):fxRow('1まとまり','#3f9b4a',[[C(),'こ'],['：'],[P.seq.join(''),'']]);
+const pickedMsg=()=>P.pk?P.N+'÷'+C()+'＝'+Q()+'あまり'+Rm()+'。つまみで、まとまりをいくつとれるか動かそう':'つまみで、まとまりをいくつとれるか動かそう';
+const wrongMsg=()=>P.hint?P.hint:({which:Rm()?'まとまりを'+Q()+'こ取ったあとの、'+Rm()+'番目だよ':'あまりが0なら、ちょうどまとまりの最後だよ',sum:'あまりの2こは「1と2」。その和を足すよ',count:'あまりの2こ（赤・青）の中にも赤が1こあるよ'})[P.kind];
 const checkHead=()=>'できた！ 答え '+P.ansText;
 const partSum=()=>P.seq.slice(0,Rm()).reduce((s,x)=>s+x,0), cyc=()=>P.seq.reduce((s,x)=>s+(+x||0),0);
 const checkLine=()=>{

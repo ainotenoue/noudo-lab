@@ -127,26 +127,31 @@ const PROBLEMS=[
   {kind:'circle',L:80,a:4,u:'m',it:'木',cu:'本',tag:'池のまわり',text:'まわりの長さが80mの池のまわりに、4mおきに木を植えます。木は何本いりますか？'},
   {kind:'both',L:200,a:25,u:'m',it:'電柱',cu:'本',tag:'両はしにも',text:'200mはなれたA地点からB地点まで、25mおきに電柱を立てます。A地点とB地点にも立てると、電柱は何本いりますか？'},
   {kind:'tape',L:73,a:10,ov:1,u:'cm',it:'テープ',cu:'枚',tag:'のりしろ',text:'長さ10cmのテープを、のりしろを1cmにしてつないでいきます。全体の長さを73cmにするには、テープは何枚いりますか？'},
-  {kind:'cut',L:300,a:50,u:'cm',it:'丸太',cu:'回',tag:'丸太を切る',text:'長さ3mの丸太を、50cmずつに切り分けます。何回切ればよいですか？'}
+  {kind:'cut',L:300,a:50,u:'cm',it:'丸太',cu:'回',tag:'丸太を切る',text:'長さ3mの丸太を、50cmずつに切り分けます。何回切ればよいですか？'},
+  /* 切る時間と休けい：休むのは 切る回数－1 */
+  {kind:'rest',L:400,a:50,ct:3,rt:1,u:'cm',it:'丸太',cu:'分',tag:'切る時間と休けい',text:'長さ4mの丸太を、50cmずつに切り分けます。1回切るのに3分かかり、切るたびに1分休みます。最後まで切り終わるのに、何分かかりますか？'},
+  /* 正方形のまわり：1辺 n 個（かどもふくむ） */
+  {kind:'sq',n:6,u:'',it:'碁石',cu:'個',tag:'正方形のまわり',text:'碁石を、正方形の形にならべます。1辺に6個ずつ（かどの石もふくむ）ならべると、碁石は全部で何個いりますか？'}
 ];
+const CUTS=()=>P.L/P.a-1;
 const G=()=>P.L/P.a;                                     // 間の数（cut は できる本数）
-const ans=()=>({both:G()+1,none:G()-1,circle:G(),tape:(P.L-P.a)/(P.a-P.ov)+1,cut:G()-1})[P.kind];
+const ans=()=>P.kind==='rest'?CUTS()*P.ct+(CUTS()-1)*P.rt:P.kind==='sq'?4*(P.n-1):({both:G()+1,none:G()-1,circle:G(),tape:(P.L-P.a)/(P.a-P.ov)+1,cut:G()-1})[P.kind];
 const tmin=()=>({tape:1,both:1})[P.kind]||0, tmax=()=>Math.ceil(ans()*1.4)+1;
 const snap=v=>Math.round(v), tickStep=()=>1, keyStep=()=>1;
-const sliderName=()=>({tape:'枚数',cut:'回数'})[P.kind]||'本数';
+const sliderName=()=>({rest:'時間',sq:'個数'})[P.kind]||({tape:'枚数',cut:'回数'})[P.kind]||'本数';
 const tlabel=()=>t+P.cu;
-const rightIsAdd=()=>P.kind==='both';
-const firstQ=()=>({both:'両はしにも植えると、本数は間の数より？',none:'両はしには植えないと、本数は間の数より？',circle:'1周すると、本数は間の数より？',
+const rightIsAdd=()=>['both','rest','sq'].includes(P.kind);
+const firstQ=()=>P.kind==='rest'?(P.L/P.a)+'本できるから、切るのは'+CUTS()+'回。休むのは何回？':P.kind==='sq'?'1辺に'+P.n+'個ならべると、1辺の「間」は何こ？':({both:'両はしにも植えると、本数は間の数より？',none:'両はしには植えないと、本数は間の数より？',circle:'1周すると、本数は間の数より？',
   tape:'のりしろの数は、テープの枚数より？',cut:'切る回数は、できる丸太の本数より？'})[P.kind];
-const firstOpts=()=>({circle:['間の数＋1','間の数と同じ'],tape:['枚数＋1','枚数－1'],cut:['本数＋1','本数－1']})[P.kind]||['間の数＋1','間の数－1'];
-const pickedQ=()=>P.kind==='tape'?fxRow('2枚目から','#3f9b4a',[[P.a,'1枚'],['－'],[P.ov,'のりしろ'],['＝'],[(P.a-P.ov)+P.u+'ずつふえる']])
+const firstOpts=()=>P.kind==='rest'?[CUTS()+'－1＝'+(CUTS()-1)+'回',CUTS()+'回']:P.kind==='sq'?[P.n+'－1＝'+(P.n-1)+'こ',P.n+'こ']:({circle:['間の数＋1','間の数と同じ'],tape:['枚数＋1','枚数－1'],cut:['本数＋1','本数－1']})[P.kind]||['間の数＋1','間の数－1'];
+const pickedQ=()=>P.kind==='rest'?fxRow('休む回数','#3f9b4a',[[CUTS(),'切る回数'],['－'],['1','最後のあと'],['＝'],[(CUTS()-1)+'回']]):P.kind==='sq'?fxRow('まわりの間','#3f9b4a',[[P.n-1,'1辺の間'],['×'],['4','辺'],['＝'],[ans()+'こ']]):P.kind==='tape'?fxRow('2枚目から','#3f9b4a',[[P.a,'1枚'],['－'],[P.ov,'のりしろ'],['＝'],[(P.a-P.ov)+P.u+'ずつふえる']])
   :P.kind==='cut'?fxRow('できる本数','#3f9b4a',[[P.L,'丸太（cm）'],['÷'],[P.a,'1本'],['＝'],[G()+'本']])
   :fxRow('間の数','#3f9b4a',[[P.L,P.kind==='circle'?'1周':'長さ'],['÷'],[P.a,'間かく'],['＝'],[G()+'こ']]);
-const pickedMsg=()=>({both:'本数は 間の数＋1。',none:'本数は 間の数－1。',circle:'本数は 間の数と同じ。',tape:'',cut:'切る回数は 本数－1。'})[P.kind]+'つまみで'+sliderName()+'を動かそう';
-const wrongMsg=()=>({both:'両はしにもあるので、木は間より1本多いよ',none:'両はしにないので、木は間より1本少ないよ',circle:'1周すると、最初の木と最後の木が同じ。木と間は同じ数',
+const pickedMsg=()=>P.kind==='rest'?'切る'+CUTS()+'回、休む'+(CUTS()-1)+'回。つまみで時間を動かそう':P.kind==='sq'?'まわりは1周だから、碁石の数＝間の数。つまみで個数を動かそう':({both:'本数は 間の数＋1。',none:'本数は 間の数－1。',circle:'本数は 間の数と同じ。',tape:'',cut:'切る回数は 本数－1。'})[P.kind]+'つまみで'+sliderName()+'を動かそう';
+const wrongMsg=()=>P.kind==='rest'?'最後に切ったあとは、もう休まなくていいよ':P.kind==='sq'?'1辺に'+P.n+'個ならべると、間はそれより1つ少ないよ':({both:'両はしにもあるので、木は間より1本多いよ',none:'両はしにないので、木は間より1本少ないよ',circle:'1周すると、最初の木と最後の木が同じ。木と間は同じ数',
   tape:'2枚をつなぐとのりしろ1つ。のりしろは枚数より1つ少ないよ',cut:'1回切ると2本。切る回数は本数より1つ少ないよ'})[P.kind];
 const checkHead=()=>'できた！ 答え '+ans()+P.cu;
-const checkLine=()=>({both:fx([[G(),'間の数'],['＋'],['1','両はし'],['＝'],[ans()+P.cu]]),none:fx([[G(),'間の数'],['－'],['1','両はしなし'],['＝'],[ans()+P.cu]]),
+const checkLine=()=>P.kind==='rest'?fx([[CUTS(),'切る回数'],['×'],[P.ct,'分'],['＋'],[CUTS()-1,'休む回数'],['×'],[P.rt,'分'],['＝'],[ans()+'分']]):P.kind==='sq'?fx([[P.n-1,'1辺の間'],['×'],['4','辺'],['＝'],[ans()+'個']]):({both:fx([[G(),'間の数'],['＋'],['1','両はし'],['＝'],[ans()+P.cu]]),none:fx([[G(),'間の数'],['－'],['1','両はしなし'],['＝'],[ans()+P.cu]]),
   circle:fx([[P.L,'1周'],['÷'],[P.a,'間かく'],['＝'],[ans()+P.cu]]),cut:fx([[G(),'できる本数'],['－'],['1'],['＝'],[ans()+P.cu]]),
   tape:fx([[P.L-P.a,'2枚目からの長さ'],['÷'],[P.a-P.ov,'1枚でふえる'],['＋'],['1','1枚目'],['＝'],[ans()+P.cu]])})[P.kind];
 
@@ -173,6 +178,38 @@ const X0=100,XW=500,RY=150;
 function tree(x,y,ok){return '<line x1="'+x+'" y1="'+y+'" x2="'+x+'" y2="'+(y-26)+'" stroke="#9a7b55" stroke-width="3"/><circle cx="'+x+'" cy="'+(y-32)+'" r="10" fill="'+(ok?'#5cbf5c':'#90ee90')+'" stroke="#3f9b4a" stroke-width="2"/>';}
 function draw(){
   const ok=solved(),n=t;let h='';
+  if(P.kind==='rest'){
+    const c=CUTS(),per=P.ct+P.rt,k=XW/P.L,TY=200,tk=XW/tmax();
+    let cutDone=0;for(let i=0;i<c;i++)if(t>=i*per+P.ct)cutDone++;
+    h+='<rect x="'+X0+'" y="'+(90-20)+'" width="'+P.L*k+'" height="40" rx="10" fill="#e9dccb" stroke="#9a7b55" stroke-width="3"/>';
+    for(let i=1;i<=c;i++){const x=X0+i*P.a*k;h+='<line x1="'+x+'" y1="'+(90-30)+'" x2="'+x+'" y2="'+(90+30)+'" stroke="'+(i<=cutDone?'#d9534f':'#e2dccf')+'" stroke-width="3"'+(i<=cutDone?'':' stroke-dasharray="4 4"')+'/>';}
+    h+=txt(X0,40,'切った回数 '+cutDone+' / '+c,{a:'start',fs:15,c:'#d9534f',fw:700});
+    // 時間の帯：切る（赤）と 休む（灰）
+    h+=txt(X0-12,TY,'時間',{a:'end',fs:14,c:'#7b766d'});
+    for(let i=0;i<c;i++){const x0=X0+i*per*tk;
+      h+='<rect x="'+x0+'" y="'+(TY-13)+'" width="'+P.ct*tk+'" height="26" rx="4" fill="'+(t>=i*per+P.ct?'#f7b3b0':'#fff')+'" stroke="#d9534f" stroke-width="1.5"/>';
+      if(i<c-1)h+='<rect x="'+(x0+P.ct*tk)+'" y="'+(TY-13)+'" width="'+P.rt*tk+'" height="26" rx="4" fill="'+(t>=(i+1)*per?'#d6cfc2':'#fff')+'" stroke="#9a9184" stroke-width="1.5"/>';}
+    h+='<line x1="'+(X0+t*tk)+'" y1="'+(TY-24)+'" x2="'+(X0+t*tk)+'" y2="'+(TY+24)+'" stroke="#3f9b4a" stroke-width="3"/>';
+    h+=txt(X0,TY+38,'赤＝切る '+P.ct+'分　灰＝休む '+P.rt+'分',{a:'start',fs:13,c:'#7b766d',fw:700});
+    if(ok)h+=pill(880,40,'切り終わった！');
+    h+=step(92,'切る回数','#d9534f',[[P.L/P.a,'できる本数'],['－'],['1'],['＝'],[c+'回']]);
+    h+=step(164,'休む回数','#9a9184',[[c,'切る回数'],['－'],['1'],['＝'],[(c-1)+'回']]);
+    h+=step(236,'いま','#e8a24f',[[t+'分','時間'],['→'],[cutDone+'回','切った']]);
+    return h;
+  }
+  if(P.kind==='sq'){
+    const m=P.n-1,G4=4*m,S=200,x0=140,y0=60,sp=S/m,pts=[];
+    for(let i=0;i<G4;i++){const side=Math.floor(i/m),j=i%m;pts.push(side===0?[x0+j*sp,y0]:side===1?[x0+S,y0+j*sp]:side===2?[x0+S-j*sp,y0+S]:[x0,y0+S-j*sp]);}
+    h+='<rect x="'+x0+'" y="'+y0+'" width="'+S+'" height="'+S+'" fill="none" stroke="#e2dccf" stroke-width="3" stroke-dasharray="6 6"/>';
+    for(let i=0;i<Math.min(n,G4+6);i++){const p=pts[i%G4],over=i>=G4,corner=(i%m)===0;
+      h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(corner?12:10)+'" fill="'+(over?'#f7b3b0':(i%2?'#2f3437':'#fff'))+'" stroke="'+(corner?'#e8a24f':'#2f3437')+'" stroke-width="'+(corner?4:2)+'"/>';}
+    h+=txt(x0+S+40,y0+S/2,'1辺に '+P.n+'個',{a:'start',fs:15,c:'#7b766d',fw:700})+txt(x0+S+40,y0+S/2+24,'オレンジのわく＝かど',{a:'start',fs:13,c:'#e8a24f',fw:700});
+    if(ok)h+=pill(880,40,'1周ぴったり！');
+    h+=step(92,'1辺の間','#3f9b4a',[[P.n,'1辺の個数'],['－'],['1'],['＝'],[m+'こ']]);
+    h+=step(164,'まわりの間','#e8a24f',[[m,'1辺の間'],['×'],['4','辺'],['＝'],[G4+'こ']]);
+    h+=step(236,'ずれ','#9a5a12',[[G4,'まわりの間'],['－'],[n,'いまの個数'],['＝'],[G4-n]]);
+    return h;
+  }
   if(P.kind==='circle'){
     const CX=360,CY=150,R=95;
     h+='<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="#dcf0f7" stroke="#9fd2e4" stroke-width="4"/>'+txt(CX,CY,'池 1周 '+P.L+P.u,{fs:16,c:'#24617a'});
